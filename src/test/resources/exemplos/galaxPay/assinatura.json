@@ -1,0 +1,169 @@
+{
+    "myId": "pay-6183e84eac6dd2.42057887",
+    "planMyId": "pay-6183e84eae1181.88643321",
+    "value": 5990,
+    "quantity": 12,
+    "periodicity": "monthly",
+    "firstPayDayDate": "2021-11-04",
+    "mainPaymentMethodId": "creditcard",
+    "paymentLink": "https://app.galaxpay.com.br/link-payment",
+    "additionalInfo": "Lorem ipsum dolor sit amet.",
+    "status": "active",
+    "Customer": {
+        "myId": "pay-6183e84ebeed87.47734796",
+        "name": "Lorem ipsum dolor sit amet.",
+        "document": "58547422170",
+        "emails": [
+            "teste1849email3728@galaxpay.com.br",
+            "teste9916email6334@galaxpay.com.br"
+        ],
+        "phones": [
+            3140201512,
+            31983890110
+        ],
+        "invoiceHoldIss": false,
+        "municipalDocument": "121212121212-02",
+        "createdAt": "2020-06-02 10:10:00",
+        "updatedAt": "2020-06-02 10:10:00",
+        "Address": {
+            "zipCode": "30411330",
+            "street": "Rua platina",
+            "number": "1330",
+            "complement": "2º andar",
+            "neighborhood": "Prado",
+            "city": "Belo Horizonte",
+            "state": "MG"
+        },
+        "ExtraFields": [
+            {
+                "tagName": "CP_MATRICULA",
+                "tagValue": "A532620"
+            }
+        ]
+    },
+    "Transactions": [
+        {
+            "myId": "pay-6183e84ee21369.64262272",
+            "value": 12999,
+            "payday": "2021-11-04",
+            "payedOutsideGalaxPay": false,
+            "additionalInfo": "Lorem ipsum dolor sit amet.",
+            "installment": 3,
+            "status": "captured",
+            "datetimeLastSentToOperator": "2021-11-04 11:03:58",
+            "Invoice": {
+                "description": "Lorem ipsum dolor sit amet.",
+                "number": "20200000123",
+                "status": "emmited",
+                "statusDescription": "Emitida com sucesso.",
+                "pdf": "https://app.galaxpay.com.br/link-pdf",
+                "xml": "https://app.galaxpay.com.br/link-xml"
+            },
+            "fee": 300,
+            "statusDescription": "Capturada na Operadora",
+            "tid": "pay-6183e84f0af9d0.32067120",
+            "authorizationCode": "pay-6183e84f0c80d6.51955785",
+            "ConciliationOccurrences": [
+                {
+                    "type": "payment",
+                    "liquidValue": 10000,
+                    "depositDate": "2021-11-04",
+                    "taxValue": 300,
+                    "taxPercent": 300,
+                    "bankName": "Banco Santander (Brasil) S.A.",
+                    "bankNumber": 33,
+                    "agency": "5412",
+                    "account": "415789"
+                }
+            ],
+            "Boleto": {
+                "pdf": "https://app.galaxpay.com.br/link-pdf",
+                "bankLine": "23312323232323232323232323232",
+                "bankNumber": 33
+            },
+            "Pix": {
+                "qrCode": "ABC123ABC123ABC123ABC123ABC123ABC123ABC123ABC123ABC123ABC123ABC123",
+                "image": "https://app.galaxpay.com.br/link-image-qrcode",
+                "page": "https://app.galaxpay.com.br/link-page-qrcode"
+            },
+            "Antifraud": {
+                "ip": "192.168.2.10",
+                "sessionId": "270e34e2365e2ca034c24f2907f24dd3",
+                "sent": true,
+                "approved": true
+            },
+            "CreditCard": {
+                "Card": {
+                    "myId": "pay-6183e84f34ddb7.24821672",
+                    "number": "5451*********1515",
+                    "createdAt": "2020-06-02 10:10:00",
+                    "updatedAt": "2020-06-02 10:10:00",
+                    "Brand": {
+                        "id": "mastercard",
+                        "name": "MasterCard",
+                        "maxInstallment": 12,
+                        "operatorIds": "getnet,cielo"
+                    }
+                }
+            }
+        }
+    ],
+    "PaymentMethodCreditCard": {
+        "cardOperatorId": "cielo",
+        "preAuthorize": false,
+        "Card": {
+            "myId": "pay-6183e84f443543.37883382",
+            "number": "5451*********1515",
+            "createdAt": "2020-06-02 10:10:00",
+            "updatedAt": "2020-06-02 10:10:00",
+            "Brand": {
+                "id": "mastercard",
+                "name": "MasterCard",
+                "maxInstallment": 12,
+                "operatorIds": "getnet,cielo"
+            }
+        }
+    },
+    "PaymentMethodBoleto": {
+        "fine": 100,
+        "interest": 200,
+        "instructions": "Lorem ipsum dolor sit amet.",
+        "Discount": {
+            "qtdDaysBeforePayDay": 1,
+            "type": "percent",
+            "value": 12999
+        }
+    },
+    "PaymentMethodPix": {
+        "fine": 100,
+        "interest": 200,
+        "instructions": "Lorem ipsum dolor sit amet.",
+        "Deadline": {
+            "type": "days",
+            "value": 60
+        },
+        "Discount": {
+            "qtdDaysBeforePayDay": 1,
+            "type": "percent",
+            "value": 1500
+        }
+    },
+    "InvoiceConfig": {
+        "description": "Lorem ipsum dolor sit amet.",
+        "type": "onlyOne",
+        "createOn": "daysBeforePayDay"
+    },
+    "ExtraFields": [
+        {
+            "tagName": "CP_FILIAL",
+            "tagValue": "MG 01"
+        }
+    ],
+    "Contract": {
+        "name": "Lorem ipsum dolor sit amet.",
+        "document": "47062930903",
+        "ip": "192.168.0.1",
+        "acceptedAt": "2021-11-04 11:03:59",
+        "pdf": "https://app.galaxpay.com.br/link-download-pdf"
+    }
+}

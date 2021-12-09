@@ -1,0 +1,33 @@
+{
+    "myId": "pay-618524ae192bc9.69231770",
+    "name": "Lorem ipsum dolor sit amet.",
+    "document": "58547422170",
+    "emails": [
+        "teste123email8531@galaxpay.com.br",
+        "teste2899email8933@galaxpay.com.br"
+    ],
+    "phones": [
+        3140201512,
+        31983890110
+    ],
+    "invoiceHoldIss": false,
+    "municipalDocument": "121212121212-02",
+    "status": "active",
+    "createdAt": "2020-06-02 10:10:00",
+    "updatedAt": "2020-06-02 10:10:00",
+    "Address": {
+        "zipCode": "30411330",
+        "street": "Rua platina",
+        "number": "1330",
+        "complement": "2º andar",
+        "neighborhood": "Prado",
+        "city": "Belo Horizonte",
+        "state": "MG"
+    },
+    "ExtraFields": [
+        {
+            "tagName": "CP_MATRICULA",
+            "tagValue": "A532620"
+        }
+    ]
+}
