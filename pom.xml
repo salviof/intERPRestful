@@ -10,12 +10,15 @@
     <version>1.0.0-RC-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>intERPRestful</name>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <jackson-core.version>2.13.0</jackson-core.version>
-
+        <projetoSB.nomeBanco>integracaoModel</projetoSB.nomeBanco>
+        <projetoSB.cliente>coletivoJava</projetoSB.cliente>
+        <projetoSB.grupoProjeto>integracao</projetoSB.grupoProjeto>
     </properties>
     <licenses>
         <license>
@@ -30,6 +33,37 @@
     <dependencies>
 
         <dependency>
+            <groupId>br.org.coletivoJava.fw.modulos</groupId>
+            <artifactId>SBAcessosModel</artifactId>
+            <version>1.0.0-RC-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+
+
+        <dependency>
+            <groupId>br.org.coletivoJava.fw</groupId>
+            <artifactId>SBPersistencia</artifactId>
+            <version>1.0.0-RC-SNAPSHOT</version>
+
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+
+
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>br.org.coletivoJava.fw</groupId>
             <artifactId>SBRestClient</artifactId>
             <version>1.0.0-RC-SNAPSHOT</version>
@@ -42,13 +76,7 @@
             <version>1.0.0-RC-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>br.org.coletivoJava.fw.modulos</groupId>
-            <artifactId>SBAcessosModel</artifactId>
-            <version>1.0.0-RC-SNAPSHOT</version>
-            <scope>test</scope>
 
-        </dependency>
 
 
 
@@ -61,16 +89,10 @@
         </dependency>
 
         <dependency>
-            <groupId>br.org.coletivoJava.fw.api.erp.contaPagarReceber</groupId>
-            <artifactId></artifactId>
+            <groupId>br.org.coletivoJava.fw.api.erp.SBErpIntegracaoSistemas</groupId>
+            <artifactId>SBErpIntegracaoSistemas</artifactId>
             <version>1.0.0-RC-SNAPSHOT</version>
         </dependency>
-
-
-
-
-
-
 
         <dependency>
             <groupId>junit</groupId>
@@ -78,6 +100,11 @@
             <scope>test</scope>
             <version>4.11</version>
         </dependency>
+
+
+
+
+
     </dependencies>
 
 
