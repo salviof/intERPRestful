@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
+package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;

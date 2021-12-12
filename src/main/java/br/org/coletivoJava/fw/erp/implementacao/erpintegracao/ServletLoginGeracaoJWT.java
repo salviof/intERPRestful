@@ -29,8 +29,8 @@ public class ServletLoginGeracaoJWT extends HttpServlet implements Serializable 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String chavePublica = req.getHeader("CHAVE_PUBLICA");
-        String emailCriptografado = req.getParameter("emailCripto");
-        String emailDescriptografado = emailCriptografado;
+        String emailCriptografado = req.getHeader("emailCripto");
+        String emailDescriptografado = UtilSBCoreSegurancaRCA.getTextoDescriptografado(emailCriptografado, chavePublica);
         ItfSistemaErp sistemaSolicitante = integracaoEntreSistemas.getSistemaByChavePublica(chavePublica);
 
         if (sistemaSolicitante == null) {

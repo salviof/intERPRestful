@@ -5,6 +5,7 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
 
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBCoreSegurancaRCA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ConfigCoreApiIntegracao;
@@ -75,24 +76,11 @@ public class ApiIntegracaoRestfulimplTest extends TesteJUnitBasicoSemPersistenci
         SistemaERPConfiavel sistema = new SistemaERPConfiavel();
         sistema.setDominio("crm.casanovadigital.com.br");
         sistema.setUrlRecepcaoCodigo("crm.casanovadigital.com.br/recepcaoOauth/integracaoSistemas");
-        KeyPairGenerator gerador;
-        try {
-            gerador = KeyPairGenerator.getInstance("RSA");
-            gerador.initialize(1024);
-            gerador.generateKeyPair();
-            RSAPublicKey pubKey = (RSAPublicKey) gerador.genKeyPair().getPublic();
-
-            Base64.Encoder encoder = Base64.getEncoder();
-            String publicRSA = encoder.encodeToString(gerador.genKeyPair().getPublic().getEncoded());
-
-            sistema.setChavePublica(publicRSA);
-            chavePrivadaDoAplicativoConfiavel = encoder.encodeToString(gerador.genKeyPair().getPrivate().getEncoded());
-
-        } catch (NoSuchAlgorithmException ex) {
-
-        }
-
-        when(request.getHeader("emailCripto")).thenReturn(sistema.getChavePublica());
+        Map<String, String> parDeChaves = UtilSBCoreSegurancaRCA.chavePublicaPrivada();
+        sistema.setChavePublica(parDeChaves.keySet().stream().findFirst().get());
+        chavePrivadaDoAplicativoConfiavel = parDeChaves.values().stream().findFirst().get();
+        String emailcripto = UtilSBCoreSegurancaRCA.getTextoCriptografado("salviof@gmail.com", chavePrivadaDoAplicativoConfiavel);
+        when(request.getHeader("emailCripto")).thenReturn(emailcripto);
         when(request.getHeader("CHAVE_PUBLICA")).thenReturn(sistema.getChavePublica());
         when(request.getHeader("origin")).thenReturn(sistema.getDominio());
         sistema = UtilSBPersistencia.mergeRegistro(sistema);
