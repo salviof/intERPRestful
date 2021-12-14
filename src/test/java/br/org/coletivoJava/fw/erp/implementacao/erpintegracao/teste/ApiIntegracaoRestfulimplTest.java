@@ -5,30 +5,29 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
 
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBCoreSegurancaRCA;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRCA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ConfigCoreApiIntegracao;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ServletLoginGeracaoJWT;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabConfigModuloWebERPChaves;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
+import com.super_bits.modulosSB.SBCore.ConfigGeral.arquivosConfiguracao.ConfigModulo;
+import java.io.BufferedReader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
-import java.security.KeyFactory;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.Cipher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,14 +35,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import testesFW.TesteJUnitBasicoSemPersistencia;
 import static org.mockito.Mockito.when;
+import testesFW.TesteJunitSBPersistencia;
 
 /**
  *
  * @author sfurbino
  */
-public class ApiIntegracaoRestfulimplTest extends TesteJUnitBasicoSemPersistencia {
+public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
     @Mock
     HttpServletRequest request;
@@ -53,6 +52,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJUnitBasicoSemPersistenci
 
     public ApiIntegracaoRestfulimplTest() {
     }
+    private SistemaERPConfiavel sistemaConfiavelERP;
 
     @Before
     public void setUp() throws Exception {
@@ -63,65 +63,158 @@ public class ApiIntegracaoRestfulimplTest extends TesteJUnitBasicoSemPersistenci
     protected void configAmbienteDesevolvimento() {
         SBCore.configurar(new ConfigCoreApiIntegracao(), SBCore.ESTADO_APP.DESENVOLVIMENTO);
         SBPersistencia.configuraJPA(new ConfigPercistenciaItegracaoSistemas());
+
     }
 
+    private static StringWriter sw;
     /**
      * Test of getCodigoApiExterna method, of class ApiIntegracaoRestfulimpl.
      */
     ItfIntegracaoERP integracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
     private static String chavePrivadaDoAplicativoConfiavel;
 
-    public SistemaERPConfiavel buildAplicativoAcesso() {
+    private static final String USUARIO_AUTENTICADO = "salviof@gmail.com";
 
-        SistemaERPConfiavel sistema = new SistemaERPConfiavel();
-        sistema.setDominio("crm.casanovadigital.com.br");
-        sistema.setUrlRecepcaoCodigo("crm.casanovadigital.com.br/recepcaoOauth/integracaoSistemas");
-        Map<String, String> parDeChaves = UtilSBCoreSegurancaRCA.chavePublicaPrivada();
-        sistema.setChavePublica(parDeChaves.keySet().stream().findFirst().get());
-        chavePrivadaDoAplicativoConfiavel = parDeChaves.values().stream().findFirst().get();
-        String emailcripto = UtilSBCoreSegurancaRCA.getTextoCriptografado("salviof@gmail.com", chavePrivadaDoAplicativoConfiavel);
-        when(request.getHeader("emailCripto")).thenReturn(emailcripto);
-        when(request.getHeader("CHAVE_PUBLICA")).thenReturn(sistema.getChavePublica());
-        when(request.getHeader("origin")).thenReturn(sistema.getDominio());
-        sistema = UtilSBPersistencia.mergeRegistro(sistema);
-        return sistema;
-    }
+    private static boolean criouAplicativo = false;
 
-    @Test
-    public void testGetCodigoApiExterna() {
-
-        Map<String, String> parDeChaves = UtilSBCoreSegurancaRCA.chavePublicaPrivada();
-        final String texto = "Olá mundo";
-        System.out.println("Chave Privada:");
-        System.out.println(parDeChaves.entrySet().stream().findFirst().get().getValue());
-        System.out.println("Chave Publica:");
-        System.out.println(parDeChaves.entrySet().stream().findFirst().get().getKey());
-
-        String textoCriptografado = UtilSBCoreSegurancaRCA.getTextoCriptografado(texto, parDeChaves.entrySet().stream().findFirst().get().getValue());
-        System.out.println("Criptografado=" + textoCriptografado);
-
-        String textodescriptString = UtilSBCoreSegurancaRCA.getTextoDescriptografado(textoCriptografado, parDeChaves.entrySet().stream().findFirst().get().getKey());
-        assertEquals("O texto não foi descriptografado corretamente", texto, textodescriptString);
-        System.out.println("Descriptografado=" + textodescriptString);
-
-        integracao
-                .getSistemaAtual();
+    private void preparaRespostasServletPostToken(String pJson) {
+        String emailcripto = UtilSBCoreCriptoRCA.getTextoCriptografado(USUARIO_AUTENTICADO, chavePrivadaDoAplicativoConfiavel);
+        sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
         try {
-            SistemaERPConfiavel sistemaCRP = buildAplicativoAcesso();
-
-            ServletLoginGeracaoJWT myServlet = new ServletLoginGeracaoJWT();
-            myServlet.doGet(request, response);
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
             when(response.getWriter()).thenReturn(pw);
-            String result = sw.getBuffer().toString().trim();
-            assertEquals(result, new String("TESTE"));
         } catch (IOException ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ServletException ex) {
             Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        try {
+            when(request.getReader()).thenReturn(new BufferedReader(new StringReader(pJson)));
+        } catch (IOException ex) {
+            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        when(request.getHeader("emailCripto")).thenReturn(emailcripto);
+        when(request.getHeader("CHAVE_PUBLICA")).thenReturn(sistemaConfiavelERP.getChavePublica());
+        when(request.getHeader("origin")).thenReturn(sistemaConfiavelERP.getDominio());
+        ConfigModulo moduloServidorOauth = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class);
+
+        try {
+            when(request.getRequestURI()).thenReturn(
+                    "/OAUTH2_SERVICE"
+                    + "/OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO"
+                    + "/" + URLEncoder.encode(moduloServidorOauth.getPropriedade(FabConfigModuloWebERPChaves.CHAVE_PUBLICA))
+                    + "/" + URLEncoder.encode(sistemaConfiavelERP.getChavePublica())
+                    + "/" + URLEncoder.encode("https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/USUARIO/", "UTF8")
+                    + "/USUARIO");
+
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void preparaRespostasServlet() {
+
+        String emailcripto = UtilSBCoreCriptoRCA.getTextoCriptografado(USUARIO_AUTENTICADO, chavePrivadaDoAplicativoConfiavel);
+        sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        try {
+            when(response.getWriter()).thenReturn(pw);
+        } catch (IOException ex) {
+            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        when(request.getHeader("emailCripto")).thenReturn(emailcripto);
+        when(request.getHeader("CHAVE_PUBLICA")).thenReturn(sistemaConfiavelERP.getChavePublica());
+        when(request.getHeader("origin")).thenReturn(sistemaConfiavelERP.getDominio());
+        ConfigModulo moduloServidorOauth = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class);
+
+        try {
+            when(request.getRequestURI()).thenReturn(
+                    "/OAUTH2_SERVICE"
+                    + "/OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO"
+                    + "/" + URLEncoder.encode(moduloServidorOauth.getPropriedade(FabConfigModuloWebERPChaves.CHAVE_PUBLICA))
+                    + "/" + URLEncoder.encode(sistemaConfiavelERP.getChavePublica())
+                    + "/" + URLEncoder.encode("https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/USUARIO/", "UTF8")
+                    + "/USUARIO");
+
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public SistemaERPConfiavel buildAplicativoAcesso() {
+
+        if (sistemaConfiavelERP != null) {
+
+            return sistemaConfiavelERP;
+        }
+        criouAplicativo = true;
+
+        sistemaConfiavelERP = new SistemaERPConfiavel();
+        sistemaConfiavelERP.setDominio("crm.casanovadigital.com.br");
+        sistemaConfiavelERP.setUrlRecepcaoCodigo("crm.casanovadigital.com.br/recepcaoOauth/integracaoSistemas");
+        Map<String, String> parDeChaves = UtilSBCoreCriptoRCA.chavePublicaPrivada();
+        sistemaConfiavelERP.setChavePublica(parDeChaves.keySet().stream().findFirst().get());
+        chavePrivadaDoAplicativoConfiavel = parDeChaves.values().stream().findFirst().get();
+
+        sistemaConfiavelERP = UtilSBPersistencia.mergeRegistro(sistemaConfiavelERP);
+        return sistemaConfiavelERP;
+    }
+
+    private final ServletOauth2Server servletFornecimentoToken = new ServletOauth2Server();
+
+    @Test
+    public void testeFormularioDeLogin() {
+        buildAplicativoAcesso();
+        preparaRespostasServlet();
+        integracao.getSistemaAtual();
+        try {
+
+            servletFornecimentoToken.doGet(request, response);
+
+            String result = sw.getBuffer().toString().trim();
+            assertTrue("O servlet não exibu o formulário de login", result.contains(USUARIO_AUTENTICADO));
+
+        } catch (IOException ex) {
+            Logger.getLogger(ApiIntegracaoRestfulimplTest.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        } catch (ServletException ex) {
+            Logger.getLogger(ApiIntegracaoRestfulimplTest.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    @Test
+    public void testeRedirecionamentoFornecimentoToken() {
+        buildAplicativoAcesso();
+
+        UsuarioSB usuario = UtilSBPersistencia.getListaTodos(UsuarioSB.class,
+                getEM()).stream().findFirst().get();
+        SBCore.getServicoSessao().getSessaoAtual().setUsuario(usuario);
+
+        try {
+            preparaRespostasServlet();
+            servletFornecimentoToken.doGet(request, response);
+            String resultado = sw.getBuffer().toString().trim();
+            System.out.println(resultado);
+            assertTrue("O código não foi retornado", resultado.contains("?code="));
+            int indicecodigostr = resultado.indexOf("?code");
+            String codigo = resultado.substring(indicecodigostr, resultado.length());
+            codigo = codigo.replace("?code=", "");
+            codigo = codigo.substring(0, codigo.indexOf("</"));
+            preparaRespostasServlet();
+            String dadosObterToken = "{\"grant_type\":\"authorization_code\",\n"
+                    + "		 \"client_id\": \"SEU_CLIENT_ID\",\n"
+                    + "		 \"client_secret\": \"EMAILCRIPTOGRAFADO\",\n"
+                    + "		 \"code\": \"SEU_AUTHORIZATION_CODE\",\n"
+                    + "		 \"redirect_uri\": \"https://SEU_APP/callback\"}'";
+            preparaRespostasServletPostToken(dadosObterToken);
+            servletFornecimentoToken.doPost(request, response);
+            System.out.println("UP");
+        } catch (ServletException | IOException ex) {
+            Logger.getLogger(ApiIntegracaoRestfulimplTest.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }

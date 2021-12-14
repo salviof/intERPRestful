@@ -20,9 +20,10 @@ public class ConfigCoreApiIntegracao extends ConfiguradorCoreDeProjetoJarPersist
     @Override
     public void defineFabricasDeACao(ItfConfiguracaoCoreCustomizavel pConfig) {
 
-        setIgnorarConfiguracaoPermissoes(true);
+        setIgnorarConfiguracaoPermissoes(false);
         pConfig.setFabricaDeAcoes(new Class[]{FabAcaoProjetoSB.class});
         pConfig.setCentralComunicacao(CentralComunicacaoDesktop.class);
+        pConfig.setClasseConfigPermissao(ConfigPermissaoTestesIntegracao.class);
     }
 
 }
