@@ -11,13 +11,17 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
  *
  * @author sfurbino
  */
-public class SistemaAtual extends SistemaERPConfiavel implements ItfSistemaERPAtual {
+public class SistemaERPAtual extends SistemaERPConfiavel implements ItfSistemaERPAtual {
 
     private String chavePrivada;
 
     @Override
     public String getChavePrivada() {
         return chavePrivada;
+    }
+
+    public void setChavePrivada(String chavePrivada) {
+        this.chavePrivada = chavePrivada;
     }
 
 }

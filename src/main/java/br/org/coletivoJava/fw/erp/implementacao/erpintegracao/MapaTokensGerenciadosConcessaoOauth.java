@@ -5,7 +5,9 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
-import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaErp;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenAcessoOauthServer;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenConcessaoOauthServer;
+import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.arquivosConfiguracao.ConfigModulo;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;

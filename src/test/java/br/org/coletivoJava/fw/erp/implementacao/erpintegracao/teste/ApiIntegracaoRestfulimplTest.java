@@ -5,13 +5,15 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
 
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRCA;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ConfigCoreApiIntegracao;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabConfigModuloWebERPChaves;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer;
 import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
@@ -54,6 +56,8 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
     }
     private SistemaERPConfiavel sistemaConfiavelERP;
 
+    private SistemaERPAtual sistemaAutual;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -63,7 +67,8 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
     protected void configAmbienteDesevolvimento() {
         SBCore.configurar(new ConfigCoreApiIntegracao(), SBCore.ESTADO_APP.DESENVOLVIMENTO);
         SBPersistencia.configuraJPA(new ConfigPercistenciaItegracaoSistemas());
-
+        ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+        sistemaAutual = (SistemaERPAtual) erp.getSistemaAtual();
     }
 
     private static StringWriter sw;
@@ -78,7 +83,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
     private static boolean criouAplicativo = false;
 
     private void preparaRespostasServletPostToken(String pJson) {
-        String emailcripto = UtilSBCoreCriptoRCA.getTextoCriptografado(USUARIO_AUTENTICADO, chavePrivadaDoAplicativoConfiavel);
+        String emailcripto = UtilSBCoreCriptoRSA.getTextoCriptografado(USUARIO_AUTENTICADO, chavePrivadaDoAplicativoConfiavel);
         sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         try {
@@ -99,10 +104,10 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
         try {
             when(request.getRequestURI()).thenReturn(
-                    "/OAUTH2_SERVICE"
-                    + "/OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO"
-                    + "/" + URLEncoder.encode(moduloServidorOauth.getPropriedade(FabConfigModuloWebERPChaves.CHAVE_PUBLICA))
-                    + "/" + URLEncoder.encode(sistemaConfiavelERP.getChavePublica())
+                    "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                    + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
+                    + "/" + sistemaAutual.getHashChavePublica()
+                    + "/" + URLEncoder.encode(sistemaConfiavelERP.getHashChavePublica())
                     + "/" + URLEncoder.encode("https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/USUARIO/", "UTF8")
                     + "/USUARIO");
 
@@ -113,7 +118,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
     private void preparaRespostasServlet() {
 
-        String emailcripto = UtilSBCoreCriptoRCA.getTextoCriptografado(USUARIO_AUTENTICADO, chavePrivadaDoAplicativoConfiavel);
+        String emailcripto = UtilSBCoreCriptoRSA.getTextoCriptografado(USUARIO_AUTENTICADO, chavePrivadaDoAplicativoConfiavel);
         sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         try {
@@ -130,8 +135,8 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
             when(request.getRequestURI()).thenReturn(
                     "/OAUTH2_SERVICE"
                     + "/OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO"
-                    + "/" + URLEncoder.encode(moduloServidorOauth.getPropriedade(FabConfigModuloWebERPChaves.CHAVE_PUBLICA))
-                    + "/" + URLEncoder.encode(sistemaConfiavelERP.getChavePublica())
+                    + "/" + sistemaAutual.getHashChavePublica()
+                    + "/" + sistemaConfiavelERP.getHashChavePublica()
                     + "/" + URLEncoder.encode("https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/USUARIO/", "UTF8")
                     + "/USUARIO");
 
@@ -152,7 +157,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         sistemaConfiavelERP = new SistemaERPConfiavel();
         sistemaConfiavelERP.setDominio("crm.casanovadigital.com.br");
         sistemaConfiavelERP.setUrlRecepcaoCodigo("crm.casanovadigital.com.br/recepcaoOauth/integracaoSistemas");
-        Map<String, String> parDeChaves = UtilSBCoreCriptoRCA.chavePublicaPrivada();
+        Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
         sistemaConfiavelERP.setChavePublica(parDeChaves.keySet().stream().findFirst().get());
         chavePrivadaDoAplicativoConfiavel = parDeChaves.values().stream().findFirst().get();
 

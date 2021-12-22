@@ -4,6 +4,7 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.dto.ItfD
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json_bind_restful.SistemaERPAtual.JsonBindDTOSistemaERPAtual;
+import jakarta.json.JsonObject;
 import java.lang.String;
 
 @JsonDeserialize(using = JsonBindDTOSistemaERPAtual.class)
@@ -62,6 +63,16 @@ public interface ItfDTOSistemaERPAtual extends ItfDTOSBJSON, ItfSistemaERPAtual 
     @Override
     public default String getUrlRecepcaoCodigo() {
         return (String) getValorPorReflexao();
+    }
+
+    @Override
+    public default String getHashChavePublica() {
+        return (String) getValorPorReflexao();
+    }
+
+    @Override
+    public default JsonObject getComoJson() {
+        return getJsonModoPojo();
     }
 
 }

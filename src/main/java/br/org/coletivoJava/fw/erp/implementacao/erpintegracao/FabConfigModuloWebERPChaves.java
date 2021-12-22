@@ -5,11 +5,12 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
 import com.super_bits.modulosSB.SBCore.ConfigGeral.arquivosConfiguracao.ItfFabConfigModulo;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.tipoModulos.integracaoOauth.FabPropriedadeModuloIntegracaoOauth;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.tipoModulos.integracaoOauth.InfoPropriedadeConfigRestIntegracao;
+import com.super_bits.modulosSB.SBCore.modulos.chavesPublicasePrivadas.RepositorioChavePublicaPrivada;
 import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Map;
 
 /**
  *
@@ -17,31 +18,24 @@ import java.util.logging.Logger;
  */
 public enum FabConfigModuloWebERPChaves implements ItfFabConfigModulo {
 
-    CHAVE_PUBLICA,
-    CHAVE_PRIVADA;
+    @InfoPropriedadeConfigRestIntegracao(tipoPropriedade = FabPropriedadeModuloIntegracaoOauth.CHAVE_PUBLICA)
+    PAR_DE_CHAVES_IDENTIFICADOR,
+    @InfoPropriedadeConfigRestIntegracao(tipoPropriedade = FabPropriedadeModuloIntegracaoOauth.URL_SERVIDOR_API)
+    SITE_URL;
     private static KeyPairGenerator gerador;
 
     @Override
     public synchronized String getValorPadrao() {
-        if (gerador == null) {
-            try {
-                gerador = KeyPairGenerator.getInstance("RSA");
-            } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(FabConfigModuloWebERPChaves.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            gerador.initialize(1024);
-            gerador.generateKeyPair();
-        }
-        switch (this) {
-            case CHAVE_PUBLICA:
-                Base64.Encoder encoder = Base64.getEncoder();
-                String publicRSA = encoder.encodeToString(gerador.genKeyPair().getPublic().getEncoded());
-                return publicRSA;
 
-            case CHAVE_PRIVADA:
-                Base64.Encoder encoder64 = Base64.getEncoder();
-                String privateRCA = encoder64.encodeToString(gerador.genKeyPair().getPrivate().getEncoded());
-                return privateRCA;
+        switch (this) {
+            case PAR_DE_CHAVES_IDENTIFICADOR: {
+                Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
+                String identificador = RepositorioChavePublicaPrivada.getIndentificadorParDeChaves(parDeChaves);
+                RepositorioChavePublicaPrivada.persistirChavePublica(parDeChaves);
+                return identificador;
+            }
+            case SITE_URL:
+                return "http://localhost:8086";
 
             default:
                 throw new AssertionError(this.name());

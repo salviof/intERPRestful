@@ -5,12 +5,12 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer;
 
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRCA;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
-import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaErp;
+import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.MapaTokensGerenciadosConcessaoOauth;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.TokenConcessaoOauthServer;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenConcessaoOauthServer;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.urls.UrlInterpretada;
@@ -26,10 +26,14 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  *
+ *
+ *
+ *
  * @author sfurbino
  */
 public class ServletOauth2Server extends HttpServlet implements Serializable {
 
+    public static final String SLUGPUBLICACAOSERVLET = "oauth2_service";
     private static final ItfIntegracaoERP integracaoEntreSistemas = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
     @Override
@@ -45,9 +49,10 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             return;
         }
 
-        String chavePublica = URLDecoder.decode(parametrosDeUrl.getValor(FabUrlOauth2Server.CHAVE_PUBLICA_ID_CLIENTE).toString());
+        String chavePublica = requisicao.getHeader("CHAVE_PUBLICA");
+        String chavePublicaServidor = requisicao.getHeader("CHAVE_PUBLICA_SERVICO");
         String emailCriptografado = requisicao.getHeader("emailCripto");
-        String emailDescriptografado = UtilSBCoreCriptoRCA.getTextoDescriptografado(emailCriptografado, chavePublica);
+        String emailDescriptografado = UtilSBCoreCriptoRSA.getTextoDescriptografado(emailCriptografado, chavePublica);
         ItfSistemaErp sistemaSolicitante = integracaoEntreSistemas.getSistemaByChavePublica(chavePublica);
 
         if (sistemaSolicitante == null) {

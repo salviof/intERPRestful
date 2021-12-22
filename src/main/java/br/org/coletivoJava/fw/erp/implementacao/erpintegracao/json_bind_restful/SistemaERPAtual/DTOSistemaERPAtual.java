@@ -1,7 +1,5 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json_bind_restful.SistemaERPAtual;
 
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json_bind_restful.SistemaERPAtual.ItfDTOSistemaERPAtual;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json_bind_restful.SistemaERPAtual.JsonBindDTOSistemaERPAtual;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.dto.DTO_SBGENERICO;
 
 public class DTOSistemaERPAtual extends DTO_SBGENERICO<ItfDTOSistemaERPAtual>

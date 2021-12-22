@@ -17,9 +17,11 @@ public enum FabUrlOauth2Server implements ItfFabUrlServletSBFW {
     @InfoParametroURL(nome = "Tipo Acesso", tipoParametro = TIPO_PARTE_URL.OBJETO_COM_CONSTRUCTOR,
             fabricaObjetosRelacionada = FabTipoRequisicaoOauthServer.class, tipoEntidade = TipoRequisicaoOauth.class)
     TIPO_REQUISICAO,
-    @InfoParametroURL(nome = "Chave Pública servidor", tipoParametro = TIPO_PARTE_URL.TEXTO)
+    @InfoParametroURL(nome = "Hash chave pública servico", tipoParametro
+            = TIPO_PARTE_URL.TEXTO)
     CHAVE_PUBLICA_ID_RECURSOS,
-    @InfoParametroURL(nome = "Chave Pública Cliente", tipoParametro = TIPO_PARTE_URL.TEXTO)
+    @InfoParametroURL(nome = "Hash chave pública cliente", tipoParametro
+            = TIPO_PARTE_URL.TEXTO)
     CHAVE_PUBLICA_ID_CLIENTE,
     @InfoParametroURL(nome = "Endereço Resposta Cliente", tipoParametro = TIPO_PARTE_URL.TEXTO)
     REDIRECT_URI,

@@ -5,16 +5,18 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 
-import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaErp;
+import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
+import jakarta.json.JsonObject;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  *
@@ -34,13 +36,17 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaEr
     private String nome;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.SITE)
+    @Column(nullable = false)
     private String dominio;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.URL)
+    @Column(nullable = false)
     private String urlRecepcaoCodigo;
 
-    @Column(length = 512)
+    @Column(length = 8000)
     private String chavePublica;
+
+    private String hashChavePublica;
 
     @Override
     public String getDominio() {
@@ -83,6 +89,24 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaEr
 
     public void setChavePublica(String chavePublica) {
         this.chavePublica = chavePublica;
+        hashChavePublica = String.valueOf(chavePublica.hashCode());
+    }
+
+    @Override
+    public String getHashChavePublica() {
+        return hashChavePublica;
+    }
+
+    public void setHashChavePublica(String hashChavePublica) {
+        this.hashChavePublica = hashChavePublica;
+    }
+
+    @Transient
+    private String comoJson;
+
+    @Override
+    public JsonObject getComoJson() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
