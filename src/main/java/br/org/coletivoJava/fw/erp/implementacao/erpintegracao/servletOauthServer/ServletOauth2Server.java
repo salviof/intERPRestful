@@ -5,19 +5,26 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer;
 
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.MapaTokensGerenciadosConcessaoOauth;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenAcessoOauthServer;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenConcessaoOauthServer;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.urls.UrlInterpretada;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.util.UtilFabUrlServlet;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.URLDecoder;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  *
  *
- *
+ * https://datatracker.ietf.org/doc/html/rfc6749
  *
  * @author sfurbino
  */
@@ -48,37 +55,36 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             resp.getWriter().append("PARAMETROS DE ACESSO INCORRETOS, VERIFIQUE A DOCUMENTAÇÃO DA CLASSE " + FabUrlOauth2Server.class.getSimpleName());
             return;
         }
-
-        String chavePublica = requisicao.getHeader("CHAVE_PUBLICA");
-        String chavePublicaServidor = requisicao.getHeader("CHAVE_PUBLICA_SERVICO");
-        String emailCriptografado = requisicao.getHeader("emailCripto");
-        String emailDescriptografado = UtilSBCoreCriptoRSA.getTextoDescriptografado(emailCriptografado, chavePublica);
-        ItfSistemaErp sistemaSolicitante = integracaoEntreSistemas.getSistemaByChavePublica(chavePublica);
+        String hashChave = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_CLIENTE);
+        ItfSistemaErp sistemaSolicitante = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChave);
+        if (sistemaSolicitante == null) {
+            resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO SISTEMA SOLICITANTE NÃO FOI REGISTRADA");
+        }
 
         if (sistemaSolicitante == null) {
             resp.getWriter().append("ACESSO NEGADO- CHAVE PÚBLICA NÃO ENCONTRADA, VOCÊ PRECISA CADASTRAR A CHAVE PÚBLICA DO APLICATIVO COMO CONFIÁVEL");
             return;
-
         }
 
         //Verifica se a origem é vinda do dominio do sistema solicitante
         String dominioDoSistema = sistemaSolicitante.getDominio();
         String dominioDaRequisicao = requisicao.getHeader("origin");
+
         if (dominioDaRequisicao == null || !dominioDoSistema.equals(dominioDaRequisicao)) {
             resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA");
             return;
-
         }
-        boolean foiCriptografadoComAChavePrivada = true;
-        ItfUsuario pUsuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDescriptografado);
+        String emailDoEscopo = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.ESCOPO);
 
-        if (emailDescriptografado == null) {
+        ItfUsuario pUsuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDoEscopo);
+
+        if (emailDoEscopo == null) {
             resp.getWriter().append("ACESSO NEGADO IMPOSSÍVEL RECONHECER O USUÁRIO VERIFIQUE SUA CHAVE PRIVADA");
             return;
         }
 
         if (pUsuario == null) {
-            resp.getWriter().append("ACESSO NEGADO O USUÁRIO " + emailDescriptografado + " NÃO FOI ENCONTRADO NO SISTEMA");
+            resp.getWriter().append("ACESSO NEGADO O USUÁRIO " + emailDoEscopo + " NÃO FOI ENCONTRADO NO SISTEMA");
             return;
         }
 
@@ -94,12 +100,9 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
 
                 SBCore.getServicoSessao().efetuarLogOut();
             }
-            if (foiCriptografadoComAChavePrivada) {
-                resp.getWriter().append("<form><input value='" + emailDescriptografado + "' > <buton  /> </form>");
 
-            } else {
-                resp.getWriter().append("ACESSO NEGADO");
-            }
+            resp.getWriter().append("<form><input value='" + emailDoEscopo + "' > <buton  /> </form>");
+
         }
 
     }
@@ -107,22 +110,42 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        StringBuffer jb = new StringBuffer();
+        StringBuffer stringBuffer = new StringBuffer();
         String line = null;
         try {
             BufferedReader reader = req.getReader();
             while ((line = reader.readLine()) != null) {
-                jb.append(line);
+                stringBuffer.append(line);
             }
         } catch (Exception e) {
             /*report an error*/ }
 
         try {
-            String jsonSTR = jb.toString();
-            System.out.println(jsonSTR);
+            String jsonSTR = stringBuffer.toString();
+            JsonReader jsonReader = Json.createReader(new StringReader(jsonSTR));
+            JsonObject json = jsonReader.readObject();
+            String codigoCripto = json.getString("code");
+            String hashChavePublicaSolicitante = json.getString("client_id");
+            ItfSistemaErp sistemaSolicitante = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChavePublicaSolicitante);
+
+            String codigoDescriptografado = UtilSBCoreCriptoRSA.getTextoDescriptografado(codigoCripto, sistemaSolicitante.getChavePublica());
+
+            TokenConcessaoOauthServer tokenConcessao = MapaTokensGerenciadosConcessaoOauth.loadTokenConcessaoExistente(sistemaSolicitante, codigoDescriptografado);
+            TokenAcessoOauthServer tokenAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenDeAcesso(codigoCripto, hashChavePublicaSolicitante, tokenConcessao.getIdentificadorUsuario());
+            JsonObject tokenJson = UtilSBCoreJson
+                    .getJsonObjectBySequenciaChaveValor("access_token", tokenAcesso.getToken(),
+                            "token_type", "Bearer",
+                            "scope", tokenConcessao.getIdentificadorUsuario(),
+                            "dataHoraExpira", String.valueOf(tokenAcesso.getDataHoraExpira().getTime()),
+                            "refresh_token", tokenAcesso.getRefresh_token()
+                    );
+
+            resp.getWriter().append(tokenJson.toString());
+
         } catch (Throwable e) {
             // crash and burn
-            throw new IOException("Error parsing JSON request string");
+            resp.getWriter().append("{erro: 'ACESSO NEGADO, ERRO SECRETO OBTENDO TOKEN'}");
+
         }
 
     }

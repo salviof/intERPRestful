@@ -69,6 +69,24 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         }
     }
 
+    public static TokenConcessaoOauthServer loadTokenConcessaoExistente(ItfSistemaErp pSistema, String pCodigo) throws ErroTentandoObterTokenAcesso {
+        TokenConcessaoOauthServer tokenConcessao = TOKEN_DE_CONCESSAO_BY_CODIGO.get(pCodigo);
+        if (tokenConcessao == null) {
+            throw new ErroTentandoObterTokenAcesso("O Código " + pCodigo + " não foi encontrado");
+        }
+        if (!tokenConcessao.getChavePublicaAplicacaoConfiavel().equals(pSistema.getChavePublica())) {
+            throw new ErroTentandoObterTokenAcesso("O código pertence a outro sistema");
+        }
+        if (tokenConcessao.getDataHoraExpira().getTime() >= new Date().getTime()) {
+            throw new ErroTentandoObterTokenAcesso("O código de solicitação de token expirou");
+        }
+        return tokenConcessao;
+    }
+
+    public static TokenAcessoOauthServer loadTokenExistente(String pTokenAcesso) {
+        return TOKEN_DE_ACESSO_BY_CODIGO.get(pTokenAcesso);
+    }
+
     public static TokenAcessoOauthServer loadTokenExistente(ItfSistemaErp pSistema, ItfUsuario pUsuario) {
         if (TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
             loadTokensPersistidos(pSistema);
@@ -86,7 +104,8 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
     public static TokenConcessaoOauthServer gerarNovoTokenCocessaoDeAcesso(ItfSistemaErp pSistema, ItfUsuario pUsuario) {
         String tokenConcessao = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio();
         Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 300);
-        TokenConcessaoOauthServer tokenDinamico = new TokenConcessaoOauthServer(tokenConcessao, dataExpiracao, pSistema.getChavePublica());
+
+        TokenConcessaoOauthServer tokenDinamico = new TokenConcessaoOauthServer(tokenConcessao, dataExpiracao, pSistema.getChavePublica(), pUsuario.getEmail());
         if (!TOKENS_DE_CONSESSAO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
             TOKENS_DE_CONSESSAO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.put(pSistema.getChavePublica(), new HashMap<>());
         }
@@ -100,9 +119,10 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         if (tokenConcessao == null) {
             return null;
         }
-        String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio();
+        String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
+        String codigoRefresh = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
         Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
-        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, dataExpiracao, pSistemaConfiavelChavePublica, pIdentificador);
+        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoRefresh, dataExpiracao, pSistemaConfiavelChavePublica, pIdentificador);
         persistirToken(pSistemaConfiavelChavePublica, novoToken);
         return novoToken;
     }
@@ -118,8 +138,9 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         }
         String sistemaConfiavelChavePublica = tokenEncontrado.getChavePublicaAplicativoConfiavel();
         Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
-        String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio();
-        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, dataExpiracao, sistemaConfiavelChavePublica, tokenEncontrado.getIdentificacaoAgenteDeAcesso());
+        String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
+        String codigoTokenRefresh = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
+        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoTokenRefresh, dataExpiracao, sistemaConfiavelChavePublica, tokenEncontrado.getIdentificacaoAgenteDeAcesso());
         persistirToken(sistemaConfiavelChavePublica, novoToken);
         return novoToken;
     }

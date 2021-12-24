@@ -15,14 +15,20 @@ import java.util.Date;
 public class TokenConcessaoOauthServer extends TokenDeAcessoExternoDinamico {
 
     private final String chavePublicaAplicativoConfiavel;
+    private final String identificadorUsuario;
 
-    public TokenConcessaoOauthServer(String pToken, Date pDataHoraExipira, String pChavePublicaAplicativoConfiavel) {
+    public TokenConcessaoOauthServer(String pToken, Date pDataHoraExipira, String pChavePublicaAplicativoConfiavel, String pIdentificadorUsuario) {
         super(pToken, pDataHoraExipira);
         chavePublicaAplicativoConfiavel = pChavePublicaAplicativoConfiavel;
+        identificadorUsuario = pIdentificadorUsuario;
     }
 
     public String getChavePublicaAplicacaoConfiavel() {
         return chavePublicaAplicativoConfiavel;
+    }
+
+    public String getIdentificadorUsuario() {
+        return identificadorUsuario;
     }
 
 }

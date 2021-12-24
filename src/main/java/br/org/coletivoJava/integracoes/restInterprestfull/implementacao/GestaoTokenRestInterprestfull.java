@@ -30,12 +30,18 @@ import java.util.logging.Logger;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+/**
+ *
+ * https://datatracker.ietf.org/doc/html/rfc6749
+ *
+ * @author sfurbino
+ */
 @InfoIntegracaoRestInterprestfullRestfull(tipo = FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL)
 public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implements ItfTokenGestaoOauth {
 
     private final String chavePublicaLocal;
     private final String chavePrivadaLocal;
-    private final String chavePublicaServer;
+    private final String chavePublicaRemoto;
 
     private final String urlServidorApiRest;
     private final ERPIntegracaoSistemasApi erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL;
@@ -51,7 +57,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
         ItfSistemaERPAtual sistemaLocal = restFulERP.getSistemaAtual();
         chavePublicaLocal = sistemaLocal.getChavePublica();
         chavePrivadaLocal = sistemaLocal.getChavePrivada();
-        chavePublicaServer = sistemaRemoto.getChavePublica();
+        chavePublicaRemoto = sistemaRemoto.getChavePublica();
         ItfSistemaERPAtual sistemaAtual = restFulERP.getSistemaAtual();
         urlServidorApiRest = sistemaRemoto.getUrlRecepcaoCodigo();
         urlRetornoReceberCodigoSolicitacao = sistemaAtual.getUrlRecepcaoCodigo();
@@ -60,7 +66,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
                 + "/" + sistemaRemoto.getChavePublica().hashCode()
                 + "/" + chavePublicaLocal.hashCode()
                 + "/" + URLEncoder.encode(urlRetornoReceberCodigoSolicitacao)
-                + "/" + "USUARIO";
+                + "/" + pUsuario.getEmail();
         urlRetornoSucessoObterToken = sistemaAtual.getDominio();
 
     }
@@ -70,20 +76,20 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
 
         if (codigoSolicitacao != null) {
             try {
-                String codigoUrlDecodigicado = URLDecoder.decode(codigoSolicitacao, "UTF8");
-                String codigoDescriptografado = UtilSBCoreCriptoRSA.getTextoDescriptografadoUsandoChavePrivada(codigoUrlDecodigicado, chavePrivadaLocal);
+
+                String codigoCriptogrado = UtilSBCoreCriptoRSA.getTextoCriptografado(codigoSolicitacao, chavePublicaRemoto);
                 ChamadaHttpSimples chamada = new ChamadaHttpSimples();
                 chamada.setTipoConexao(FabTipoConexaoRest.POST);
                 JsonObjectBuilder jsonEnvioCodigoAcesso = Json.createObjectBuilder();
                 jsonEnvioCodigoAcesso.add("grant_type", FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString());
                 jsonEnvioCodigoAcesso.add("client_id", chavePublicaLocal.hashCode());
-                jsonEnvioCodigoAcesso.add("code", codigoDescriptografado);
+                jsonEnvioCodigoAcesso.add("code", codigoCriptogrado);
                 jsonEnvioCodigoAcesso.add("redirect_uri", urlRetornoSucessoObterToken);
                 JsonObject jsonPostSolicitacao = jsonEnvioCodigoAcesso.build();
                 chamada.setCorpo(jsonPostSolicitacao.toString());
                 return chamada;
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(GestaoTokenRestInterprestfull.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Throwable ex) {
+                Logger.getLogger(GestaoTokenRestInterprestfull.class.getName()).log(Level.SEVERE, "Falha gerando chamada para obter token", ex);
                 return null;
             }
 
