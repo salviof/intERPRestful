@@ -6,15 +6,19 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer;
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
+import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.MapaTokensGerenciadosConcessaoOauth;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenAcessoOauthServer;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenConcessaoOauthServer;
+import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTokenRestInterprestfull;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.UtilSBApiRestClient;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.urls.UrlInterpretada;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.util.UtilFabUrlServlet;
@@ -59,6 +63,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
         ItfSistemaErp sistemaSolicitante = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChave);
         if (sistemaSolicitante == null) {
             resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO SISTEMA SOLICITANTE NÃO FOI REGISTRADA");
+            return;
         }
 
         if (sistemaSolicitante == null) {
@@ -92,7 +97,9 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
 
             TokenConcessaoOauthServer tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(sistemaSolicitante, pUsuario);
             String url = URLDecoder.decode(parametrosDeUrl.getValorComoString(FabUrlOauth2Server.REDIRECT_URI));
-            url = url + "?code=" + tokenConcessaodeAcesso.getToken();
+            ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+            ItfSistemaERPAtual sistemaAutual = (SistemaERPAtual) erp.getSistemaAtual();
+            url = url + "?tipoAplicacao=" + sistemaAutual.getHashChavePublica() + "&code=" + tokenConcessaodeAcesso.getToken();
             resp.getWriter().append("<script> windows.location='" + url + "'</script>");
             resp.sendRedirect(url);
         } else {
@@ -127,6 +134,8 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             String codigoCripto = json.getString("code");
             String hashChavePublicaSolicitante = json.getString("client_id");
             ItfSistemaErp sistemaSolicitante = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChavePublicaSolicitante);
+            ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+            ItfSistemaERPAtual sistemaAutual = (SistemaERPAtual) erp.getSistemaAtual();
 
             String codigoDescriptografado = UtilSBCoreCriptoRSA.getTextoDescriptografado(codigoCripto, sistemaSolicitante.getChavePublica());
 
@@ -139,7 +148,10 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                             "dataHoraExpira", String.valueOf(tokenAcesso.getDataHoraExpira().getTime()),
                             "refresh_token", tokenAcesso.getRefresh_token()
                     );
-
+            // compatível com redirecturl e com conteúdo do post.
+            String urlEnvioCodigo = UtilSBApiRestClient.gerarUrlServicoReceberCodigoSolicitacaoPadrao(GestaoTokenRestInterprestfull.class, FabTipoAgenteClienteApi.SISTEMA, "code", sistemaAutual.getDominio());
+            String urlEnvioCodigoTeste2 = sistemaAutual.getUrlRecepcaoCodigo();
+            String urlRetorno = urlEnvioCodigo + "?tipoAplicacao=" + sistemaAutual.getHashChavePublica() + "&code=" + tokenAcesso.getToken();
             resp.getWriter().append(tokenJson.toString());
 
         } catch (Throwable e) {

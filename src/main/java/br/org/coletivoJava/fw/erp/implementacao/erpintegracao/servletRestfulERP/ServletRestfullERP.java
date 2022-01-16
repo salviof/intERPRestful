@@ -9,7 +9,6 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ErroTentandoObterT
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.MapaTokensGerenciadosConcessaoOauth;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.SolicitacaoControllerERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenAcessoOauthServer;
-import com.super_bits.modulos.SBAcessosModel.model.acoes.AcaoDoSistema;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
@@ -40,6 +39,8 @@ import javax.servlet.http.HttpServletResponse;
  * @author sfurbino
  */
 public class ServletRestfullERP extends HttpServlet implements Serializable {
+
+    public static final String SLUGPUBLICACAOSERVLET = "acoesRestful";
 
     private SolicitacaoControllerERP getSolicitacao(HttpServletRequest pRequisicao) {
         String jsonSolicitacaoTexto = pRequisicao.getHeader("solicitacao");
@@ -107,22 +108,32 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
         return null;
     }
 
+    private void buildResposta(ItfRespostaAcaoDoSistema resposta, HttpServletResponse resp) throws ServletException {
+        JsonObject respostaJson = UtilSBCoreJson
+                .getJsonObjectBySequenciaChaveValor(
+                        "resultado", "",
+                        "resposta", "{}",
+                        "mensagens", "{}",
+                        "sucesso", "{}",
+                        "urlDestino", "",
+                        "urlDestinoFalha", "",
+                        "urlDestinoSucesso", ""
+                );
+        try {
+            resp.getWriter().append(respostaJson.toString());
+        } catch (IOException ex) {
+            throw new ServletException("Falha gerando resposta");
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             ItfUsuario usuario = autenticarUsuario(resp);
+
             SolicitacaoControllerERP soclicitacao = getSolicitacao(req);
             ItfRespostaAcaoDoSistema resposata = getResposta(soclicitacao);
-            UtilSBCoreJson
-                    .getJsonObjectBySequenciaChaveValor(
-                            "resultado", "",
-                            "resposta", "{}",
-                            "mensagens", "{}",
-                            "sucesso", "{}",
-                            "urlDestino", "",
-                            "urlDestinoFalha", "",
-                            "urlDestinoSucesso", ""
-                    );
+            buildResposta(resposata, resp);
         } catch (ErroTentandoObterTokenAcesso ex) {
             enviarAcessoNegado(ex, resp);
         }
@@ -131,27 +142,54 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPost(req, resp); //To change body of generated methods, choose Tools | Templates.
+        try {
+            ItfUsuario usuario = autenticarUsuario(resp);
+
+            SolicitacaoControllerERP soclicitacao = getSolicitacao(req);
+            ItfRespostaAcaoDoSistema resposata = getResposta(soclicitacao);
+            buildResposta(resposata, resp);
+        } catch (ErroTentandoObterTokenAcesso ex) {
+            enviarAcessoNegado(ex, resp);
+        }
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            ItfUsuario usuario = autenticarUsuario(resp);
 
+            SolicitacaoControllerERP soclicitacao = getSolicitacao(req);
+            ItfRespostaAcaoDoSistema resposata = getResposta(soclicitacao);
+            buildResposta(resposata, resp);
+        } catch (ErroTentandoObterTokenAcesso ex) {
+            enviarAcessoNegado(ex, resp);
+        }
     }
 
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doOptions(req, resp); //To change body of generated methods, choose Tools | Templates.
-    }
+        try {
+            ItfUsuario usuario = autenticarUsuario(resp);
 
-    @Override
-    protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doTrace(req, resp); //To change body of generated methods, choose Tools | Templates.
+            SolicitacaoControllerERP soclicitacao = getSolicitacao(req);
+            ItfRespostaAcaoDoSistema resposata = getResposta(soclicitacao);
+            buildResposta(resposata, resp);
+        } catch (ErroTentandoObterTokenAcesso ex) {
+            enviarAcessoNegado(ex, resp);
+        }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doDelete(req, resp); //To change body of generated methods, choose Tools | Templates.
+        try {
+            ItfUsuario usuario = autenticarUsuario(resp);
+
+            SolicitacaoControllerERP soclicitacao = getSolicitacao(req);
+            ItfRespostaAcaoDoSistema resposata = getResposta(soclicitacao);
+            buildResposta(resposata, resp);
+        } catch (ErroTentandoObterTokenAcesso ex) {
+            enviarAcessoNegado(ex, resp);
+        }
     }
 
 }

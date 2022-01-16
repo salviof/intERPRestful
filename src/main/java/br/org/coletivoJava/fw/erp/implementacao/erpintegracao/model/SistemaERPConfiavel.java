@@ -35,7 +35,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaEr
     @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_NOME)
     private String nome;
 
-    @InfoCampo(tipo = FabTipoAtributoObjeto.SITE)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.SITE, label = "dominio")
     @Column(nullable = false)
     private String dominio;
 
@@ -44,6 +44,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaEr
     private String urlRecepcaoCodigo;
 
     @Column(length = 8000)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_DESCRITIVO)
     private String chavePublica;
 
     private String hashChavePublica;

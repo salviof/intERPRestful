@@ -38,6 +38,7 @@ public enum FabDadosIniciaisTesteIntegracao implements ItfFabricaComPersistencia
                 usuario.setId(1);
                 usuario.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
                 usuario.setEmail("salviof@gmail.com");
+                usuario.setSenha("123456");
                 return usuario;
 
             default:

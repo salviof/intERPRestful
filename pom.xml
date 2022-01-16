@@ -47,13 +47,25 @@
 
         </dependency>
 
+
+        <dependency>
+            <groupId>br.org.coletivoJava.fw</groupId>
+            <artifactId>SBWebPaginas</artifactId>
+            <version>1.0.0-RC-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
 
 
         <dependency>

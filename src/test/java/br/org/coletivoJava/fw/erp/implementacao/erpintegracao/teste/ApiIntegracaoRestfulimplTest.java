@@ -9,35 +9,21 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ConfigCoreApiIntegracao;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabConfigModuloWebERPChaves;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer;
-import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
-import com.super_bits.modulosSB.SBCore.ConfigGeral.arquivosConfiguracao.ConfigModulo;
-import java.io.BufferedReader;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import com.super_bits.modulosSB.webPaginas.controller.servlets.servletRecepcaoOauth.ServletRecepcaoOauth;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import static org.mockito.Mockito.when;
 import testesFW.TesteJunitSBPersistencia;
 
 /**
@@ -47,10 +33,28 @@ import testesFW.TesteJunitSBPersistencia;
 public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
     @Mock
-    HttpServletRequest request;
+    HttpServletRequest requisicaoObterCodigoSoclitacaoToken;
 
     @Mock
-    HttpServletResponse response;
+    HttpServletResponse respostaObterCodigoSoclitacaoToken;
+
+    @Mock
+    HttpServletRequest requisicaoSolicitarTokenAcessso;
+
+    @Mock
+    HttpServletResponse respostaObterSolicitarTokenAcesso;
+
+    @Mock
+    HttpServletRequest requisicaoAcessoComToken;
+
+    @Mock
+    HttpServletResponse respostaAcessoComToken;
+
+    @Mock
+    HttpServletRequest requisicaoRegistroCodigoSolicitacao;
+
+    @Mock
+    HttpServletResponse respostaRegistroCodigoSolicitacao;
 
     public ApiIntegracaoRestfulimplTest() {
     }
@@ -67,11 +71,11 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
     protected void configAmbienteDesevolvimento() {
         SBCore.configurar(new ConfigCoreApiIntegracao(), SBCore.ESTADO_APP.DESENVOLVIMENTO);
         SBPersistencia.configuraJPA(new ConfigPercistenciaItegracaoSistemas());
+
         ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         sistemaAutual = (SistemaERPAtual) erp.getSistemaAtual();
     }
 
-    private static StringWriter sw;
     /**
      * Test of getCodigoApiExterna method, of class ApiIntegracaoRestfulimpl.
      */
@@ -82,70 +86,6 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
     private static boolean criouAplicativo = false;
 
-    private void preparaRespostasServletPostToken(String pJson) {
-        String emailcripto = UtilSBCoreCriptoRSA.getTextoCriptografado(USUARIO_AUTENTICADO, chavePrivadaDoAplicativoConfiavel);
-        sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        try {
-            when(response.getWriter()).thenReturn(pw);
-        } catch (IOException ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        try {
-            when(request.getReader()).thenReturn(new BufferedReader(new StringReader(pJson)));
-        } catch (IOException ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        when(request.getHeader("emailCripto")).thenReturn(emailcripto);
-        when(request.getHeader("CHAVE_PUBLICA")).thenReturn(sistemaConfiavelERP.getChavePublica());
-        when(request.getHeader("origin")).thenReturn(sistemaConfiavelERP.getDominio());
-        ConfigModulo moduloServidorOauth = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class);
-
-        try {
-            when(request.getRequestURI()).thenReturn(
-                    "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
-                    + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
-                    + "/" + sistemaAutual.getHashChavePublica()
-                    + "/" + URLEncoder.encode(sistemaConfiavelERP.getHashChavePublica())
-                    + "/" + URLEncoder.encode("https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/USUARIO/", "UTF8")
-                    + "/USUARIO");
-
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void preparaRespostasServlet() {
-
-        String emailcripto = UtilSBCoreCriptoRSA.getTextoCriptografado(USUARIO_AUTENTICADO, chavePrivadaDoAplicativoConfiavel);
-        sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        try {
-            when(response.getWriter()).thenReturn(pw);
-        } catch (IOException ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        when(request.getHeader("emailCripto")).thenReturn(emailcripto);
-        when(request.getHeader("CHAVE_PUBLICA")).thenReturn(sistemaConfiavelERP.getChavePublica());
-        when(request.getHeader("origin")).thenReturn(sistemaConfiavelERP.getDominio());
-        ConfigModulo moduloServidorOauth = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class);
-
-        try {
-            when(request.getRequestURI()).thenReturn(
-                    "/OAUTH2_SERVICE"
-                    + "/OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO"
-                    + "/" + sistemaAutual.getHashChavePublica()
-                    + "/" + sistemaConfiavelERP.getHashChavePublica()
-                    + "/" + URLEncoder.encode("https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/USUARIO/", "UTF8")
-                    + "/USUARIO");
-
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
     public SistemaERPConfiavel buildAplicativoAcesso() {
 
         if (sistemaConfiavelERP != null) {
@@ -155,6 +95,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         criouAplicativo = true;
 
         sistemaConfiavelERP = new SistemaERPConfiavel();
+        sistemaConfiavelERP.setNome("crm.casanovadigital.com.br");
         sistemaConfiavelERP.setDominio("crm.casanovadigital.com.br");
         sistemaConfiavelERP.setUrlRecepcaoCodigo("crm.casanovadigital.com.br/recepcaoOauth/integracaoSistemas");
         Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
@@ -162,64 +103,80 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         chavePrivadaDoAplicativoConfiavel = parDeChaves.values().stream().findFirst().get();
 
         sistemaConfiavelERP = UtilSBPersistencia.mergeRegistro(sistemaConfiavelERP);
+
+        List<SistemaERPConfiavel> sistemasConfiaveis = UtilSBPersistencia.getListaTodos(SistemaERPConfiavel.class);
+        for (SistemaERPConfiavel sistemaConfiavel : sistemasConfiaveis) {
+            System.out.println("__________________________________");
+            System.out.println(sistemaConfiavel.getNome());
+            System.out.println(sistemaConfiavel.getHashChavePublica());
+            System.out.println("########################################");
+        }
         return sistemaConfiavelERP;
     }
 
     private final ServletOauth2Server servletFornecimentoToken = new ServletOauth2Server();
 
+    private final ServletRecepcaoOauth servletRecepcaoOauth = new ServletRecepcaoOauth();
+
     @Test
     public void testeFormularioDeLogin() {
         buildAplicativoAcesso();
-        preparaRespostasServlet();
-        integracao.getSistemaAtual();
-        try {
 
-            servletFornecimentoToken.doGet(request, response);
-
-            String result = sw.getBuffer().toString().trim();
-            assertTrue("O servlet não exibu o formulário de login", result.contains(USUARIO_AUTENTICADO));
-
-        } catch (IOException ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimplTest.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        } catch (ServletException ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimplTest.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+        obterCodigoSolicitacaoDeslogado();
+        String codigoSolicitacaoToken = obterCodigoSolicitacaoAposLogin();
+        String reposta = obterToken(codigoSolicitacaoToken);
+        String url = reposta;
+        receberToken(url);
 
     }
 
-    @Test
-    public void testeRedirecionamentoFornecimentoToken() {
-        buildAplicativoAcesso();
+    public void obterCodigoSolicitacaoDeslogado() {
+        EnvelopeServeletSolicitarCodigoObterToken obterCodigoSolicitacaoToken = new EnvelopeServeletSolicitarCodigoObterToken(requisicaoObterCodigoSoclitacaoToken,
+                respostaObterCodigoSoclitacaoToken, sistemaAutual, sistemaConfiavelERP, USUARIO_AUTENTICADO);
+        String respostaSolicitacaoTOken = obterCodigoSolicitacaoToken.getRespostaGet(servletFornecimentoToken);
 
-        UsuarioSB usuario = UtilSBPersistencia.getListaTodos(UsuarioSB.class,
-                getEM()).stream().findFirst().get();
-        SBCore.getServicoSessao().getSessaoAtual().setUsuario(usuario);
+        assertTrue("Formulário para login não foi exibido", respostaSolicitacaoTOken.contains("input"));
+    }
 
-        try {
-            preparaRespostasServlet();
-            servletFornecimentoToken.doGet(request, response);
-            String resultado = sw.getBuffer().toString().trim();
-            System.out.println(resultado);
-            assertTrue("O código não foi retornado", resultado.contains("?code="));
-            int indicecodigostr = resultado.indexOf("?code");
-            String codigo = resultado.substring(indicecodigostr, resultado.length());
-            codigo = codigo.replace("?code=", "");
-            codigo = codigo.substring(0, codigo.indexOf("</"));
-            preparaRespostasServlet();
-            String dadosObterToken = "{\"grant_type\":\"authorization_code\",\n"
-                    + "		 \"client_id\": \"SEU_CLIENT_ID\",\n"
-                    + "		 \"client_secret\": \"EMAILCRIPTOGRAFADO\",\n"
-                    + "		 \"code\": \"SEU_AUTHORIZATION_CODE\",\n"
-                    + "		 \"redirect_uri\": \"https://SEU_APP/callback\"}'";
-            preparaRespostasServletPostToken(dadosObterToken);
-            servletFornecimentoToken.doPost(request, response);
-            System.out.println("UP");
-        } catch (ServletException | IOException ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimplTest.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        }
+    public String obterCodigoSolicitacaoAposLogin() {
+        SBCore.getServicoSessao().logarEmailESenha("salviof@gmail.com", "123456");
+        assertTrue("Usuário não logrou êxito ao efetuar login", SBCore.getServicoSessao().getSessaoAtual().isIdentificado());
+        EnvelopeServeletSolicitarCodigoObterToken solicitacaoTokenPosLogin
+                = new EnvelopeServeletSolicitarCodigoObterToken(requisicaoObterCodigoSoclitacaoToken,
+                        respostaObterCodigoSoclitacaoToken, sistemaAutual, sistemaConfiavelERP, USUARIO_AUTENTICADO);
+        String respostaPosLogin = solicitacaoTokenPosLogin.getRespostaGet(servletFornecimentoToken);
+        System.out.println(respostaPosLogin);
+        assertTrue("O código não foi enviado", respostaPosLogin.contains("&code="));
+        int indiceConexao = respostaPosLogin.indexOf("&code=");
+
+        String respostaCodigo = respostaPosLogin.substring(indiceConexao);
+        String codigoSolicitacao = respostaCodigo.substring("&code=".length(), respostaCodigo.indexOf("'"));
+        String url = respostaPosLogin.substring(respostaPosLogin.indexOf("windows.location='") + "windows.location='".length(), respostaPosLogin
+                .indexOf("'</script>")
+        );
+        return codigoSolicitacao;
+    }
+
+    public String obterToken(String pCodigoSolicitacao) {
+        EnvelopePostSolicitacaoToken postRequisicao = new EnvelopePostSolicitacaoToken(requisicaoSolicitarTokenAcessso, respostaObterSolicitarTokenAcesso, sistemaAutual, sistemaConfiavelERP, USUARIO_AUTENTICADO, chavePrivada);
+        String dadosObterToken = "{\"grant_type\":\"authorization_code\",\n"
+                + "		 \"client_id\": \"SEU_CLIENT_ID\",\n"
+                + "		 \"client_secret\": \"EMAILCRIPTOGRAFADO\",\n"
+                + "		 \"code\": \"SEU_AUTHORIZATION_CODE\",\n"
+                + "		 \"redirect_uri\": \"https://SEU_APP/callback\"}'";
+        postRequisicao.setBodyRequisicao(dadosObterToken);
+        String resposta = postRequisicao.getRespostaPost(servletFornecimentoToken);
+        return resposta;
+    }
+
+    public void receberToken(String urlRedirecionamento) {
+        String codigoSolicitacao = null;
+        String url = null;
+        String hashChavePublicaServidor = sistemaAutual.getHashChavePublica();
+        EnvelopeRequisicacaoRegistroDeCodigoSolicitacao clienteRegistroCodigo
+                = new EnvelopeRequisicacaoRegistroDeCodigoSolicitacao(requisicaoRegistroCodigoSolicitacao,
+                        respostaRegistroCodigoSolicitacao, codigoSolicitacao, url, hashChavePublicaServidor);
+        clienteRegistroCodigo.getRespostaGet(servletRecepcaoOauth);
     }
 
 }
