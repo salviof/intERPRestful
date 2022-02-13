@@ -5,24 +5,33 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
 
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao.EnvelopeServeletSolicitarCodigoAcessoAoToken;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao.EnvelopeRequisicacaoTokenAcesso;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ConfigCoreApiIntegracao;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.SolicitacaoControllerERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
+import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTokenRestInterprestfull;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.RespostaWebServiceSimples;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestao;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.webPaginas.controller.servlets.servletRecepcaoOauth.ServletRecepcaoOauth;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import testesFW.TesteJunitSBPersistencia;
 
@@ -32,35 +41,11 @@ import testesFW.TesteJunitSBPersistencia;
  */
 public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
-    @Mock
-    HttpServletRequest requisicaoObterCodigoSoclitacaoToken;
-
-    @Mock
-    HttpServletResponse respostaObterCodigoSoclitacaoToken;
-
-    @Mock
-    HttpServletRequest requisicaoSolicitarTokenAcessso;
-
-    @Mock
-    HttpServletResponse respostaObterSolicitarTokenAcesso;
-
-    @Mock
-    HttpServletRequest requisicaoAcessoComToken;
-
-    @Mock
-    HttpServletResponse respostaAcessoComToken;
-
-    @Mock
-    HttpServletRequest requisicaoRegistroCodigoSolicitacao;
-
-    @Mock
-    HttpServletResponse respostaRegistroCodigoSolicitacao;
-
     public ApiIntegracaoRestfulimplTest() {
     }
-    private SistemaERPConfiavel sistemaConfiavelERP;
+    private SistemaERPConfiavel sistemaCliente;
 
-    private SistemaERPAtual sistemaAutual;
+    private SistemaERPConfiavel sistemaRemoto;
 
     @Before
     public void setUp() throws Exception {
@@ -73,7 +58,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         SBPersistencia.configuraJPA(new ConfigPercistenciaItegracaoSistemas());
 
         ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
-        sistemaAutual = (SistemaERPAtual) erp.getSistemaAtual();
+        sistemaRemoto = (SistemaERPAtual) erp.getSistemaAtual();
     }
 
     /**
@@ -88,30 +73,34 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
     public SistemaERPConfiavel buildAplicativoAcesso() {
 
-        if (sistemaConfiavelERP != null) {
+        if (sistemaCliente != null) {
 
-            return sistemaConfiavelERP;
+            return sistemaCliente;
         }
         criouAplicativo = true;
 
-        sistemaConfiavelERP = new SistemaERPConfiavel();
-        sistemaConfiavelERP.setNome("crm.casanovadigital.com.br");
-        sistemaConfiavelERP.setDominio("crm.casanovadigital.com.br");
-        sistemaConfiavelERP.setUrlRecepcaoCodigo("crm.casanovadigital.com.br/recepcaoOauth/integracaoSistemas");
+        sistemaCliente = new SistemaERPConfiavel();
+        sistemaCliente.setNome("crm.casanovadigital.com.br");
+        sistemaCliente.setDominio("crm.casanovadigital.com.br");
+        String urlRecpcaoCodigo = "https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/Usuario/" + GestaoTokenRestInterprestfull.class.getSimpleName() + "/" + "UTF8";
+        sistemaCliente.setUrlRecepcaoCodigo(urlRecpcaoCodigo);
         Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
-        sistemaConfiavelERP.setChavePublica(parDeChaves.keySet().stream().findFirst().get());
+        sistemaCliente.setChavePublica(parDeChaves.keySet().stream().findFirst().get());
         chavePrivadaDoAplicativoConfiavel = parDeChaves.values().stream().findFirst().get();
 
-        sistemaConfiavelERP = UtilSBPersistencia.mergeRegistro(sistemaConfiavelERP);
+        sistemaCliente = UtilSBPersistencia.mergeRegistro(sistemaCliente);
 
-        List<SistemaERPConfiavel> sistemasConfiaveis = UtilSBPersistencia.getListaTodos(SistemaERPConfiavel.class);
-        for (SistemaERPConfiavel sistemaConfiavel : sistemasConfiaveis) {
-            System.out.println("__________________________________");
-            System.out.println(sistemaConfiavel.getNome());
-            System.out.println(sistemaConfiavel.getHashChavePublica());
-            System.out.println("########################################");
-        }
-        return sistemaConfiavelERP;
+        ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+        SistemaERPAtual sistemaRemotoRef = (SistemaERPAtual) erp.getSistemaAtual();
+
+        sistemaRemoto = new SistemaERPConfiavel();
+        sistemaRemoto.setChavePublica(sistemaRemotoRef.getChavePublica());
+        sistemaRemoto.setHashChavePublica(sistemaRemotoRef.getHashChavePublica());
+        sistemaRemoto.setUrlRecepcaoCodigo(sistemaRemotoRef.getUrlRecepcaoCodigo());
+        sistemaRemoto.setDominio(sistemaRemotoRef.getDominio());
+        UtilSBPersistencia.mergeRegistro(sistemaRemoto);
+
+        return sistemaCliente;
     }
 
     private final ServletOauth2Server servletFornecimentoToken = new ServletOauth2Server();
@@ -119,64 +108,128 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
     private final ServletRecepcaoOauth servletRecepcaoOauth = new ServletRecepcaoOauth();
 
     @Test
-    public void testeFormularioDeLogin() {
+    public void testeFluxoREgistroDeToken() {
         buildAplicativoAcesso();
 
-        obterCodigoSolicitacaoDeslogado();
-        String codigoSolicitacaoToken = obterCodigoSolicitacaoAposLogin();
-        String reposta = obterToken(codigoSolicitacaoToken);
-        String url = reposta;
-        receberToken(url);
+        renovarConexao();
 
+        List<SistemaERPConfiavel> sistemasRegistrados = UtilSBPersistencia.getListaTodos(SistemaERPConfiavel.class, getEMTeste());
+        System.out.println(sistemasRegistrados.size() + " sistemas encontrados");
+        for (SistemaERPConfiavel sis : sistemasRegistrados) {
+            System.out.println("nome ->" + sis.getNome());
+            System.out.println("Dominio ->" + sis.getDominio());
+            System.out.println("Hashpub ->" + sis.getHashChavePublica());
+            System.out.println("___________________________________________");
+        }
+
+        ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+        // sistemaRemoto = (SistemaERPAtual) erp.getSistemaAtual();
+        // SBCore.getServicoSessao().logarEmailESenha("salviof@gmail.com", "123456");
+
+        System.out.println("O usuário utiliza o sistema crm.casanovadigital.com.br");
+        assertTrue(sistemaCliente.getDominio().contains("crm.casanovadigita"));
+
+        System.out.println("O usuário deseja ver uma nota no sistema fatura");
+        ItfSistemaErp sisRemoto = erp.getSistemaByDominio("fatura.casanovadigital.com.br");
+        assertNotNull("O sistema fatura não foi registrado no sistemas", sisRemoto);
+
+        System.out.println("O usuário não possui um token de acesso");
+        ItfTokenGestao gestao = FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL.getGestaoToken(sistemaRemoto);
+        assertFalse(gestao.isTemTokemAtivo());
+
+        System.out.println("O usuário acessa a url para obter o código de solicitação,"
+                + " e uma vez que já está logado, recebe um comando de redirecionamento para o crm contendo o codigo de acesso");
+        String urlRecepcaoCodigoAcesso = obterCodigoSolicitacaoAposLogin();
+        String codigoAcesso = extrairCodigoDeAcessoPelaUrl(urlRecepcaoCodigoAcesso);
+
+        GestaoTokenRestInterprestfull gestaoResful = (GestaoTokenRestInterprestfull) FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL
+                .getGestaoToken(sisRemoto);
+        assertNotNull("O código de acesso não foi enviado", codigoAcesso);
+        //gestaoResful.getComoGestaoOauth().get
+        System.out.println("o sistema crm recebe o código de solicitação");
+        String reposta = receberCodigoSolicitacaoRegistrarToken(urlRecepcaoCodigoAcesso);
+        assertTrue("O código de solicitação não foi registrado", gestaoResful.isCodigoSolicitacaoRegistrado());
+
+        System.out.println("O token é registrado com sucesso");
+        assertTrue("token", gestaoResful.isTemTokemAtivo());
+        System.out.println("Usando o token, a ação listar ações do sistema é executada");
+        //obterCodigoSolicitacaoDeslogado();
+
+        String url = reposta;
+
+        SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(sisRemoto, "");
+
+        ItfAcaoApiRest acao = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(sisRemoto);
+        RespostaWebServiceSimples resp = acao.getResposta();
+        System.out.println(resp.getResposta());
     }
 
     public void obterCodigoSolicitacaoDeslogado() {
-        EnvelopeServeletSolicitarCodigoObterToken obterCodigoSolicitacaoToken = new EnvelopeServeletSolicitarCodigoObterToken(requisicaoObterCodigoSoclitacaoToken,
-                respostaObterCodigoSoclitacaoToken, sistemaAutual, sistemaConfiavelERP, USUARIO_AUTENTICADO);
+        EnvelopeServeletSolicitarCodigoAcessoAoToken obterCodigoSolicitacaoToken
+                = new EnvelopeServeletSolicitarCodigoAcessoAoToken(
+                        sistemaRemoto, sistemaCliente, USUARIO_AUTENTICADO);
         String respostaSolicitacaoTOken = obterCodigoSolicitacaoToken.getRespostaGet(servletFornecimentoToken);
 
         assertTrue("Formulário para login não foi exibido", respostaSolicitacaoTOken.contains("input"));
     }
 
-    public String obterCodigoSolicitacaoAposLogin() {
-        SBCore.getServicoSessao().logarEmailESenha("salviof@gmail.com", "123456");
-        assertTrue("Usuário não logrou êxito ao efetuar login", SBCore.getServicoSessao().getSessaoAtual().isIdentificado());
-        EnvelopeServeletSolicitarCodigoObterToken solicitacaoTokenPosLogin
-                = new EnvelopeServeletSolicitarCodigoObterToken(requisicaoObterCodigoSoclitacaoToken,
-                        respostaObterCodigoSoclitacaoToken, sistemaAutual, sistemaConfiavelERP, USUARIO_AUTENTICADO);
-        String respostaPosLogin = solicitacaoTokenPosLogin.getRespostaGet(servletFornecimentoToken);
-        System.out.println(respostaPosLogin);
-        assertTrue("O código não foi enviado", respostaPosLogin.contains("&code="));
-        int indiceConexao = respostaPosLogin.indexOf("&code=");
+    public String extrairCodigoDeAcessoPelaUrl(String pUrl) {
 
-        String respostaCodigo = respostaPosLogin.substring(indiceConexao);
-        String codigoSolicitacao = respostaCodigo.substring("&code=".length(), respostaCodigo.indexOf("'"));
-        String url = respostaPosLogin.substring(respostaPosLogin.indexOf("windows.location='") + "windows.location='".length(), respostaPosLogin
-                .indexOf("'</script>")
-        );
+        int indiceConexao = pUrl.indexOf("?code=");
+
+        String respostaCodigo = pUrl.substring(indiceConexao);
+        String codigoSolicitacao = respostaCodigo.substring("?code=".length(), respostaCodigo.indexOf("&"));
         return codigoSolicitacao;
     }
 
-    public String obterToken(String pCodigoSolicitacao) {
-        EnvelopePostSolicitacaoToken postRequisicao = new EnvelopePostSolicitacaoToken(requisicaoSolicitarTokenAcessso, respostaObterSolicitarTokenAcesso, sistemaAutual, sistemaConfiavelERP, USUARIO_AUTENTICADO, chavePrivada);
-        String dadosObterToken = "{\"grant_type\":\"authorization_code\",\n"
-                + "		 \"client_id\": \"SEU_CLIENT_ID\",\n"
-                + "		 \"client_secret\": \"EMAILCRIPTOGRAFADO\",\n"
-                + "		 \"code\": \"SEU_AUTHORIZATION_CODE\",\n"
-                + "		 \"redirect_uri\": \"https://SEU_APP/callback\"}'";
-        postRequisicao.setBodyRequisicao(dadosObterToken);
-        String resposta = postRequisicao.getRespostaPost(servletFornecimentoToken);
-        return resposta;
+    public String obterCodigoSolicitacaoAposLogin() {
+        SBCore.getServicoSessao().logarEmailESenha("salviof@gmail.com", "123456");
+        assertTrue("Usuário não logrou êxito ao efetuar login", SBCore.getServicoSessao().getSessaoAtual().isIdentificado());
+        EnvelopeServeletSolicitarCodigoAcessoAoToken solicitacaoTokenPosLogin
+                = new EnvelopeServeletSolicitarCodigoAcessoAoToken(
+                        sistemaRemoto, sistemaCliente, USUARIO_AUTENTICADO);
+        String respostaPosLogin = solicitacaoTokenPosLogin.getRespostaGet(servletFornecimentoToken);
+        System.out.println(respostaPosLogin);
+        assertTrue("O código não foi enviado", respostaPosLogin.contains("?code="));
+        int indiceConexao = respostaPosLogin.indexOf("?code=");
+
+        String respostaCodigo = respostaPosLogin.substring(indiceConexao);
+        String codigoSolicitacao = respostaCodigo.substring("?code=".length(), respostaCodigo.indexOf("'"));
+        String url = respostaPosLogin.substring(respostaPosLogin.indexOf("windows.location='") + "windows.location='".length(), respostaPosLogin
+                .indexOf("'</script>")
+        );
+        return url;
     }
 
-    public void receberToken(String urlRedirecionamento) {
-        String codigoSolicitacao = null;
-        String url = null;
-        String hashChavePublicaServidor = sistemaAutual.getHashChavePublica();
-        EnvelopeRequisicacaoRegistroDeCodigoSolicitacao clienteRegistroCodigo
-                = new EnvelopeRequisicacaoRegistroDeCodigoSolicitacao(requisicaoRegistroCodigoSolicitacao,
-                        respostaRegistroCodigoSolicitacao, codigoSolicitacao, url, hashChavePublicaServidor);
-        clienteRegistroCodigo.getRespostaGet(servletRecepcaoOauth);
+    public String receberCodigoSolicitacaoRegistrarToken(String urlRedirecionamento) {
+        String codigoSolicitacao = extrairCodigoDeAcessoPelaUrl(urlRedirecionamento);
+        String url = urlRedirecionamento;
+        System.out.println("Simulando recepção  via " + ServletRecepcaoOauth.class.getSimpleName() + " ");
+        String hashChavePublicaSistemaCliente = sistemaCliente.getHashChavePublica();
+        EnvelopeRequisicacaoTokenAcesso clienteRegistroCodigo;
+        try {
+            clienteRegistroCodigo = new EnvelopeRequisicacaoTokenAcesso(codigoSolicitacao,
+                    url, hashChavePublicaSistemaCliente);
+            String resposta = clienteRegistroCodigo.getRespostaGet(servletRecepcaoOauth);
+            return resposta;
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(ApiIntegracaoRestfulimplTest.class.getName()).log(Level.SEVERE, null, ex);
+            throw new UnsupportedOperationException("Falha simulando comunicação para obtenção de token");
+        }
+
     }
+    //   public String obterToken(String pCodigoSolicitacao) {
+    //      EnvelopeSolicitacaoCodigoObterToken postRequisicao = new EnvelopeSolicitacaoCodigoObterToken(
+    //            requisicaoSolicitarTokenAcessso, respostaObterSolicitarTokenAcesso, sistemaAutual,
+    //              sistemaConfiavelERP, USUARIO_AUTENTICADO);
+    //      String dadosObterToken = "{\"grant_type\":\"authorization_code\",\n"
+    //               + "		 \"client_id\": \"SEU_CLIENT_ID\",\n"
+    //               + "		 \"client_secret\": \"EMAILCRIPTOGRAFADO\",\n"
+    //               + "		 \"code\": \"SEU_AUTHORIZATION_CODE\",\n"
+    //               + "		 \"redirect_uri\": \"https://SEU_APP/callback\"}'";
+    //       postRequisicao.setBodyRequisicao(dadosObterToken);
+    //       String resposta = postRequisicao.getRespostaPost(servletFornecimentoToken);
+    //      return resposta;
+    //  }
 
 }

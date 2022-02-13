@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
+package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao;
 
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabConfigModuloWebERPChaves;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
@@ -18,6 +18,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,43 +34,44 @@ import static org.mockito.Mockito.when;
  *
  * @author sfurbino
  */
-public class EnvelopePostSolicitacaoToken extends EnvelopeRequisicaoServlet {
+public class EnvelopeSolicitacaoCodigoObterToken extends EnvelopeRequisicaoServlet {
 
     private final SistemaERPAtual sistemaServidor;
     private final SistemaERPConfiavel sistemaConfiavel;
     private final String usuario;
-    private final String chavPrivadaSolicitante;
 
-    public EnvelopePostSolicitacaoToken(HttpServletRequest pRequisicao, HttpServletResponse pResposta,
-            SistemaERPAtual pSistemaServidor, SistemaERPConfiavel pSistemaRequisicao, String pEmailUsuarioACesso, String pChavePrivada
+    public EnvelopeSolicitacaoCodigoObterToken(HttpServletRequest pRequisicao, HttpServletResponse pResposta,
+            SistemaERPAtual pSistemaServidor, SistemaERPConfiavel pSistemaRequisicao, String pEmailUsuarioACesso
     ) {
-        super(pRequisicao, pResposta);
+        super(true);
         sistemaServidor = pSistemaServidor;
         sistemaConfiavel = pSistemaRequisicao;
         buildRequisicao();
-        chavPrivadaSolicitante = pChavePrivada;
+        //  chavPrivadaSolicitante = pChavePrivada;
         usuario = pEmailUsuarioACesso;
     }
 
     private void buildRequisicao() {
-        String emailcripto = UtilSBCoreCriptoRSA.getTextoCriptografado(usuario, chavPrivadaSolicitante);
-
-        adicionarHeader("emailCripto", emailcripto);
+        //String emailcripto = UtilSBCoreCriptoRSA.getTextoCriptografado(usuario, chavPrivadaSolicitante);
+        //adicionarHeader("emailCripto", emailcripto);
         adicionarHeader("CHAVE_PUBLICA", sistemaConfiavel.getChavePublica());
         setOrigimHeader(sistemaConfiavel.getDominio());
 
         ConfigModulo moduloServidorOauth = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class);
 
         try {
-            String urlRequisicao = "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+            String urlRequisicao = "https://" + sistemaServidor.getDominio() + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                    + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
                     + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
                     + "/" + sistemaServidor.getHashChavePublica()
                     + "/" + URLEncoder.encode(sistemaConfiavel.getHashChavePublica())
                     + "/" + URLEncoder.encode("https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/USUARIO/", "UTF8")
                     + "/USUARIO";
-            setRequestURI(urlRequisicao);
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(EnvelopePostSolicitacaoToken.class.getName()).log(Level.SEVERE, null, ex);
+
+            setRequestURL(new URL(urlRequisicao));
+        } catch (UnsupportedEncodingException | MalformedURLException ex) {
+            Logger.getLogger(EnvelopeSolicitacaoCodigoObterToken.class.getName()).log(Level.SEVERE, null, ex);
+            SBCore.RelatarErro(FabErro.SOLICITAR_REPARO, "Falha gerando simulação obter", ex);
         }
 
     }

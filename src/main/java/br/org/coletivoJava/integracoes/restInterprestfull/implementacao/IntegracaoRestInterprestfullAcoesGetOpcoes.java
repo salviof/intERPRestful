@@ -18,4 +18,10 @@ public class IntegracaoRestInterprestfullAcoesGetOpcoes
         super(pTipoAplicacaoERP, FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES, pTipoAgente,
                 pUsuario, pParametro);
     }
+
+    @Override
+    protected void executarAcao() {
+        super.executarAcao();
+    }
+
 }

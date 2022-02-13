@@ -3,57 +3,61 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
+package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao;
 
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.coletivojava.fw.api.tratamentoErros.FabErro;
 
 /**
  *
  * @author sfurbino
  */
-public class EnvelopeServeletSolicitarCodigoObterToken extends EnvelopeRequisicaoServlet {
+public class EnvelopeServeletSolicitarCodigoAcessoAoToken extends EnvelopeRequisicaoServlet {
 
-    private final SistemaERPAtual sistemaServidor;
-    private final SistemaERPConfiavel sistemaConfiavel;
+    private final SistemaERPConfiavel sistemaServidor;
+    private final SistemaERPConfiavel sistemaCliente;
     private final String emailSolicitante;
 
-    public EnvelopeServeletSolicitarCodigoObterToken(HttpServletRequest pRequisicao, HttpServletResponse pResposta,
-            SistemaERPAtual pSistemaServidor, SistemaERPConfiavel pSistemaRequisicao, String pEmailSolicitante
+    public EnvelopeServeletSolicitarCodigoAcessoAoToken(
+            SistemaERPConfiavel pSistemaServidor, SistemaERPConfiavel pSistemaRequisicao, String pEmailSolicitante
     ) {
-        super(pRequisicao, pResposta);
+        super(true);
         sistemaServidor = pSistemaServidor;
-        sistemaConfiavel = pSistemaRequisicao;
+        sistemaCliente = pSistemaRequisicao;
         emailSolicitante = pEmailSolicitante;
         buildRequisicao();
     }
 
     private void buildRequisicao() {
-        adicionarHeader("CHAVE_PUBLICA", sistemaConfiavel.getChavePublica());
-        setOrigimHeader(sistemaConfiavel.getDominio());
+        adicionarHeader("CHAVE_PUBLICA", sistemaCliente.getChavePublica());
+        setOrigimHeader(sistemaCliente.getDominio());
 
         try {
-            String urlRequisicao = "/OAUTH2_SERVICE"
-                    + "/OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO"
+            String patchRequisicao = "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                    + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO.toString()
                     + "/" + sistemaServidor.getHashChavePublica()
-                    + "/" + sistemaConfiavel.getHashChavePublica()
-                    + "/" + URLEncoder.encode("https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/USUARIO/", "UTF8")
+                    + "/" + sistemaCliente.getHashChavePublica()
+                    + "/" + URLEncoder.encode(sistemaCliente.getUrlRecepcaoCodigo(), "UTF8")
                     + "/" + emailSolicitante;
-            setRequestURI(urlRequisicao);
+
+            URL urlCompleto = new URL("https://" + sistemaServidor.getDominio() + patchRequisicao);
+            setRequestURL(urlCompleto);
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(EnvelopeServeletSolicitarCodigoObterToken.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EnvelopeServeletSolicitarCodigoAcessoAoToken.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(EnvelopeServeletSolicitarCodigoAcessoAoToken.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

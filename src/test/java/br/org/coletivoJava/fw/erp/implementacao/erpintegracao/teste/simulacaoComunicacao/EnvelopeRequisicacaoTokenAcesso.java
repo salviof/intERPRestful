@@ -3,43 +3,43 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
+package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao;
 
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.webPaginas.controller.servlets.servletRecepcaoOauth.ServletRecepcaoOauth;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.coletivojava.fw.api.tratamentoErros.FabErro;
 
 /**
  *
  * @author sfurbino
  */
-public class EnvelopeRequisicacaoRegistroDeCodigoSolicitacao extends EnvelopeRequisicaoServlet {
+public class EnvelopeRequisicacaoTokenAcesso extends EnvelopeRequisicaoServlet {
 
     private final String codigo;
-    private final String url;
+    private final String pathURI;
+    private final URL urlcompleta;
     private final String hashServidor;
 
-    public EnvelopeRequisicacaoRegistroDeCodigoSolicitacao(HttpServletRequest pRequisicao,
-            HttpServletResponse pResposta, String pCodigo, String pUrl, String pHashServidor
-    ) {
-        super(pRequisicao, pResposta);
+    public EnvelopeRequisicacaoTokenAcesso(String pCodigo, String pUrl, String pHashServidor
+    ) throws MalformedURLException {
+        super(true);
         codigo = pCodigo;
-        url = pCodigo;
+
+        urlcompleta = new URL(pUrl);
+        pathURI = urlcompleta.getPath();
         hashServidor = pHashServidor;
         buildRequisicao();
 
     }
 
     private void buildRequisicao() {
-        setRequestURI(url);
-        adicionarParametro("code", codigo);
-        adicionarParametro("tipoAplicacao", hashServidor);
+        setRequestURL(urlcompleta);
+        setOrigimHeader(codigo);
     }
 
     @Override

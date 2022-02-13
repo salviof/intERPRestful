@@ -23,8 +23,9 @@ public class TokenAcessoOauthServer extends TokenDeAcessoExternoDinamico {
     private JsonObject objetoJsonResposta;
     private String refresh_token;
 
-    public TokenAcessoOauthServer(String pCodigoToken, String pRefresh_token, Date pDataHoraExipira, String chavePublicaAplicativo, String pIdentigicadorAgente) {
+    public TokenAcessoOauthServer(String pCodigoToken, String pRefresh_token, Date pDataHoraExipira, String client_id, String pIdentigicadorAgente) {
         super(pCodigoToken, pDataHoraExipira);
+        refresh_token = pRefresh_token;
     }
 
     public TokenAcessoOauthServer(JsonObject pObjetoJsonArmazenamento) {

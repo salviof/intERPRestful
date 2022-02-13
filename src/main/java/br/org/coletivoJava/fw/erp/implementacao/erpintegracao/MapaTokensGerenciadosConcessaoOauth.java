@@ -77,7 +77,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         if (!tokenConcessao.getChavePublicaAplicacaoConfiavel().equals(pSistema.getChavePublica())) {
             throw new ErroTentandoObterTokenAcesso("O código pertence a outro sistema");
         }
-        if (tokenConcessao.getDataHoraExpira().getTime() >= new Date().getTime()) {
+        if (new Date().getTime() >= tokenConcessao.getDataHoraExpira().getTime()) {
             throw new ErroTentandoObterTokenAcesso("O código de solicitação de token expirou");
         }
         return tokenConcessao;
@@ -114,7 +114,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         return tokenDinamico;
     }
 
-    public static TokenAcessoOauthServer gerarNovoTokenDeAcesso(String pcodigoTokenConsessao, String pSistemaConfiavelChavePublica, String pIdentificador) {
+    public static TokenAcessoOauthServer gerarNovoTokenDeAcesso(String pcodigoTokenConsessao, String pClient_id, String pIdentificadorUsuario) {
         TokenConcessaoOauthServer tokenConcessao = TOKEN_DE_CONCESSAO_BY_CODIGO.get(pcodigoTokenConsessao);
         if (tokenConcessao == null) {
             return null;
@@ -122,8 +122,8 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
         String codigoRefresh = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
         Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
-        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoRefresh, dataExpiracao, pSistemaConfiavelChavePublica, pIdentificador);
-        persistirToken(pSistemaConfiavelChavePublica, novoToken);
+        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoRefresh, dataExpiracao, pClient_id, pIdentificadorUsuario);
+        persistirToken(pClient_id, novoToken);
         return novoToken;
     }
 

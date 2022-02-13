@@ -1,6 +1,7 @@
 package br.org.coletivoJava.integracoes.restInterprestfull.api;
 
 import javax.inject.Qualifier;
+import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -13,6 +13,8 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoA
 import jakarta.json.JsonObject;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
@@ -30,6 +32,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaEr
 
     @Id
     @InfoCampo(tipo = FabTipoAtributoObjeto.ID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_NOME)

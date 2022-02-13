@@ -4,10 +4,13 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSiste
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.InfoIntegracaoRestInterprestfullRestfull;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
+import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
+import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.FabTipoConexaoRest;
@@ -25,6 +28,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.simple.parser.JSONParser;
@@ -39,36 +44,50 @@ import org.json.simple.parser.ParseException;
 @InfoIntegracaoRestInterprestfullRestfull(tipo = FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL)
 public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implements ItfTokenGestaoOauth {
 
-    private final String chavePublicaLocal;
-    private final String chavePrivadaLocal;
-    private final String chavePublicaRemoto;
-
     private final String urlServidorApiRest;
     private final ERPIntegracaoSistemasApi erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL;
-    private final ItfIntegracaoERP restFulERP = erpIntegracao.getImplementacaoDoContexto();
+    private final ItfIntegracaoERP integracaoERP = erpIntegracao.getImplementacaoDoContexto();
     private final String urlObterCodigoSolicitacao;
-    private final String urlRetornoReceberCodigoSolicitacao;
+    private final String urlObterToken;
+    private final String chavePublicaCliente;
+    private final String chavePublicaServidor;
     private final String urlRetornoSucessoObterToken;
+    private final String urlRetornoReceberCodigoSolicitao;
 
     public GestaoTokenRestInterprestfull(
-            final FabTipoAgenteClienteApi pTipoAgente, final ItfUsuario pUsuario, String pDominio) {
-        super(FabIntApiRestIntegracaoERPRestfull.class, pTipoAgente, pUsuario, pDominio);
-        ItfSistemaErp sistemaRemoto = restFulERP.getSistemaByDominio(pDominio);
-        ItfSistemaERPAtual sistemaLocal = restFulERP.getSistemaAtual();
-        chavePublicaLocal = sistemaLocal.getChavePublica();
-        chavePrivadaLocal = sistemaLocal.getChavePrivada();
-        chavePublicaRemoto = sistemaRemoto.getChavePublica();
-        ItfSistemaERPAtual sistemaAtual = restFulERP.getSistemaAtual();
-        urlServidorApiRest = sistemaRemoto.getUrlRecepcaoCodigo();
-        urlRetornoReceberCodigoSolicitacao = sistemaAtual.getUrlRecepcaoCodigo();
-        urlObterCodigoSolicitacao = sistemaRemoto.getDominio() + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+            final FabTipoAgenteClienteApi pTipoAgente, final ItfUsuario pUsuario, String pIdentificadorServico) {
+        super(FabIntApiRestIntegracaoERPRestfull.class, pTipoAgente, pUsuario, pIdentificadorServico);
+        ItfSistemaErp sistemaServidor = integracaoERP.getSistemaByHashChavePublica(pIdentificadorServico);
+        ItfSistemaErp sistemaCliente = integracaoERP.getSistemaAtual();
+        if (SBCore.isEmModoDesenvolvimento()) {
+            if (sistemaCliente.getHashChavePublica().equals(pIdentificadorServico)) {
+                //detectado ambiente de teste
+                List<SistemaERPConfiavel> sistemasRegistrados = UtilSBPersistencia.getListaTodos(SistemaERPConfiavel.class);
+                if (sistemasRegistrados.size() != 2) {
+                    throw new UnsupportedOperationException("para homologar a couminicação ERP usando um sistema unicico como cliente e servidor, devem existir ");
+                }
+                Optional<SistemaERPConfiavel> sistemaClientePesquisa = sistemasRegistrados.stream().filter(sis -> !sis.getHashChavePublica().equals(pIdentificadorServico)).findFirst();
+                sistemaCliente = sistemaClientePesquisa.get();
+            }
+        }
+        chavePublicaServidor = sistemaServidor.getChavePublica();
+        urlServidorApiRest = "https://" + sistemaServidor.getDominio();
+        chavePublicaCliente = sistemaCliente.getHashChavePublica();
+        urlObterCodigoSolicitacao = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
                 + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
-                + "/" + sistemaRemoto.getChavePublica().hashCode()
-                + "/" + chavePublicaLocal.hashCode()
-                + "/" + URLEncoder.encode(urlRetornoReceberCodigoSolicitacao)
+                + "/" + sistemaServidor.getChavePublica().hashCode()
+                + "/" + sistemaCliente.hashCode()
+                + "/" + URLEncoder.encode(sistemaCliente.getUrlRecepcaoCodigo())
                 + "/" + pUsuario.getEmail();
-        urlRetornoSucessoObterToken = sistemaAtual.getDominio();
 
+        urlObterToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
+                + "/" + sistemaServidor.getHashChavePublica()
+                + "/" + sistemaCliente.getHashChavePublica()
+                + "/" + URLEncoder.encode(sistemaCliente.getUrlRecepcaoCodigo())
+                + "/" + pUsuario.getEmail();
+        urlRetornoReceberCodigoSolicitao = sistemaCliente.getUrlRecepcaoCodigo();
+        urlRetornoSucessoObterToken = "https://" + sistemaCliente.getDominio();
     }
 
     @Override
@@ -77,16 +96,19 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
         if (codigoSolicitacao != null) {
             try {
 
-                String codigoCriptogrado = UtilSBCoreCriptoRSA.getTextoCriptografado(codigoSolicitacao, chavePublicaRemoto);
+                String codigoCriptogrado = UtilSBCoreCriptoRSA.getTextoCriptografadoUsandoChavePublica(codigoSolicitacao, chavePublicaServidor);
                 ChamadaHttpSimples chamada = new ChamadaHttpSimples();
                 chamada.setTipoConexao(FabTipoConexaoRest.POST);
+                chamada.setEnderecoHost(urlServidorApiRest);
+                chamada.setPath(urlObterToken.replace(urlServidorApiRest, ""));
                 JsonObjectBuilder jsonEnvioCodigoAcesso = Json.createObjectBuilder();
                 jsonEnvioCodigoAcesso.add("grant_type", FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString());
-                jsonEnvioCodigoAcesso.add("client_id", chavePublicaLocal.hashCode());
+                jsonEnvioCodigoAcesso.add("client_id", chavePublicaCliente.hashCode());
                 jsonEnvioCodigoAcesso.add("code", codigoCriptogrado);
                 jsonEnvioCodigoAcesso.add("redirect_uri", urlRetornoSucessoObterToken);
                 JsonObject jsonPostSolicitacao = jsonEnvioCodigoAcesso.build();
                 chamada.setCorpo(jsonPostSolicitacao.toString());
+                chamada.setPossuiCorpoComConteudo(true);
                 return chamada;
             } catch (Throwable ex) {
                 Logger.getLogger(GestaoTokenRestInterprestfull.class.getName()).log(Level.SEVERE, "Falha gerando chamada para obter token", ex);
@@ -140,7 +162,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
 
     @Override
     public String getUrlRetornoReceberCodigoSolicitacao() {
-        return urlRetornoReceberCodigoSolicitacao;
+        return urlRetornoSucessoObterToken;
     }
 
     @Override
@@ -155,6 +177,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
 
     @Override
     protected String gerarUrlRetornoSucessoGeracaoTokenDeAcesso() {
+
         return urlRetornoSucessoObterToken;
     }
 

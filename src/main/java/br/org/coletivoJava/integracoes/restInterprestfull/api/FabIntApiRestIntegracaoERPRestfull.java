@@ -7,7 +7,6 @@ package br.org.coletivoJava.integracoes.restInterprestfull.api;
 
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabConfigModuloWebERPChaves;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.SolicitacaoControllerERP;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ItfFabricaIntegracaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.FabTipoConexaoRest;
@@ -18,6 +17,7 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTok
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.ManipulaArquivo.importacao.FabTipoArquivoImportacao;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
+import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 
 /**
  *
@@ -83,16 +83,21 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
     ACOES_GET_REGISTRO_ENTIDADE;
 
     public ItfTokenGestao getGestaoToken(SolicitacaoControllerERP pSistema) {
-        return ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pSistema.getErpServico().getDominio()); //To change body of generated methods, choose Tools | Templates.
+        return ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(),
+                pSistema.getErpServico().getHashChavePublica());
     }
 
     public ItfAcaoApiRest getAcao(SolicitacaoControllerERP pSolicicatacao) {
-        return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao, pSolicicatacao.getErpServico()); //To change body of generated methods, choose Tools | Templates.
+        return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao, pSolicicatacao.getErpServico().getHashChavePublica()); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public ItfTokenGestao getGestaoToken(ItfSistemaErp pIdentificadorApi) {
+        return ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pIdentificadorApi.getHashChavePublica());
     }
 
     @Override
     public ItfTokenGestao getGestaoToken(ItfUsuario pUsuario) {
-        return ItfFabricaIntegracaoRest.super.getGestaoToken(pUsuario); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Informe o sistema chamando get GestaoDeToken(Sistema)");
     }
 
 }
