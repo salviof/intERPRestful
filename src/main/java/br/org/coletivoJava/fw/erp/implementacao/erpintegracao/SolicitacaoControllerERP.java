@@ -8,6 +8,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistema;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
@@ -20,6 +21,7 @@ public class SolicitacaoControllerERP {
 
     private final String nomeUnicoAcao;
     private final String corpoParametros;
+
     private final ItfSistemaErp erpServico;
     private final ItfSistemaErp erpCliente;
     private final JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();

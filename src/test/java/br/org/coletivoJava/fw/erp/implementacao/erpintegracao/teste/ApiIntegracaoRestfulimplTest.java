@@ -15,6 +15,7 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.SolicitacaoControl
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.servicoTeste.UtilTesteServicoRestfull;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTokenRestInterprestfull;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
@@ -130,7 +131,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         assertTrue(sistemaCliente.getDominio().contains("crm.casanovadigita"));
 
         System.out.println("O usuário deseja ver uma nota no sistema fatura");
-        ItfSistemaErp sisRemoto = erp.getSistemaByDominio("fatura.casanovadigital.com.br");
+        ItfSistemaErp sisRemoto = erp.getSistemaByDominio("localhost");
         assertNotNull("O sistema fatura não foi registrado no sistemas", sisRemoto);
 
         System.out.println("O usuário não possui um token de acesso");
@@ -156,11 +157,12 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         //obterCodigoSolicitacaoDeslogado();
 
         String url = reposta;
-
+        UtilTesteServicoRestfull.iniciarServico();
         SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(sisRemoto, "");
 
         ItfAcaoApiRest acao = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(sisRemoto);
         RespostaWebServiceSimples resp = acao.getResposta();
+        System.out.println(resp.getCodigoResposta());
         System.out.println(resp.getResposta());
     }
 

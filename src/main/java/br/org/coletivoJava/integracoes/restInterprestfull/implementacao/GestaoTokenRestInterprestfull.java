@@ -1,7 +1,6 @@
 package br.org.coletivoJava.integracoes.restInterprestfull.implementacao;
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
-import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
@@ -24,8 +23,6 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basic
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
@@ -134,6 +131,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
         tokenGerado.setTokenRefresh((String) pJson.get("refresh_token"));
         String expiraStr = String.valueOf(pJson.get("dataHoraExpirarToken"));
         tokenGerado.setDataHoraExpirarToken(new Date(Long.valueOf(expiraStr)));
+        tokenGerado.setScope((String) pJson.get("scope"));
         return tokenGerado;
     }
 

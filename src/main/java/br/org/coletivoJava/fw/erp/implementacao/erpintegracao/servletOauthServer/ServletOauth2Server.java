@@ -205,7 +205,9 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
         try {
             TokenConcessaoOauthServer tokenConcessao = MapaTokensGerenciadosConcessaoOauth.loadTokenConcessaoExistente(sistemaCliente, codigoDescriptografado);
             if (tokenConcessao.isTokenValido()) {
-                TokenAcessoOauthServer novoToken = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenDeAcesso(tokenConcessao.getToken(), sistemaCliente.getChavePublica(), emailDoEscopo);
+                TokenAcessoOauthServer novoToken = MapaTokensGerenciadosConcessaoOauth
+                        .gerarNovoTokenDeAcesso(tokenConcessao.getToken(), sistemaCliente.getHashChavePublica(),
+                                emailDoEscopo);
                 Integer segudos = UtilSBCoreDataHora.segundosEntre(new Date(), novoToken.getDataHoraExpira());
                 JsonObject tokenJson = UtilSBCoreJson
                         .getJsonObjectBySequenciaChaveValor("access_token", novoToken.getToken(),

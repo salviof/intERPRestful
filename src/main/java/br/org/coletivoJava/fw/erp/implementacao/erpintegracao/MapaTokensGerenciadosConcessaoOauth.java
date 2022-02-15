@@ -127,27 +127,9 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         return novoToken;
     }
 
-    public static TokenAcessoOauthServer renovarNovoTokenDeAcesso(String pcodigoAtualizacaoToken) {
-        TokenAcessoOauthServer tokenEncontrado = TOKEN_DE_ACESSO_BY_CODIGO_ATUALIZACAO.get(pcodigoAtualizacaoToken);
-        if (tokenEncontrado == null) {
-            return null;
-        }
-        Date dataHoraLimiteRenovacaoToken = UtilSBCoreDataHora.incrementaDias(tokenEncontrado.getDataHoraExpira(), 5);
-        if (dataHoraLimiteRenovacaoToken.getTime() <= new Date().getTime()) {
-            return null;
-        }
-        String sistemaConfiavelChavePublica = tokenEncontrado.getChavePublicaAplicativoConfiavel();
-        Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
-        String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
-        String codigoTokenRefresh = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
-        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoTokenRefresh, dataExpiracao, sistemaConfiavelChavePublica, tokenEncontrado.getIdentificacaoAgenteDeAcesso());
-        persistirToken(sistemaConfiavelChavePublica, novoToken);
-        return novoToken;
-    }
-
-    public synchronized static boolean persistirToken(String pSistemaConfiavelChavePublica, TokenAcessoOauthServer pToken) {
+    public synchronized static boolean persistirToken(String pHashClientidentificador, TokenAcessoOauthServer pToken) {
         try {
-            String chavesPersistidasTExto = chavesDeAcessoErrp.getRepositorioDeArquivosExternos().getTexto(pSistemaConfiavelChavePublica);
+            String chavesPersistidasTExto = chavesDeAcessoErrp.getRepositorioDeArquivosExternos().getTexto(pHashClientidentificador);
             List<TokenAcessoOauthServer> tokensValidos = new ArrayList<>();
             tokensValidos.add(pToken);
             if (!UtilSBCoreStringValidador.isNuloOuEmbranco(chavesPersistidasTExto)) {
@@ -166,11 +148,30 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
             for (TokenAcessoOauthServer tokenValido : tokensValidos) {
                 jsonArraybuilder.add(tokenValido.getObjetoJsonArmazenamento());
             }
-            chavesDeAcessoErrp.getRepositorioDeArquivosExternos().putConteudoRecursoExterno(pToken.getChavePublicaAplicativoConfiavel(), jsonArraybuilder.build().toString());
+            chavesDeAcessoErrp.getRepositorioDeArquivosExternos().putConteudoRecursoExterno(pHashClientidentificador, jsonArraybuilder.build().toString());
+            TOKEN_DE_ACESSO_BY_CODIGO.put(pToken.getToken(), pToken);
             return true;
         } catch (Throwable t) {
             return false;
         }
+    }
+
+    public static TokenAcessoOauthServer renovarNovoTokenDeAcesso(String pcodigoAtualizacaoToken) {
+        TokenAcessoOauthServer tokenEncontrado = TOKEN_DE_ACESSO_BY_CODIGO_ATUALIZACAO.get(pcodigoAtualizacaoToken);
+        if (tokenEncontrado == null) {
+            return null;
+        }
+        Date dataHoraLimiteRenovacaoToken = UtilSBCoreDataHora.incrementaDias(tokenEncontrado.getDataHoraExpira(), 5);
+        if (dataHoraLimiteRenovacaoToken.getTime() <= new Date().getTime()) {
+            return null;
+        }
+        String sistemaConfiavelChavePublica = tokenEncontrado.getChavePublicaAplicativoConfiavel();
+        Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
+        String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
+        String codigoTokenRefresh = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
+        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoTokenRefresh, dataExpiracao, sistemaConfiavelChavePublica, tokenEncontrado.getIdentificacaoAgenteDeAcesso());
+        persistirToken(sistemaConfiavelChavePublica, novoToken);
+        return novoToken;
     }
 
 }

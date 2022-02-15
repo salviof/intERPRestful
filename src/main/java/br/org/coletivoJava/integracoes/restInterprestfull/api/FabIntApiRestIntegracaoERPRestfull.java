@@ -88,7 +88,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
     }
 
     public ItfAcaoApiRest getAcao(SolicitacaoControllerERP pSolicicatacao) {
-        return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao, pSolicicatacao.getErpServico().getHashChavePublica()); //To change body of generated methods, choose Tools | Templates.
+        return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao, pSolicicatacao.getErpServico().getHashChavePublica());
     }
 
     public ItfTokenGestao getGestaoToken(ItfSistemaErp pIdentificadorApi) {
