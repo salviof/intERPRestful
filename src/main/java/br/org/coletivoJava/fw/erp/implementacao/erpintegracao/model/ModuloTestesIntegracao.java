@@ -24,7 +24,7 @@ import javax.persistence.Entity;
 public class ModuloTestesIntegracao extends ModuloAcaoSistema {
 
     @Enumerated(EnumType.ORDINAL)
-    @InfoCampo(tipo = FabTipoAtributoObjeto.ENUM_FABRICA)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.ENUM_FABRICA, fabricaDeOpcoes = FabModuloTestesIntegracao.class)
     private FabModuloTestesIntegracao moduloFab;
 
     @Override

@@ -5,6 +5,7 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao.FabAcaoRestfullTestes;
 import com.super_bits.modulos.SBAcessosModel.fabricas.FabAcaoProjetoSB;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.ConfiguradorCoreDeProjetoJarPersistenciaAbstrato;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.ItfConfiguracaoCoreCustomizavel;
@@ -21,9 +22,10 @@ public class ConfigCoreApiIntegracao extends ConfiguradorCoreDeProjetoJarPersist
     public void defineFabricasDeACao(ItfConfiguracaoCoreCustomizavel pConfig) {
 
         setIgnorarConfiguracaoPermissoes(false);
-        pConfig.setFabricaDeAcoes(new Class[]{FabAcaoProjetoSB.class});
+        pConfig.setFabricaDeAcoes(new Class[]{FabAcaoProjetoSB.class, FabAcaoRestfullTestes.class});
         pConfig.setCentralComunicacao(CentralComunicacaoDesktop.class);
         pConfig.setClasseConfigPermissao(ConfigPermissaoTestesIntegracao.class);
+
     }
 
 }

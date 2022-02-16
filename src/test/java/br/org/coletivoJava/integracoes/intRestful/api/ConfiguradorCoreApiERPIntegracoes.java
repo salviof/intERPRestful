@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.org.coletivoJava.integracoes.intGalaxPay.api;
+package br.org.coletivoJava.integracoes.intRestful.api;
 
 import com.super_bits.modulos.SBAcessosModel.fabricas.FabAcaoProjetoSB;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.ConfiguradorCoreModelSemPersistencia;

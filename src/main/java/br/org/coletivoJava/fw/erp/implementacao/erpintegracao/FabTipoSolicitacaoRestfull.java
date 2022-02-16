@@ -16,6 +16,26 @@ public enum FabTipoSolicitacaoRestfull {
     LISTA_DA_ENTIDADE,
     LISTA_DE_ENTIDADE,
     ESTRUTURA_FORMULARIO,
-    BEAN_FORMULARIO,
+    BEAN_FORMULARIO;
+
+    public String getMetodo() {
+        switch (this) {
+            case CONTROLLER:
+                return "PUT";
+            case OPCOES:
+                return "OPTIONS";
+            case LISTA_DA_ENTIDADE:
+                return "GET";
+            case LISTA_DE_ENTIDADE:
+                return "GET";
+            case ESTRUTURA_FORMULARIO:
+                return "GET";
+            case BEAN_FORMULARIO:
+                return "GET";
+            default:
+                throw new AssertionError(this.name());
+
+        }
+    }
 
 }

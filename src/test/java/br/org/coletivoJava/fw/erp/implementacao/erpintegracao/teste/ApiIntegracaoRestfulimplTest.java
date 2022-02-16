@@ -11,25 +11,32 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ConfigCoreApiIntegracao;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.SolicitacaoControllerERP;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabTipoSolicitacaoRestfull;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.FabGrupoTestesIntegracao;
+import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.servicoTeste.UtilTesteServicoRestfull;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao.FabAcaoRestfullTestes;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTokenRestInterprestfull;
+import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.RespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestao;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfGrupoUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servlets.servletRecepcaoOauth.ServletRecepcaoOauth;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.EntityManager;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import org.junit.Before;
 import org.junit.Test;
@@ -158,12 +165,34 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
         String url = reposta;
         UtilTesteServicoRestfull.iniciarServico();
-        SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(sisRemoto, "");
 
-        ItfAcaoApiRest acao = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(sisRemoto);
-        RespostaWebServiceSimples resp = acao.getResposta();
-        System.out.println(resp.getCodigoResposta());
+        ItfAcaoApiRest acaoOpcoes = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(sisRemoto);
+        RespostaWebServiceSimples respOpcoes = acaoOpcoes.getResposta();
+        System.out.println(respOpcoes.getCodigoResposta());
+        System.out.println(respOpcoes.getResposta());
+
+        UsuarioSB novoUsuario = new UsuarioSB();
+        novoUsuario.setNome("Usuario teste");
+        novoUsuario.setEmail("emailTesterestfull@casanovadigital.com.br");
+        novoUsuario.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
+        //UtilSBRestful.getSolicitacaoByRequest(pRequest)
+        ItfAcaoApiRest acaoPost = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER
+                .getAcao(UtilSBRestful.getSolicitacaoByRequest(sistemaCliente,
+                        FabTipoSolicitacaoRestfull.CONTROLLER,
+                        FabAcaoRestfullTestes.USUARIO_RESTFUL_CTR_SALVAR_MERGE.getRegistro(),
+                        novoUsuario)
+                );
+        EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
+        List<UsuarioSB> usuarios = UtilSBPersistencia.getListaTodos(UsuarioSB.class, em);
+        UtilSBPersistencia.fecharEM(em);
+
+        RespostaWebServiceSimples resp = acaoPost.getResposta();
+        assertEquals("O usuário não foi registrado", usuarios.size(), 2);
         System.out.println(resp.getResposta());
+
+        RespostaWebServiceSimples respPosts = acaoPost.getResposta();
+        System.out.println(respPosts.getCodigoResposta());
+        System.out.println(respPosts.getResposta());
     }
 
     public void obterCodigoSolicitacaoDeslogado() {
@@ -220,18 +249,5 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         }
 
     }
-    //   public String obterToken(String pCodigoSolicitacao) {
-    //      EnvelopeSolicitacaoCodigoObterToken postRequisicao = new EnvelopeSolicitacaoCodigoObterToken(
-    //            requisicaoSolicitarTokenAcessso, respostaObterSolicitarTokenAcesso, sistemaAutual,
-    //              sistemaConfiavelERP, USUARIO_AUTENTICADO);
-    //      String dadosObterToken = "{\"grant_type\":\"authorization_code\",\n"
-    //               + "		 \"client_id\": \"SEU_CLIENT_ID\",\n"
-    //               + "		 \"client_secret\": \"EMAILCRIPTOGRAFADO\",\n"
-    //               + "		 \"code\": \"SEU_AUTHORIZATION_CODE\",\n"
-    //               + "		 \"redirect_uri\": \"https://SEU_APP/callback\"}'";
-    //       postRequisicao.setBodyRequisicao(dadosObterToken);
-    //       String resposta = postRequisicao.getRespostaPost(servletFornecimentoToken);
-    //      return resposta;
-    //  }
 
 }

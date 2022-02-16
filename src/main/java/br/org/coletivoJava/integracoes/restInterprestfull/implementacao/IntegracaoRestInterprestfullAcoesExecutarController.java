@@ -18,4 +18,10 @@ public class IntegracaoRestInterprestfullAcoesExecutarController
         super(pTipoAplicacaoERP, FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER,
                 pTipoAgente, pUsuario, pParametro);
     }
+
+    @Override
+    protected void executarAcao() {
+        super.executarAcao(); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

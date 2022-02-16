@@ -6,7 +6,7 @@
 package br.org.coletivoJava.integracoes.erpRestful;
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
-import br.org.coletivoJava.integracoes.intGalaxPay.api.ConfiguradorCoreApiERPIntegracoes;
+import br.org.coletivoJava.integracoes.intRestful.api.ConfiguradorCoreApiERPIntegracoes;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import org.apache.logging.log4j.LogManager;
 import org.coletivojava.fw.api.objetoNativo.log.LogPadraoSB;

@@ -6,7 +6,7 @@
 package br.org.coletivoJava.integracoes.restInterprestfull.api;
 
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabConfigModuloWebERPChaves;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.SolicitacaoControllerERP;
+import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ItfFabricaIntegracaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.FabTipoConexaoRest;
@@ -47,7 +47,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
     @InfoConsumoRestService(getPachServico = "/controllerERP/acao/executar/{0}/",
             tipoConexao = FabTipoConexaoRest.POST,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
-            parametrosGet = {"nomeUnicoAcaoGestao"},
+            parametrosGet = {"nomeUnicoAcaoGestao", "codigoEntidade"},
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     ACOES_EXECUTAR_CONTROLLER,
@@ -84,11 +84,11 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
 
     public ItfTokenGestao getGestaoToken(SolicitacaoControllerERP pSistema) {
         return ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(),
-                pSistema.getErpServico().getHashChavePublica());
+                pSistema.getErpServico());
     }
 
     public ItfAcaoApiRest getAcao(SolicitacaoControllerERP pSolicicatacao) {
-        return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao, pSolicicatacao.getErpServico().getHashChavePublica());
+        return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao, pSolicicatacao.getErpServico());
     }
 
     public ItfTokenGestao getGestaoToken(ItfSistemaErp pIdentificadorApi) {

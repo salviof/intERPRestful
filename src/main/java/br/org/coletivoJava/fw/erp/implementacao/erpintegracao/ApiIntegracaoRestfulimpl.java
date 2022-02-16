@@ -1,8 +1,10 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
+import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimplesSomenteLeitura;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.repositorioLinkEntidades.RepositorioLinkEntidadesGenerico;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.ApiIntegracaoRestful;
+import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
@@ -12,16 +14,26 @@ import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestInteg
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.consultaDinamica.ConsultaDinamicaDeEntidade;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
-import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.RespostaWebServiceSimples;
+import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ItfAcaoGerenciarEntidade;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.chavesPublicasePrivadas.RepositorioChavePublicaPrivada;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ErroJsonInterpredador;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 
 @ApiIntegracaoRestful
@@ -31,6 +43,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     public ApiIntegracaoRestfulimpl() {
         System.out.println("");
+
     }
 
     @Override
@@ -53,16 +66,6 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     @Override
     public String getCodigoApiExterna(java.lang.Class c, int i) {
         return null;
-    }
-
-    @Override
-    public ItfResposta getResposta(ItfSistemaErp pSistema, String nomeAcao, ItfBeanSimples pParametro) {
-        JsonObject jsonParametro = gerarConversaoJson(pSistema, pParametro);
-        SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(pSistema, nomeAcao, jsonParametro);
-        RespostaWebServiceSimples resposta = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER
-                .getAcao(solicitacao).getResposta();
-
-        return resposta;
     }
 
     @Override
@@ -168,17 +171,127 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public JsonObject gerarConversaoJson(ItfSistemaErp pSistema, String pJson) {
+    public ItfResposta getResposta(ItfSistemaErp pSistema, String nomeAcao, ItfBeanSimples pParametro) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ItfBeanSimples gerarConversaoJson(ItfSistemaErp pSistema, JsonObject pJson) {
+    public ItfBeanSimples gerarConversaoJsonStringToObjeto(ItfSistemaErp pSistema, String pJson) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public JsonObject gerarConversaoJson(ItfSistemaErp pSistema, ItfBeanSimples pJson) {
+    public ItfBeanSimples gerarConversaoJsonStringToObjeto(String pJson) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ItfBeanSimples gerarConversaoJsonToObjeto(ItfSistemaErp pSistema, JsonObject pJson) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ItfBeanSimples gerarConversaoJsonToObjeto(JsonObject pJson) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public JsonObject gerarConversaoObjetoToJson(ItfSistemaErp pSistema, ItfBeanSimples pJson) {
+        ERPIntegracaoSistemasApi erp = ERPIntegracaoSistemasApi.RESTFUL;
+        try {
+            ItfBeanSimples entidade = erp.getDTO("", pJson.getClass());
+        } catch (ErroJsonInterpredador ex) {
+            Logger.getLogger(ApiIntegracaoRestfulimpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return null;
     }
+
+    @Override
+    public JsonObject gerarConversaoObjetoToJson(ItfBeanSimples pJson) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public static JsonObject buildRespostaOptions(SolicitacaoControllerERP pSolicitacao) {
+        try {
+            if (pSolicitacao.isAutenticadoComSucesso() && pSolicitacao.getAcaoStrNomeUnico() == null) {
+                List<ItfAcaoGerenciarEntidade> acoesDoUsuario = new ArrayList();
+
+                JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+                jsonBuilder.add("scope", pSolicitacao.getUsuarioSolicitante().getEmail());
+                jsonBuilder.add("modulo", pSolicitacao.getUsuarioSolicitante().getGrupo().getModuloPrincipal().getNome());
+
+                List<ItfAcaoGerenciarEntidade> acoes = MapaAcoesSistema.getListaTodasGestao();
+
+                acoes.stream().filter(ac -> SBCore.getServicoPermissao().isAcaoPermitidaUsuario(pSolicitacao.getUsuarioSolicitante(), ac))
+                        .forEach(acoesDoUsuario::add);
+                JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+                acoesDoUsuario.stream().map(ac -> ac.getNomeUnicoSlug()).forEach(jsonArrayBuilder::add);
+                jsonBuilder.add("acoes", jsonArrayBuilder.build());
+
+                JsonObject retorno = jsonBuilder.build();
+
+                return retorno;
+            }
+            return null;
+        } catch (Throwable ex) {
+
+            return null;
+        }
+
+    }
+
+    @Override
+    public ItfRespostaAcaoDoSistema getRespostaAcaoDoSistema(SolicitacaoControllerERP pSolicitacao) {
+        ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+
+        ItfAcaoDoSistema acao = null;
+        ItfRespostaAcaoDoSistema resposta = null;
+        ItfIntegracaoERP integracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+        if (!pSolicitacao.isAutenticadoComSucesso()) {
+            resposta = new RespostaAcaoDoSistema();
+            resposta.addErro("Ação " + pSolicitacao.getAcaoStrNomeUnico() + " não encontrada");
+            return resposta;
+        }
+
+        if (pSolicitacao.getAcaoStrNomeUnico() != null) {
+            acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(pSolicitacao.getAcaoStrNomeUnico());
+            if (acao == null) {
+                resposta = new RespostaAcaoDoSistema();
+                resposta.addErro("Ação " + pSolicitacao.getAcaoStrNomeUnico() + " não encontrada");
+            } else {
+                resposta = integracao.getRespostaAcaoDoSistema(pSolicitacao);
+            }
+        }
+
+        if (resposta == null) {
+            resposta = new RespostaAcaoDoSistema();
+        }
+
+        String metodo = pSolicitacao.getMetodo();
+        JsonObject retornoProcessado;
+
+        switch (metodo) {
+            case "POST":
+
+                break;
+            case "GET":
+                break;
+            case "OPTIONS":
+                retornoProcessado = buildRespostaOptions(pSolicitacao);
+                resposta.setRetorno(retornoProcessado);
+                break;
+            case "PUT":
+
+                break;
+
+        }
+        return resposta;
+
+    }
+
+    @Override
+    public String executarAcaoPacoteServico() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

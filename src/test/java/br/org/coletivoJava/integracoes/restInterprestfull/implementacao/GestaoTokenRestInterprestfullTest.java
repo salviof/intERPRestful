@@ -5,10 +5,10 @@
  */
 package br.org.coletivoJava.integracoes.restInterprestfull.implementacao;
 
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.SolicitacaoControllerERP;
+import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.ConfigPercistenciaItegracaoSistemas;
-import br.org.coletivoJava.integracoes.intGalaxPay.api.ConfiguradorCoreApiERPIntegracoes;
+import br.org.coletivoJava.integracoes.intRestful.api.ConfiguradorCoreApiERPIntegracoes;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
@@ -30,10 +30,7 @@ public class GestaoTokenRestInterprestfullTest {
         SistemaERPConfiavel sistema = new SistemaERPConfiavel();
         sistema.setDominio("fatura.coletivojaval.com.br");
 
-        SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(sistema, "TESTEERP_CTR_PROVA_VIDA");
-
-        FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(solicitacao);
-
+        //FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(solicitacao);
     }
 
 }
