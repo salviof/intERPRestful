@@ -10,7 +10,6 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.TokenD
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.Json;
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -19,24 +18,25 @@ import java.util.Date;
  */
 public class TokenAcessoOauthServer extends TokenDeAcessoExternoDinamico {
 
-    private String chavePublicaAplicativoConfiavel;
-    private String identificacaoAgenteDeAcesso;
     private JsonObject objetoJsonArmazenamento;
     private JsonObject objetoJsonResposta;
-    private String refresh_token;
-    private String scope;
+    private final String refresh_token;
+    private final String scope;
+    private final String client_id;
 
-    public TokenAcessoOauthServer(String pCodigoToken, String pRefresh_token, Date pDataHoraExipira, String client_id, String pIdentigicadorAgente) {
+    public TokenAcessoOauthServer(String pCodigoToken, String pRefresh_token, Date pDataHoraExipira, String hashChavePuvlica_client_id, String pIdentigicadorAgente) {
         super(pCodigoToken, pDataHoraExipira);
         refresh_token = pRefresh_token;
         scope = pIdentigicadorAgente;
+        client_id = hashChavePuvlica_client_id;
     }
 
     public TokenAcessoOauthServer(JsonObject pObjetoJsonArmazenamento) {
-        super(pObjetoJsonArmazenamento.getString("token"), new Date(pObjetoJsonArmazenamento.getJsonNumber("validade").longValue()));
-        chavePublicaAplicativoConfiavel = pObjetoJsonArmazenamento.getString("chavePublicaAplicativoConfiavel");
-        identificacaoAgenteDeAcesso = pObjetoJsonArmazenamento.getString("identificacaoAgenteDeAcesso");
+        super(pObjetoJsonArmazenamento.getString("token"), new Date(pObjetoJsonArmazenamento.getJsonNumber("dataHoraExpirarToken").longValue()));
+        client_id = pObjetoJsonArmazenamento.getString("client_id");
+
         scope = pObjetoJsonArmazenamento.getString("scope");
+        refresh_token = pObjetoJsonArmazenamento.getString("refresh_token");
     }
 
     public JsonObject getComoJsonResposta() {
@@ -47,17 +47,10 @@ public class TokenAcessoOauthServer extends TokenDeAcessoExternoDinamico {
         return objetoJsonResposta;
     }
 
-    public String getChavePublicaAplicativoConfiavel() {
-        return chavePublicaAplicativoConfiavel;
-    }
-
-    public String getIdentificacaoAgenteDeAcesso() {
-        return identificacaoAgenteDeAcesso;
-    }
-
     public JsonObject getObjetoJsonArmazenamento() {
         if (objetoJsonArmazenamento == null) {
             JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("client_id", client_id);
             objectBuilder.add("refresh_token", refresh_token);
             objectBuilder.add("access_token", getToken());
             objectBuilder.add("dataHoraExpirarToken", Long.toString(getDataHoraExpira().getTime()));
@@ -81,8 +74,8 @@ public class TokenAcessoOauthServer extends TokenDeAcessoExternoDinamico {
         return scope;
     }
 
-    public void setScope(String scope) {
-        this.scope = scope;
+    public String getClient_id() {
+        return client_id;
     }
 
 }

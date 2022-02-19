@@ -77,12 +77,23 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
         return null;
     }
 
+    private void processarSolicitacao(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        SolicitacaoControllerERP solicitacao;
+        try {
+            solicitacao = UtilSBRestful.getSolicitacaoByRequest(req);
+            ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
+            String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+            resp.getWriter().append(respostaStr);
+        } catch (ErroTentandoObterTokenAcesso ex) {
+            Logger.getLogger(ServletRestfullERP.class.getName()).log(Level.SEVERE, null, ex);
+            enviarAcessoNegado(ex, resp);
+        }
+    }
+
     @Override
     public void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        SolicitacaoControllerERP solicitacao = UtilSBRestful.getSolicitacaoByRequest(req);
-        ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
-        String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
-        resp.getWriter().append(respostaStr);
+        processarSolicitacao(req, resp);
+
     }
 
     private void enviarAcessoNegado(ErroTentandoObterTokenAcesso pErro, HttpServletResponse pREsposta) throws ServletException {
@@ -95,35 +106,23 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        SolicitacaoControllerERP solicitacao = UtilSBRestful.getSolicitacaoByRequest(req);
-        ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
-        String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
-        resp.getWriter().append(respostaStr);
+        processarSolicitacao(req, resp);
 
     }
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        SolicitacaoControllerERP solicitacao = UtilSBRestful.getSolicitacaoByRequest(req);
-        ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
-        String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
-        resp.getWriter().append(respostaStr);
+        processarSolicitacao(req, resp);
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        SolicitacaoControllerERP solicitacao = UtilSBRestful.getSolicitacaoByRequest(req);
-        ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
-        String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
-        resp.getWriter().append(respostaStr);
+        processarSolicitacao(req, resp);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        SolicitacaoControllerERP solicitacao = UtilSBRestful.getSolicitacaoByRequest(req);
-        ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
-        String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
-        resp.getWriter().append(respostaStr);
+        processarSolicitacao(req, resp);
     }
 
 }

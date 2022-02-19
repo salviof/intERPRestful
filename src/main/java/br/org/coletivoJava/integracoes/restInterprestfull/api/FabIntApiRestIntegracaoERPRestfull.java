@@ -5,6 +5,9 @@
  */
 package br.org.coletivoJava.integracoes.restInterprestfull.api;
 
+import br.org.coletivoJava.fw.api.erp.codigoPostal.br.ERPCodigoPostalBR;
+import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
+import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabConfigModuloWebERPChaves;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
@@ -37,7 +40,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     OAUTH_VALIDAR_CREDENCIAL,
-    @InfoConsumoRestService(getPachServico = "/controllerERP/acao/executar/{0}/{1}",
+    @InfoConsumoRestService(getPachServico = "/acoesRestful/acao/executar/{0}/{1}",
             tipoConexao = FabTipoConexaoRest.PUT,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             parametrosGet = {"nomeUnicoAcaoGestao", "codigoEntidade"},
@@ -51,28 +54,28 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     ACOES_EXECUTAR_CONTROLLER,
-    @InfoConsumoRestService(getPachServico = "/controllerERP/acaogestao/",
+    @InfoConsumoRestService(getPachServico = "/acoesRestful/acaogestao/",
             tipoConexao = FabTipoConexaoRest.POST,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             parametrosGet = {},
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     ACOES_EXECUTAR_CRIAR_NOVA_ENTIDADE,
-    @InfoConsumoRestService(getPachServico = "/controllerERP/acaogestao/{0}",
+    @InfoConsumoRestService(getPachServico = "/acoesRestful/acaogestao/{0}",
             tipoConexao = FabTipoConexaoRest.PUT,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             parametrosGet = {"idEntidade"},
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     ACOES_EXECUTAR_ATUALIZAR_ENTIDADE,
-    @InfoConsumoRestService(getPachServico = "/controllerERP/acaogestao/{0}",
+    @InfoConsumoRestService(getPachServico = "/acoesRestful/acaogestao/{0}",
             tipoConexao = FabTipoConexaoRest.DELET,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             parametrosGet = {"identidade"},
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     ACOES_EXECUTAR_DELETE,
-    @InfoConsumoRestService(getPachServico = "/controllerERP/acaogestao/",
+    @InfoConsumoRestService(getPachServico = "/acoesRestful/acaogestao/",
             tipoConexao = FabTipoConexaoRest.OPTIONS,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             urlDocumentacao = "https://coletivojava.com.br",
@@ -83,16 +86,21 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
     ACOES_GET_REGISTRO_ENTIDADE;
 
     public ItfTokenGestao getGestaoToken(SolicitacaoControllerERP pSistema) {
-        return ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(),
-                pSistema.getErpServico());
+        return getGestaoToken(pSistema.getErpServico());
     }
 
     public ItfAcaoApiRest getAcao(SolicitacaoControllerERP pSolicicatacao) {
-        return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao, pSolicicatacao.getErpServico());
+        ItfIntegracaoERP resp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+        //pSolicicatacao.getErpServico()
+        ItfSistemaErp sistemaSErvidor = resp.getSistemaByHashChavePublica(pSolicicatacao.getErpServico());
+        if (sistemaSErvidor == null) {
+            throw new UnsupportedOperationException("Hash chave pública do serviço não foi definida");
+        }
+        return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao);
     }
 
-    public ItfTokenGestao getGestaoToken(ItfSistemaErp pIdentificadorApi) {
-        return ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pIdentificadorApi.getHashChavePublica());
+    public ItfTokenGestao getGestaoToken(ItfSistemaErp pSistemaServico) {
+        return ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pSistemaServico.getHashChavePublica());
     }
 
     @Override

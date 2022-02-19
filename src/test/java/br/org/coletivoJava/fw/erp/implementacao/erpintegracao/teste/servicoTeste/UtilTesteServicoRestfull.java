@@ -7,8 +7,11 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.servicoTest
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ErroTentandoObterTokenAcesso;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import spark.Spark;
 
@@ -24,14 +27,44 @@ public class UtilTesteServicoRestfull {
         Spark.port(8066);
         Spark.get("/hello", (req, res) -> "Hello World");
 
-        Spark.options("/controllerERP/*", (req, res) -> {
+        Spark.options("/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET + "/*", (req, res) -> {
 
-            SolicitacaoControllerERP solicitacao = UtilSBRestful.getSolicitacaoByRequest(req.raw());
+            SolicitacaoControllerERP solicitacao;
+            try {
+                solicitacao = UtilSBRestful.getSolicitacaoByRequest(req.raw());
+            } catch (ErroTentandoObterTokenAcesso ex) {
+                RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
+                resposta.addErro("Autenticação negada");
+                res.status(401);
+                String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+                return respostaStr;
+            }
             ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
+            res.status(200);
             String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
             return respostaStr;
 
         });
+
+        Spark.post("/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET + "/*", (req, res)
+                -> {
+            SolicitacaoControllerERP solicitacao;
+            try {
+                solicitacao = UtilSBRestful.getSolicitacaoByRequest(req.raw());
+            } catch (ErroTentandoObterTokenAcesso ex) {
+                RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
+                resposta.addErro("Autenticação negada");
+                res.status(401);
+                String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+                return respostaStr;
+            }
+            ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
+            res.status(200);
+            String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+            return respostaStr;
+
+        }
+        );
 
     }
 ;

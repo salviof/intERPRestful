@@ -5,8 +5,8 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
-import br.org.coletivoJava.fw.api.erp.codigoPostal.br.ERPCodigoPostalBR;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
+import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenAcessoOauthServer;
 import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP.SLUGPUBLICACAOSERVLET;
@@ -24,7 +24,9 @@ import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
@@ -36,8 +38,14 @@ import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 public class UtilSBRestful {
 
     public static String getCorpoRequisicao(HttpServletRequest pRequest) {
+        String corpo;
+        try {
+            corpo = pRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            return corpo;
+        } catch (IOException ex) {
+            return null;
+        }
 
-        return null;
     }
 
     public static String getCodigoEntidade(HttpServletRequest pRequest) {
@@ -53,54 +61,61 @@ public class UtilSBRestful {
     public static String getNomeSlugAcao(HttpServletRequest pRequest) {
         String caminhoChamada = pRequest.getRequestURI();
 
-        String[] partes = pRequest.getRequestURI().split("/");
-        if (partes.length >= 4) {
-            return partes[4];
+        String[] partes = caminhoChamada.split("/");
+        if (partes.length >= 3) {
+            String slugAcao = partes[2];
+            return slugAcao;
         }
         return null;
     }
 
     //(String pMetodoRestful, String pHashIdentificadorCliente,
     //String pNomeUnicoAcao, ItfUsuario pUsuario, String pCodigo, String pAtributo, JsonObject pParametros)
-    public static SolicitacaoControllerERP getSolicitacaoByRequest(ItfSistemaErp pCliente, FabTipoSolicitacaoRestfull pAcaoRestful,
+    public static SolicitacaoControllerERP getSolicitacao(ItfSistemaErp pCliente, ItfSistemaErp pServico, FabTipoSolicitacaoRestfull pAcaoRestful,
             ItfAcaoDoSistema pAcaoSistema, ItfBeanSimples pBeanSimples) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
-        SolicitacaoControllerERP novaSolicitacao = new SolicitacaoControllerERP(pAcaoRestful.getMetodo(),
-                pCliente.getChavePublica(),
-                pAcaoSistema.getNomeUnico(), SBCore.getUsuarioLogado(),
-                String.valueOf(pBeanSimples.getId()), null, erpIntegracao.gerarConversaoObjetoToJson(pCliente, pBeanSimples));
+        String acao = null;
+        if (pAcaoSistema != null) {
+            acao = pAcaoSistema.getNomeUnico();
+        }
+        String codigoBeanSimples = null;
+        if (pBeanSimples != null) {
+            codigoBeanSimples = String.valueOf(pBeanSimples.getId());
+        }
+        SolicitacaoControllerERP novaSolicitacao = new SolicitacaoControllerERP(
+                pAcaoRestful.getMetodo(),
+                pServico.getHashChavePublica(),
+                pCliente.getHashChavePublica(),
+                acao, SBCore.getUsuarioLogado(), codigoBeanSimples,
+                null,
+                erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples));
 
         return novaSolicitacao;
     }
 
-    public static SolicitacaoControllerERP getSolicitacaoByRequest(HttpServletRequest pRequest) {
+    public static SolicitacaoControllerERP getSolicitacaoByRequest(HttpServletRequest pRequest) throws ErroTentandoObterTokenAcesso {
         TokenAcessoOauthServer token = null;
         ItfUsuario usuario = null;
         String acaoDoSistemaEnum = null;
         String codigoEntidade = null;
         String atributoEntidade = null;
         JsonObject json = null;
-        try {
-            token = getTokenAcesso(pRequest);
-            usuario = autenticarUsuario(token);
-            acaoDoSistemaEnum = getNomeSlugAcao(pRequest);
 
-            String corpoRequisicaoTesxto = getCorpoRequisicao(pRequest);
-            json = UtilSBCoreJson.getJsonObjectByTexto(corpoRequisicaoTesxto);
-            SolicitacaoControllerERP solicitacao
-                    = new SolicitacaoControllerERP(pRequest.getMethod(),
-                            token.getChavePublicaAplicativoConfiavel(), acaoDoSistemaEnum, usuario, codigoEntidade,
-                            atributoEntidade,
-                            json);
-            return solicitacao;
-        } catch (ErroTentandoObterTokenAcesso ex) {
-            SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(
-                    pRequest.getMethod(),
-                    token.getChavePublicaAplicativoConfiavel(), acaoDoSistemaEnum, usuario, codigoEntidade,
-                    atributoEntidade,
-                    json);
-            return solicitacao;
-        }
+        token = getTokenAcesso(pRequest);
+        usuario = autenticarUsuario(token);
+        acaoDoSistemaEnum = getNomeSlugAcao(pRequest);
+        token.getObjetoJsonResposta();
+        String corpoRequisicaoTesxto = getCorpoRequisicao(pRequest);
+        json = UtilSBCoreJson.getJsonObjectByTexto(corpoRequisicaoTesxto);
+        ItfIntegracaoERP servicoRestful = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+        ItfSistemaERPAtual servidor = servicoRestful.getSistemaAtual();
+
+        SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(
+                pRequest.getMethod(),
+                servidor.getHashChavePublica(),
+                token.getClient_id(), codigoEntidade, usuario, codigoEntidade, atributoEntidade, json);
+
+        return solicitacao;
 
     }
 

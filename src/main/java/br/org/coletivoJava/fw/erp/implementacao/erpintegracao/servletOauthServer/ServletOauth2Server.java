@@ -17,6 +17,7 @@ import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.json.ErroProcessandoJson;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.urls.UrlInterpretada;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.util.UtilFabUrlServlet;
@@ -27,10 +28,13 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.coletivojava.fw.api.tratamentoErros.FabErro;
 import org.json.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -216,12 +220,15 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                                 "expires_in", segudos.toString(),
                                 "refresh_token", novoToken.getRefresh_token()
                         );
+
                 PrintWriter writer = resp.getWriter();
                 String textoJson = UtilSBCoreJson.getTextoByJsonObjeect(tokenJson.asJsonObject());
                 writer.append(textoJson);
             }
         } catch (ErroTentandoObterTokenAcesso ex) {
             throw new ServletException("O token não foi encontrado");
+        } catch (ErroProcessandoJson ex) {
+            SBCore.RelatarErro(FabErro.SOLICITAR_REPARO, "Erro criando json de resposta com token de acesso", ex);
         }
 
     }

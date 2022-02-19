@@ -18,6 +18,7 @@ import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.servicoTeste.UtilTesteServicoRestfull;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao.FabAcaoRestfullTestes;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
@@ -90,6 +91,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         sistemaCliente = new SistemaERPConfiavel();
         sistemaCliente.setNome("crm.casanovadigital.com.br");
         sistemaCliente.setDominio("crm.casanovadigital.com.br");
+        sistemaCliente.setUrlPublicaEndPoint("https://crm.casanovadigital.com.br/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
         String urlRecpcaoCodigo = "https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/Usuario/" + GestaoTokenRestInterprestfull.class.getSimpleName() + "/" + "UTF8";
         sistemaCliente.setUrlRecepcaoCodigo(urlRecpcaoCodigo);
         Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
@@ -104,7 +106,8 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         sistemaRemoto = new SistemaERPConfiavel();
         sistemaRemoto.setChavePublica(sistemaRemotoRef.getChavePublica());
         sistemaRemoto.setHashChavePublica(sistemaRemotoRef.getHashChavePublica());
-        sistemaRemoto.setUrlRecepcaoCodigo(sistemaRemotoRef.getUrlRecepcaoCodigo());
+        sistemaRemoto.setUrlRecepcaoCodigo("http://localhost:8066");
+        sistemaRemoto.setUrlPublicaEndPoint("http://localhost:8066/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
         sistemaRemoto.setDominio(sistemaRemotoRef.getDominio());
         UtilSBPersistencia.mergeRegistro(sistemaRemoto);
 
@@ -166,7 +169,8 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         String url = reposta;
         UtilTesteServicoRestfull.iniciarServico();
 
-        ItfAcaoApiRest acaoOpcoes = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(sisRemoto);
+        ItfAcaoApiRest acaoOpcoes = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(UtilSBRestful.getSolicitacao(sistemaCliente, sisRemoto,
+                FabTipoSolicitacaoRestfull.OPCOES, null, null));
         RespostaWebServiceSimples respOpcoes = acaoOpcoes.getResposta();
         System.out.println(respOpcoes.getCodigoResposta());
         System.out.println(respOpcoes.getResposta());
@@ -176,12 +180,12 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         novoUsuario.setEmail("emailTesterestfull@casanovadigital.com.br");
         novoUsuario.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
         //UtilSBRestful.getSolicitacaoByRequest(pRequest)
+        SolicitacaoControllerERP solicitaca = UtilSBRestful.getSolicitacao(sistemaCliente, sisRemoto,
+                FabTipoSolicitacaoRestfull.CONTROLLER,
+                FabAcaoRestfullTestes.USUARIO_RESTFUL_CTR_SALVAR_MERGE.getRegistro(),
+                novoUsuario);
         ItfAcaoApiRest acaoPost = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER
-                .getAcao(UtilSBRestful.getSolicitacaoByRequest(sistemaCliente,
-                        FabTipoSolicitacaoRestfull.CONTROLLER,
-                        FabAcaoRestfullTestes.USUARIO_RESTFUL_CTR_SALVAR_MERGE.getRegistro(),
-                        novoUsuario)
-                );
+                .getAcao(solicitaca);
         EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
         List<UsuarioSB> usuarios = UtilSBPersistencia.getListaTodos(UsuarioSB.class, em);
         UtilSBPersistencia.fecharEM(em);

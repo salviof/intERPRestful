@@ -165,11 +165,12 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         if (dataHoraLimiteRenovacaoToken.getTime() <= new Date().getTime()) {
             return null;
         }
-        String sistemaConfiavelChavePublica = tokenEncontrado.getChavePublicaAplicativoConfiavel();
+        String sistemaConfiavelChavePublica = tokenEncontrado.getClient_id();
         Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
         String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
         String codigoTokenRefresh = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
-        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoTokenRefresh, dataExpiracao, sistemaConfiavelChavePublica, tokenEncontrado.getIdentificacaoAgenteDeAcesso());
+        TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoTokenRefresh, dataExpiracao, sistemaConfiavelChavePublica,
+                tokenEncontrado.getClient_id());
         persistirToken(sistemaConfiavelChavePublica, novoToken);
         return novoToken;
     }

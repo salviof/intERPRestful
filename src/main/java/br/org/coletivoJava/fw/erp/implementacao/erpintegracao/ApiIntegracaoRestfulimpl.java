@@ -4,15 +4,16 @@ import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimplesSomenteLeitura;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.repositorioLinkEntidades.RepositorioLinkEntidadesGenerico;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.ApiIntegracaoRestful;
-import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.consultaDinamica.ConsultaDinamicaDeEntidade;
+import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
@@ -21,7 +22,9 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAc
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ItfAcaoGerenciarEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.chavesPublicasePrivadas.RepositorioChavePublicaPrivada;
-import com.super_bits.modulosSB.SBCore.modulos.erp.ErroJsonInterpredador;
+import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaDeEntidade;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.estrutura.ItfEstruturaCampoEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
@@ -32,8 +35,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 
 @ApiIntegracaoRestful
@@ -118,6 +119,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         try {
             URL urlSite = new URL(urlStr);
             sistemAtual.setDominio(urlSite.getHost());
+            sistemAtual.setUrlPublicaEndPoint(urlStr + "/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
             String getaoTpkenIdentificador = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER.getClasseGestaoOauth().getSimpleName();
             sistemAtual.setUrlRecepcaoCodigo(urlStr + "/solicitacaoAuth2Recept/" + "/code/Usuario/" + getaoTpkenIdentificador);
 
@@ -197,13 +199,10 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     @Override
     public JsonObject gerarConversaoObjetoToJson(ItfSistemaErp pSistema, ItfBeanSimples pJson) {
-        ERPIntegracaoSistemasApi erp = ERPIntegracaoSistemasApi.RESTFUL;
-        try {
-            ItfBeanSimples entidade = erp.getDTO("", pJson.getClass());
-        } catch (ErroJsonInterpredador ex) {
-            Logger.getLogger(ApiIntegracaoRestfulimpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+
+        JsonObject json = UtilSBJsonRestfulTemp.getJsonFromObjeto(pJson);
+        return json;
+
     }
 
     @Override
@@ -242,11 +241,10 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     @Override
     public ItfRespostaAcaoDoSistema getRespostaAcaoDoSistema(SolicitacaoControllerERP pSolicitacao) {
-        ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
         ItfAcaoDoSistema acao = null;
         ItfRespostaAcaoDoSistema resposta = null;
-        ItfIntegracaoERP integracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+
         if (!pSolicitacao.isAutenticadoComSucesso()) {
             resposta = new RespostaAcaoDoSistema();
             resposta.addErro("Ação " + pSolicitacao.getAcaoStrNomeUnico() + " não encontrada");
@@ -259,7 +257,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                 resposta = new RespostaAcaoDoSistema();
                 resposta.addErro("Ação " + pSolicitacao.getAcaoStrNomeUnico() + " não encontrada");
             } else {
-                resposta = integracao.getRespostaAcaoDoSistema(pSolicitacao);
+                resposta = getRespostaAcaoDoSistema(pSolicitacao);
             }
         }
 
@@ -272,6 +270,21 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
         switch (metodo) {
             case "POST":
+                ItfBeanSimples entidade = null;
+                if (pSolicitacao.getCodigoEntidade() != null) {
+                    if (!pSolicitacao.getCodigoEntidade().equals("0")) {
+                        Class<? extends EntidadeSimples> classeEntidade = acao.getComoAcaoDeEntidade().getClasseRelacionada();
+                        EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
+                        int codigo = Integer.valueOf(pSolicitacao.getCodigoEntidade());
+                        entidade = UtilSBPersistencia.getRegistroByID(classeEntidade, codigo, em);
+                        EstruturaDeEntidade estrutura = MapaObjetosProjetoAtual.getEstruturaObjeto(classeEntidade);
+                        for (ItfEstruturaCampoEntidade campo : estrutura.getCampos()) {
+
+                        }
+
+                        UtilSBPersistencia.fecharEM(em);
+                    }
+                }
 
                 break;
             case "GET":

@@ -8,6 +8,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampoValidadorLogico;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
 import jakarta.json.JsonObject;
@@ -49,6 +50,11 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaEr
     @Column(length = 8000)
     @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_DESCRITIVO)
     private String chavePublica;
+
+    @InfoCampo(tipo = FabTipoAtributoObjeto.URL)
+    @Column(nullable = false)
+    @InfoCampoValidadorLogico()
+    private String urlPublicaEndPoint;
 
     private String hashChavePublica;
 
@@ -111,6 +117,15 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaEr
     @Override
     public JsonObject getComoJson() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getUrlPublicaEndPoint() {
+        return urlPublicaEndPoint;
+    }
+
+    public void setUrlPublicaEndPoint(String urlPublicaEndPoint) {
+        this.urlPublicaEndPoint = urlPublicaEndPoint;
     }
 
 }
