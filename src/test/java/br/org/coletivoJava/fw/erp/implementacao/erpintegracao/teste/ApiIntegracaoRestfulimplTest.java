@@ -20,16 +20,17 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.servicoTeste.UtilTesteServicoRestfull;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao.FabAcaoRestfullTestes;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao.acoes.FabAcaoRestfullTestes;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTokenRestInterprestfull;
 import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
-import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.RespostaWebServiceSimples;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.ItfRespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestao;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfGrupoUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servlets.servletRecepcaoOauth.ServletRecepcaoOauth;
 import java.net.MalformedURLException;
@@ -37,8 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.EntityManager;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -171,13 +172,14 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
         ItfAcaoApiRest acaoOpcoes = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(UtilSBRestful.getSolicitacao(sistemaCliente, sisRemoto,
                 FabTipoSolicitacaoRestfull.OPCOES, null, null));
-        RespostaWebServiceSimples respOpcoes = acaoOpcoes.getResposta();
-        System.out.println(respOpcoes.getCodigoResposta());
-        System.out.println(respOpcoes.getResposta());
+        ItfResposta respOpcoes = acaoOpcoes.getResposta();
 
         UsuarioSB novoUsuario = new UsuarioSB();
         novoUsuario.setNome("Usuario teste");
         novoUsuario.setEmail("emailTesterestfull@casanovadigital.com.br");
+        novoUsuario.setApelido("Usuario teste");
+        novoUsuario.setSenha("123");
+
         novoUsuario.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
         //UtilSBRestful.getSolicitacaoByRequest(pRequest)
         SolicitacaoControllerERP solicitaca = UtilSBRestful.getSolicitacao(sistemaCliente, sisRemoto,
@@ -186,17 +188,22 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
                 novoUsuario);
         ItfAcaoApiRest acaoPost = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER
                 .getAcao(solicitaca);
-        EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
-        List<UsuarioSB> usuarios = UtilSBPersistencia.getListaTodos(UsuarioSB.class, em);
-        UtilSBPersistencia.fecharEM(em);
 
-        RespostaWebServiceSimples resp = acaoPost.getResposta();
+        ItfRespostaWebServiceSimples resp = acaoPost.getResposta();
+        renovarConexao();
+        resp.getMensagens().stream().map(msg -> msg.getMenssagem()).forEach(System.out::println);
+
+        Assert.assertTrue("A resposta para criação de usuários falhou", resp.isSucesso());
+        System.out.println("Usuário criado::::::::::::::::::");
+        System.out.println(resp.getRetorno());
+        List<UsuarioSB> usuarios = UtilSBPersistencia.getListaTodos(UsuarioSB.class, getEMTeste());
+
         assertEquals("O usuário não foi registrado", usuarios.size(), 2);
-        System.out.println(resp.getResposta());
 
-        RespostaWebServiceSimples respPosts = acaoPost.getResposta();
-        System.out.println(respPosts.getCodigoResposta());
-        System.out.println(respPosts.getResposta());
+        System.out.println(resp);
+
+        ItfRespostaWebServiceSimples respPosts = acaoPost.getResposta();
+
     }
 
     public void obterCodigoSolicitacaoDeslogado() {

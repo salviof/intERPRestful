@@ -5,6 +5,7 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.servicoTeste.ModuloRestfulTeste;
 import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.token.ItfTokenAcessoDinamico;
@@ -27,7 +28,7 @@ import org.coletivojava.fw.api.objetoNativo.view.menu.MenuSBFW;
 public class ConfigPermissaoTestesIntegracao extends ConfigPermissaoPadraoEmMemoria {
 
     public ConfigPermissaoTestesIntegracao() {
-        super(new Class[]{});
+        super(new Class[]{ModuloRestfulTeste.class});
     }
 
     @Override

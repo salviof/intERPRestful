@@ -10,7 +10,11 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ErroTentandoObterTokenAcesso;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
+import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
+import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import spark.Spark;
@@ -58,9 +62,24 @@ public class UtilTesteServicoRestfull {
                 String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
                 return respostaStr;
             }
+
             ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
-            res.status(200);
             String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+
+            if (resposta.isSucesso()) {
+                res.status(200);
+            } else {
+                if (!UtilSBCoreStringValidador.isNuloOuEmbranco(solicitacao.getAcaoStrNomeUnico())) {
+                    ItfAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
+                    if (!SBCore.getServicoPermissao().isAcaoPermitidaUsuario(solicitacao.getUsuarioSolicitante(), acao)) {
+                        res.status(403);
+
+                    }
+                } else {
+                    res.status(500);
+                }
+            }
+
             return respostaStr;
 
         }

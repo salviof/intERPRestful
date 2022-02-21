@@ -40,6 +40,7 @@ public class UtilSBRestful {
     public static String getCorpoRequisicao(HttpServletRequest pRequest) {
         String corpo;
         try {
+
             corpo = pRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             return corpo;
         } catch (IOException ex) {
@@ -49,7 +50,13 @@ public class UtilSBRestful {
     }
 
     public static String getCodigoEntidade(HttpServletRequest pRequest) {
+        String caminhoChamada = pRequest.getRequestURI();
 
+        String[] partes = caminhoChamada.split("/");
+        if (partes.length >= 4) {
+            String slugAcao = partes[3];
+            return slugAcao;
+        }
         return null;
     }
 
@@ -97,7 +104,7 @@ public class UtilSBRestful {
         TokenAcessoOauthServer token = null;
         ItfUsuario usuario = null;
         String acaoDoSistemaEnum = null;
-        String codigoEntidade = null;
+        String codigoEntidade = getCodigoEntidade(pRequest);
         String atributoEntidade = null;
         JsonObject json = null;
 
@@ -106,14 +113,17 @@ public class UtilSBRestful {
         acaoDoSistemaEnum = getNomeSlugAcao(pRequest);
         token.getObjetoJsonResposta();
         String corpoRequisicaoTesxto = getCorpoRequisicao(pRequest);
-        json = UtilSBCoreJson.getJsonObjectByTexto(corpoRequisicaoTesxto);
+        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(corpoRequisicaoTesxto)) {
+            json = UtilSBCoreJson.getJsonObjectByTexto(corpoRequisicaoTesxto);
+        }
+
         ItfIntegracaoERP servicoRestful = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         ItfSistemaERPAtual servidor = servicoRestful.getSistemaAtual();
 
         SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(
                 pRequest.getMethod(),
                 servidor.getHashChavePublica(),
-                token.getClient_id(), codigoEntidade, usuario, codigoEntidade, atributoEntidade, json);
+                token.getClient_id(), acaoDoSistemaEnum, usuario, codigoEntidade, atributoEntidade, json);
 
         return solicitacao;
 
@@ -149,6 +159,7 @@ public class UtilSBRestful {
     }
 
     public static String buildTextoJsonResposta(ItfRespostaAcaoDoSistema resposta) throws ServletException {
+        ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         JsonArrayBuilder mensagens = Json.createArrayBuilder();
         for (ItfMensagem msg : resposta.getMensagens()) {
             JsonObjectBuilder msgJsonBuilder = Json.createObjectBuilder();
@@ -158,23 +169,27 @@ public class UtilSBRestful {
             mensagens.add(msgJsonBuilder.build());
         }
 
-        JsonObjectBuilder construtor = Json.createObjectBuilder();
-        construtor.add("resultado", resposta.getResultado().name());
-        construtor.add("sucesso", resposta.isSucesso());
-        construtor.add("mensagem", mensagens);
+        JsonObjectBuilder jsonRespconstrutor = Json.createObjectBuilder();
+        jsonRespconstrutor.add("resultado", resposta.getResultado().name());
+        jsonRespconstrutor.add("sucesso", resposta.isSucesso());
+        jsonRespconstrutor.add("mensagem", mensagens);
+
         if (resposta.getRetorno() instanceof JsonObject) {
-            construtor.add("retorno", (JsonObject) resposta.getRetorno());
+            jsonRespconstrutor.add("retorno", (JsonObject) resposta.getRetorno());
+        } else if (resposta.getRetorno() instanceof ItfBeanSimples) {
+            JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) resposta.getRetorno());
+            jsonRespconstrutor.add("retorno", retorno);
         } else {
-            construtor.add("retorno", "");
+            jsonRespconstrutor.add("retorno", "");
         }
 
         if (UtilSBCoreStringValidador.isNuloOuEmbranco(resposta.getUrlDestino())) {
-            construtor.add("urlDestino", JsonValue.NULL);
+            jsonRespconstrutor.add("urlDestino", JsonValue.NULL);
         } else {
-            construtor.add(SLUGPUBLICACAOSERVLET, BigDecimal.ONE);
+            jsonRespconstrutor.add(SLUGPUBLICACAOSERVLET, BigDecimal.ONE);
         }
 
-        String respostaTexto = UtilSBCoreJson.getTextoByJsonObjeect(construtor.build());
+        String respostaTexto = UtilSBCoreJson.getTextoByJsonObjeect(jsonRespconstrutor.build());
         return respostaTexto;
 
     }

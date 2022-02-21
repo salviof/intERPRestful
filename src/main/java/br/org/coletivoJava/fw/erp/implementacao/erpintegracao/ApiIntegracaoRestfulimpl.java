@@ -16,6 +16,9 @@ import com.super_bits.modulosSB.Persistencia.dao.consultaDinamica.ConsultaDinami
 import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.ErroChamadaController;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
@@ -23,6 +26,7 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.chavesPublicasePrivadas.RepositorioChavePublicaPrivada;
 import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaDeEntidade;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.estrutura.ItfEstruturaCampoEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
@@ -33,9 +37,11 @@ import jakarta.json.JsonObjectBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
+import org.coletivojava.fw.api.tratamentoErros.FabErro;
 
 @ApiIntegracaoRestful
 public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
@@ -207,7 +213,8 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     @Override
     public JsonObject gerarConversaoObjetoToJson(ItfBeanSimples pJson) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return UtilSBJsonRestfulTemp.getJsonFromObjeto(pJson);
+
     }
 
     public static JsonObject buildRespostaOptions(SolicitacaoControllerERP pSolicitacao) {
@@ -243,6 +250,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     public ItfRespostaAcaoDoSistema getRespostaAcaoDoSistema(SolicitacaoControllerERP pSolicitacao) {
 
         ItfAcaoDoSistema acao = null;
+
         ItfRespostaAcaoDoSistema resposta = null;
 
         if (!pSolicitacao.isAutenticadoComSucesso()) {
@@ -256,8 +264,9 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             if (acao == null) {
                 resposta = new RespostaAcaoDoSistema();
                 resposta.addErro("Ação " + pSolicitacao.getAcaoStrNomeUnico() + " não encontrada");
+                return resposta;
             } else {
-                resposta = getRespostaAcaoDoSistema(pSolicitacao);
+                resposta = new RespostaAcaoDoSistema(acao);
             }
         }
 
@@ -267,26 +276,117 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
         String metodo = pSolicitacao.getMetodo();
         JsonObject retornoProcessado;
-
+        JsonObject parametroSolicitacao = null;
+        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getCorpoParametros())) {
+            parametroSolicitacao = UtilSBCoreJson.getJsonObjectByTexto(pSolicitacao.getCorpoParametros());
+        }
         switch (metodo) {
             case "POST":
                 ItfBeanSimples entidade = null;
-                if (pSolicitacao.getCodigoEntidade() != null) {
+                Class<? extends EntidadeSimples> classeEntidade = null;
+                if (acao != null) {
+                    classeEntidade = acao.getAcaoDeGestaoEntidade().getClasseRelacionada();
+                }
+                EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
+                if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getCodigoEntidade())) {
+
                     if (!pSolicitacao.getCodigoEntidade().equals("0")) {
-                        Class<? extends EntidadeSimples> classeEntidade = acao.getComoAcaoDeEntidade().getClasseRelacionada();
-                        EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
+
                         int codigo = Integer.valueOf(pSolicitacao.getCodigoEntidade());
                         entidade = UtilSBPersistencia.getRegistroByID(classeEntidade, codigo, em);
                         EstruturaDeEntidade estrutura = MapaObjetosProjetoAtual.getEstruturaObjeto(classeEntidade);
                         for (ItfEstruturaCampoEntidade campo : estrutura.getCampos()) {
-
+                            try {
+                                SBCore.getServicoController().getResposta(acao.getEnumAcaoDoSistema(), entidade);
+                            } catch (ErroChamadaController ex) {
+                                SBCore.RelatarErro(FabErro.SOLICITAR_REPARO, "Erro localizando médodo de execução da ação " + acao, ex);
+                            }
                         }
 
-                        UtilSBPersistencia.fecharEM(em);
+                    } else {
+                        try {
+                            entidade = (ItfBeanSimples) classeEntidade.newInstance();
+                            EstruturaDeEntidade estrutura = MapaObjetosProjetoAtual.getEstruturaObjeto(classeEntidade);
+                            for (ItfEstruturaCampoEntidade campo : estrutura.getCampos()) {
+                                try {
+                                    if (parametroSolicitacao.containsKey(campo.getNomeDeclarado()) && !parametroSolicitacao.isNull(campo.getNomeDeclarado())) {
+                                        switch (campo.getFabricaTipoAtributo().getTipoPrimitivo()) {
+                                            case INTEIRO:
+                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
+                                                        .setValor(parametroSolicitacao.getInt(campo.getNomeDeclarado()));
+                                                break;
+                                            case NUMERO_LONGO:
+                                                if (parametroSolicitacao.containsKey(campo.getNomeDeclarado())) {
+                                                    entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
+                                                            .setValor(parametroSolicitacao.getJsonNumber(campo.getNomeDeclarado()).longValue());
+                                                } else {
+                                                    System.out.println("Teste");
+                                                }
+
+                                                break;
+                                            case LETRAS:
+
+                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
+                                                        .setValor(parametroSolicitacao.getString(campo.getNomeDeclarado()));
+
+                                                break;
+                                            case DATAS:
+                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
+                                                        .setValor(new Date(parametroSolicitacao.getJsonNumber(campo.getNomeDeclarado()).longValue()));
+                                                break;
+                                            case BOOLEAN:
+                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
+                                                        .setValor(parametroSolicitacao.getBoolean(campo.getNomeDeclarado()));
+                                                break;
+                                            case DECIMAL:
+                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
+                                                        .setValor(parametroSolicitacao.getJsonNumber(campo.getNomeDeclarado()).doubleValue());
+                                                break;
+                                            case ENTIDADE:
+
+                                                switch (campo.getFabricaTipoAtributo()) {
+                                                    case OBJETO_DE_UMA_LISTA:
+                                                        ItfCampoInstanciado cp = entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado());
+
+                                                        Class entidadeFilho = MapaObjetosProjetoAtual.getClasseDoObjetoByNome(campo.getClasseCampoDeclaradoOuTipoLista());
+                                                        ItfBeanSimples objeto = (ItfBeanSimples) UtilSBPersistencia.
+                                                                getRegistroByID(entidadeFilho, parametroSolicitacao.getJsonObject(campo.getNomeDeclarado())
+                                                                        .getInt("id"), em);
+                                                        cp.setValor(objeto);
+                                                        break;
+                                                    case LISTA_OBJETOS_PARTICULARES:
+                                                    case LISTA_OBJETOS_PUBLICOS:
+                                                        System.out.println("Listas ainda não foram definidas");
+                                                    default:
+                                                        throw new AssertionError(campo.getFabricaTipoAtributo().name());
+
+                                                }
+
+                                                break;
+
+                                            case OUTROS_OBJETOS:
+                                                break;
+                                            default:
+                                                throw new AssertionError(campo.getFabricaTipoAtributo().getTipoPrimitivo().name());
+
+                                        }
+                                    }
+                                } catch (Throwable t) {
+                                    System.out.println("Falha interpretando " + campo.getNomeDeclarado());
+                                }
+
+                            }
+                            resposta = SBCore.getServicoController().getResposta(acao.getEnumAcaoDoSistema(), entidade);
+                        } catch (ErroChamadaController ex) {
+                            resposta.addErro("Falha localizando Ação" + acao);
+                        } catch (InstantiationException | IllegalAccessException ex) {
+                            resposta.addErro("Iniciando novo Objeto" + acao);
+                        }
                     }
                 }
-
+                UtilSBPersistencia.fecharEM(em);
                 break;
+
             case "GET":
                 break;
             case "OPTIONS":

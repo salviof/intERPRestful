@@ -12,12 +12,18 @@ import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestInteg
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ItfFabricaIntegracaoRest;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.RespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.AcaoApiIntegracaoComOauthAbstrato;
+import com.super_bits.modulosSB.SBCore.modulos.Mensagens.FabMensagens;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -85,6 +91,36 @@ public class IntegracaoResfullPadrao extends
     @Override
     public String gerarCorpoRequisicao() {
         return getSoliciatacao().getCorpoParametros();
+    }
+
+    @Override
+    protected RespostaWebServiceSimples buildResposta(RespostaWebServiceSimples pRespostaWSSemTratamento) {
+        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pRespostaWSSemTratamento.getRetorno())) {
+            pRespostaWSSemTratamento.getMensagens();
+            JsonObject respostaJson = UtilSBCoreJson.getJsonObjectByTexto(pRespostaWSSemTratamento.getRetorno().toString());
+            if (respostaJson.containsKey("resultado")) {
+
+                String resultado = respostaJson.getString("resultado");
+                JsonArray mensagensJson = respostaJson.getJsonArray("mensagem");
+                mensagensJson.stream().forEach(msg -> {
+                    JsonObject mensagemJson = msg.asJsonObject();
+                    String tipo = mensagemJson.getString("tipoMensagem");
+                    if (tipo.equals(FabMensagens.ERRO.toString())
+                            || tipo.equals(FabMensagens.ERRO_FATAL.toString())) {
+                        pRespostaWSSemTratamento.addErro(msg.asJsonObject().getString("mensagem"));
+                    } else {
+                        pRespostaWSSemTratamento.addAviso(msg.asJsonObject().getString("mensagem"));
+
+                    }
+
+                });
+
+            }
+            System.out.println(pRespostaWSSemTratamento.getResultado());
+
+        }
+        return pRespostaWSSemTratamento;
+
     }
 
 }
