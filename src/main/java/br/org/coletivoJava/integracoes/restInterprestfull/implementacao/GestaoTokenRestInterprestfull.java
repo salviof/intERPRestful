@@ -1,7 +1,7 @@
 package br.org.coletivoJava.integracoes.restInterprestfull.implementacao;
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
-import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
+
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer;
@@ -19,6 +19,7 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTok
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestaoOauth;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.ChamadaHttpSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.gestaoToken.GestaoTokenOath2Base;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -54,8 +55,8 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
     public GestaoTokenRestInterprestfull(
             final FabTipoAgenteClienteApi pTipoAgente, final ItfUsuario pUsuario, String pIdentificadorServico) {
         super(FabIntApiRestIntegracaoERPRestfull.class, pTipoAgente, pUsuario, pIdentificadorServico);
-        ItfSistemaErp sistemaServidor = integracaoERP.getSistemaByHashChavePublica(pIdentificadorServico);
-        ItfSistemaErp sistemaCliente = integracaoERP.getSistemaAtual();
+        ItfSistemaERP sistemaServidor = integracaoERP.getSistemaByHashChavePublica(pIdentificadorServico);
+        ItfSistemaERP sistemaCliente = integracaoERP.getSistemaAtual();
         if (SBCore.isEmModoDesenvolvimento()) {
             if (sistemaCliente.getHashChavePublica().equals(pIdentificadorServico)) {
                 //detectado ambiente de teste
@@ -69,11 +70,11 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
         }
         chavePublicaServidor = sistemaServidor.getChavePublica();
         urlServidorApiRest = "https://" + sistemaServidor.getDominio();
-        chavePublicaCliente = sistemaCliente.getHashChavePublica();
+        chavePublicaCliente = sistemaCliente.getChavePublica();
         urlObterCodigoSolicitacao = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
-                + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
+                + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO.toString()
                 + "/" + sistemaServidor.getChavePublica().hashCode()
-                + "/" + sistemaCliente.hashCode()
+                + "/" + chavePublicaCliente.hashCode()
                 + "/" + URLEncoder.encode(sistemaCliente.getUrlRecepcaoCodigo())
                 + "/" + pUsuario.getEmail();
 

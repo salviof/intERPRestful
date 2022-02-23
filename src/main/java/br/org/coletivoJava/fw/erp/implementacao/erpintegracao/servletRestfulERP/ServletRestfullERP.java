@@ -12,11 +12,14 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
+import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.dto.DTO_SBGENERICO;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.UtilSBController;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabricaAcoes;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
@@ -81,13 +84,49 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
         SolicitacaoControllerERP solicitacao;
         try {
             solicitacao = UtilSBRestful.getSolicitacaoByRequest(req);
-            ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
+            if (!solicitacao.getMetodo().equals("OPTIONS")) {
+                if (solicitacao.getAcaoStrNomeUnico() == null) {
+                    RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
+                    resposta.addErro("A ação do sistema não foi enviada");
+                    resp.setStatus(503);
+                    String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+                    resp.getWriter().append(respostaStr);
+                    return;
+                }
+                ItfAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
+                RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
+                resposta.addErro("A ação " + solicitacao.getAcaoStrNomeUnico() + " não foi encontrata");
+                resp.setStatus(503);
+                String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+                resp.getWriter().append(respostaStr);
+                return;
+            }
+        } catch (ErroTentandoObterTokenAcesso ex) {
+            RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
+            resposta.addErro("Autenticação negada ");
+            resp.setStatus(401);
             String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
             resp.getWriter().append(respostaStr);
-        } catch (ErroTentandoObterTokenAcesso ex) {
-            Logger.getLogger(ServletRestfullERP.class.getName()).log(Level.SEVERE, null, ex);
-            enviarAcessoNegado(ex, resp);
+            return;
         }
+
+        ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
+        String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+
+        if (resposta.isSucesso()) {
+            resp.setStatus(200);
+        } else {
+            if (!UtilSBCoreStringValidador.isNuloOuEmbranco(solicitacao.getAcaoStrNomeUnico())) {
+                ItfAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
+                if (!SBCore.getServicoPermissao().isAcaoPermitidaUsuario(solicitacao.getUsuarioSolicitante(), acao)) {
+                    resp.setStatus(401);
+                    resp.getWriter().append(respostaStr);
+                }
+            } else {
+                resp.setStatus(500);
+            }
+        }
+
     }
 
     @Override

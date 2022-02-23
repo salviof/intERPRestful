@@ -7,7 +7,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServe
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
-import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
+
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ErroTentandoObterTokenAcesso;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.MapaTokensGerenciadosConcessaoOauth;
@@ -18,6 +18,9 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.json.ErroProcessandoJson;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.qualificadoresCDI.sessao.QlSessaoFacesContext;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfSessao;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.urls.UrlInterpretada;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.util.UtilFabUrlServlet;
@@ -28,16 +31,14 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.inject.Inject;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.coletivojava.fw.api.tratamentoErros.FabErro;
-import org.json.HTTP;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  *
@@ -51,6 +52,10 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
     public static final String SLUGPUBLICACAOSERVLET = "OAUTH2_SERVICE";
     private static final ItfIntegracaoERP integracaoEntreSistemas = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
+    @Inject
+    @QlSessaoFacesContext
+    private ItfSessao sessaoAtual;
+
     @Override
     public void doGet(HttpServletRequest requisicao, HttpServletResponse resp) throws ServletException, IOException {
 
@@ -63,22 +68,25 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             resp.getWriter().append("PARAMETROS DE ACESSO INCORRETOS, VERIFIQUE A DOCUMENTAÇÃO DA CLASSE " + FabUrlOauth2Server.class.getSimpleName());
             return;
         }
+
+        //FacesContext contexto = FacesContext.getCurrentInstance();
         String hashChave = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_CLIENTE);
-        ItfSistemaErp sistemaCliente = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChave);
+        ItfSistemaERP sistemaCliente = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChave);
         if (sistemaCliente == null) {
             resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO CLIENTE NÃO FOI REGISTRADA");
             return;
         }
         // PODE VALIDAR TAMBÉM A CHAVE PÚBLICA DO SERVIDOR, POR MOTIVOS DE COMPATIBILIDADE DE TESTES FOI REMOVIDA A VALIDAÇÃO
-
         //Verifica se a origem é vinda do dominio do sistema solicitante
         String dominioDoSistema = sistemaCliente.getDominio();
         String dominioDaRequisicao = requisicao.getHeader("origin");
 
-        if (dominioDaRequisicao == null || !dominioDoSistema.equals(dominioDaRequisicao)) {
+        if (SBCore.isEmModoProducao() && (dominioDaRequisicao == null || !dominioDoSistema.equals(dominioDaRequisicao))) {
+
             resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA");
             return;
         }
+
         String emailDoEscopo = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.ESCOPO);
 
         ItfUsuario pUsuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDoEscopo);
@@ -93,16 +101,30 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             return;
         }
         TipoRequisicaoOauth tipoRequisicao = (TipoRequisicaoOauth) parametrosDeUrl.getValorComoBeanSimples(FabUrlOauth2Server.TIPO_REQUISICAO);
-        if (!pUsuario.equals(SBCore.getUsuarioLogado())) {
 
-            if (SBCore.getServicoSessao().getSessaoAtual().isIdentificado()) {
+        try {
+            sessaoAtual.getUsuario();
+            System.out.println(sessaoAtual.getUsuario().getEmail());
+        } catch (Throwable t) {
 
-                SBCore.getServicoSessao().efetuarLogOut();
+        }
+        if (!pUsuario.equals(sessaoAtual.getUsuario())) {
+
+            if (sessaoAtual.isIdentificado()) {
+
+                sessaoAtual.encerrarSessao();
             }
+            if (SBCore.isEmModoDesenvolvimento()) {
+                resp.getWriter().append("EFETUE LOGIN DE FORMA PROGRAMÁTICA,POR PADRÃO O SERVIÇO JSF NÃO É ATIVADO NO MODO TESTES");
+            } else {
+                RequestDispatcher despachadorDeRespostaParaRequisicao = requisicao
+                        .getRequestDispatcher("/resources/oauth/login.xhtml?hashChavePublicaAplicacaoSolicitante=" + sistemaCliente.getHashChavePublica() + "&scopo=" + pUsuario.getEmail());
+                requisicao.setAttribute("teste", "parametro");
 
-            resp.getWriter().append("<form><input value='" + emailDoEscopo + "' > <buton  /> </form>");
-
-            return;
+                despachadorDeRespostaParaRequisicao.forward(requisicao, resp);
+                SBCore.getServicoSessao().getSessaoAtual().isIdentificado();
+                return;
+            }
         }
         switch (tipoRequisicao.getEnumVinculado()) {
             case OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO:
@@ -152,7 +174,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             return;
         }
         String hashChave = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_CLIENTE);
-        ItfSistemaErp sistemaCliente = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChave);
+        ItfSistemaERP sistemaCliente = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChave);
         if (sistemaCliente == null) {
             resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO CLIENTE NÃO FOI REGISTRADA");
             return;

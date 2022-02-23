@@ -5,7 +5,7 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basic
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.repositorioLinkEntidades.RepositorioLinkEntidadesGenerico;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.ApiIntegracaoRestful;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
-import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
+
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
@@ -25,6 +25,7 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAc
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ItfAcaoGerenciarEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.chavesPublicasePrivadas.RepositorioChavePublicaPrivada;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaDeEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
@@ -76,22 +77,22 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public List<String> getAcoesDisponiveis(ItfSistemaErp pSistema, String nomeAcao, ItfBeanSimples pParametro) {
+    public List<String> getAcoesDisponiveis(ItfSistemaERP pSistema, String nomeAcao, ItfBeanSimples pParametro) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public List<String> getAcoesDisponiveis(ItfSistemaErp pSistema, String nomeAcao) {
+    public List<String> getAcoesDisponiveis(ItfSistemaERP pSistema, String nomeAcao) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public List<String> getAcoesDisponiveis(ItfSistemaErp pSistema) {
+    public List<String> getAcoesDisponiveis(ItfSistemaERP pSistema) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ItfRespostaAcaoDoSistema enviarChavePublica(ItfSistemaErp pSistema) {
+    public ItfRespostaAcaoDoSistema enviarChavePublica(ItfSistemaERP pSistema) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -101,7 +102,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public String gerarTokenUsuarioLogado(ItfSistemaErp pSistema) {
+    public String gerarTokenUsuarioLogado(ItfSistemaERP pSistema) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -137,7 +138,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public ItfSistemaErp getSistemaByChavePublica(String pChavePublica) {
+    public ItfSistemaERP getSistemaByChavePublica(String pChavePublica) {
         EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
         ConsultaDinamicaDeEntidade novaConsulta = new ConsultaDinamicaDeEntidade(SistemaERPConfiavel.class, em);
         novaConsulta.addcondicaoCampoIgualA("chavePublica", pChavePublica);
@@ -151,7 +152,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public ItfSistemaErp getSistemaByDominio(String pChavePublica) {
+    public ItfSistemaERP getSistemaByDominio(String pChavePublica) {
         EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
         ConsultaDinamicaDeEntidade novaConsulta = new ConsultaDinamicaDeEntidade(SistemaERPConfiavel.class, em);
         novaConsulta.addcondicaoCampoIgualA("dominio", pChavePublica);
@@ -165,7 +166,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public ItfSistemaErp getSistemaByHashChavePublica(String pHashChavePuvlica) {
+    public ItfSistemaERP getSistemaByHashChavePublica(String pHashChavePuvlica) {
         EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
         ConsultaDinamicaDeEntidade novaConsulta = new ConsultaDinamicaDeEntidade(SistemaERPConfiavel.class, em);
         novaConsulta.addcondicaoCampoIgualA("hashChavePublica", pHashChavePuvlica);
@@ -179,12 +180,12 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public ItfResposta getResposta(ItfSistemaErp pSistema, String nomeAcao, ItfBeanSimples pParametro) {
+    public ItfResposta getResposta(ItfSistemaERP pSistema, String nomeAcao, ItfBeanSimples pParametro) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ItfBeanSimples gerarConversaoJsonStringToObjeto(ItfSistemaErp pSistema, String pJson) {
+    public ItfBeanSimples gerarConversaoJsonStringToObjeto(ItfSistemaERP pSistema, String pJson) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -194,7 +195,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public ItfBeanSimples gerarConversaoJsonToObjeto(ItfSistemaErp pSistema, JsonObject pJson) {
+    public ItfBeanSimples gerarConversaoJsonToObjeto(ItfSistemaERP pSistema, JsonObject pJson) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -204,7 +205,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public JsonObject gerarConversaoObjetoToJson(ItfSistemaErp pSistema, ItfBeanSimples pJson) {
+    public JsonObject gerarConversaoObjetoToJson(ItfSistemaERP pSistema, ItfBeanSimples pJson) {
 
         JsonObject json = UtilSBJsonRestfulTemp.getJsonFromObjeto(pJson);
         return json;

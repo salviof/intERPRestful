@@ -5,10 +5,11 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 
-import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampoValidadorLogico;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampoValorLogico;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
 import jakarta.json.JsonObject;
@@ -29,33 +30,34 @@ import javax.persistence.Transient;
 @Table(indexes = {
     @Index(name = "CHAVEPUBLICA", columnList = "chavePublica")})
 @InfoObjetoSB(tags = "Sistema ERP Confiável", plural = "Sistemas Confiáveis")
-public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaErp {
+public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaERP {
 
     @Id
-    @InfoCampo(tipo = FabTipoAtributoObjeto.ID)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.ID, somenteLeitura = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_NOME)
     private String nome;
 
-    @InfoCampo(tipo = FabTipoAtributoObjeto.SITE, label = "dominio")
+    @InfoCampo(tipo = FabTipoAtributoObjeto.TEXTO_SIMPLES, label = "dominio")
     @Column(nullable = false)
     private String dominio;
 
-    @InfoCampo(tipo = FabTipoAtributoObjeto.URL)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Endereço Recepção Código Autorização")
     @Column(nullable = false)
     private String urlRecepcaoCodigo;
 
     @Column(length = 8000)
-    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_DESCRITIVO)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_DESCRITIVO, obrigatorio = true)
     private String chavePublica;
 
-    @InfoCampo(tipo = FabTipoAtributoObjeto.URL)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Url endpoint Restful")
     @Column(nullable = false)
     @InfoCampoValidadorLogico()
     private String urlPublicaEndPoint;
 
+    @InfoCampoValorLogico(nomeCalculo = "Hash")
     private String hashChavePublica;
 
     @Override
@@ -73,18 +75,22 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaEr
         return urlRecepcaoCodigo;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public void setId(int id) {
         this.id = id;
     }
 
+    @Override
     public String getNome() {
         return nome;
     }
 
+    @Override
     public void setNome(String nome) {
         this.nome = nome;
     }

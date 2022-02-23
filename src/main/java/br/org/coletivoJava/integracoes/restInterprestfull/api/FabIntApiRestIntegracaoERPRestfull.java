@@ -19,8 +19,8 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.servicoRegis
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestao;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.ManipulaArquivo.importacao.FabTipoArquivoImportacao;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
-import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 
 /**
  *
@@ -85,21 +85,21 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
     ACOES_GET_LISTA_ENTIDADES,
     ACOES_GET_REGISTRO_ENTIDADE;
 
-    public ItfTokenGestao getGestaoToken(SolicitacaoControllerERP pSistema) {
-        return getGestaoToken(pSistema.getErpServico());
+    public ItfTokenGestao getGestaoToken(SolicitacaoControllerERP pSolicitacao) {
+        return getGestaoToken(pSolicitacao.getErpServico());
     }
 
     public ItfAcaoApiRest getAcao(SolicitacaoControllerERP pSolicicatacao) {
         ItfIntegracaoERP resp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         //pSolicicatacao.getErpServico()
-        ItfSistemaErp sistemaSErvidor = resp.getSistemaByHashChavePublica(pSolicicatacao.getErpServico());
+        ItfSistemaERP sistemaSErvidor = resp.getSistemaByHashChavePublica(pSolicicatacao.getErpServico());
         if (sistemaSErvidor == null) {
             throw new UnsupportedOperationException("Hash chave pública do serviço não foi definida");
         }
         return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao);
     }
 
-    public ItfTokenGestao getGestaoToken(ItfSistemaErp pSistemaServico) {
+    public ItfTokenGestao getGestaoToken(ItfSistemaERP pSistemaServico) {
         return ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pSistemaServico.getHashChavePublica());
     }
 

@@ -16,6 +16,7 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Mensagens.ItfMensagem;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
@@ -29,7 +30,6 @@ import java.math.BigDecimal;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
 
 /**
  *
@@ -78,7 +78,7 @@ public class UtilSBRestful {
 
     //(String pMetodoRestful, String pHashIdentificadorCliente,
     //String pNomeUnicoAcao, ItfUsuario pUsuario, String pCodigo, String pAtributo, JsonObject pParametros)
-    public static SolicitacaoControllerERP getSolicitacao(ItfSistemaErp pCliente, ItfSistemaErp pServico, FabTipoSolicitacaoRestfull pAcaoRestful,
+    public static SolicitacaoControllerERP getSolicitacao(ItfSistemaERP pCliente, ItfSistemaERP pServico, FabTipoSolicitacaoRestfull pAcaoRestful,
             ItfAcaoDoSistema pAcaoSistema, ItfBeanSimples pBeanSimples) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         String acao = null;

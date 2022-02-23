@@ -31,6 +31,7 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebSer
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestao;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfGrupoUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servlets.servletRecepcaoOauth.ServletRecepcaoOauth;
 import java.net.MalformedURLException;
@@ -38,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -142,7 +143,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         assertTrue(sistemaCliente.getDominio().contains("crm.casanovadigita"));
 
         System.out.println("O usuário deseja ver uma nota no sistema fatura");
-        ItfSistemaErp sisRemoto = erp.getSistemaByDominio("localhost");
+        ItfSistemaERP sisRemoto = erp.getSistemaByDominio("localhost");
         assertNotNull("O sistema fatura não foi registrado no sistemas", sisRemoto);
 
         System.out.println("O usuário não possui um token de acesso");

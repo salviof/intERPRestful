@@ -16,12 +16,13 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebSer
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.AcaoApiIntegracaoComOauthAbstrato;
 import com.super_bits.modulosSB.SBCore.modulos.Mensagens.FabMensagens;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
-import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,7 +34,7 @@ public class IntegracaoResfullPadrao extends
         AcaoApiIntegracaoComOauthAbstrato {
 
     private SolicitacaoControllerERP solicitacao;
-    private ItfSistemaErp dadosServico;
+    private ItfSistemaERP dadosServico;
 
     public IntegracaoResfullPadrao(String pTipoApicacao, ItfFabricaIntegracaoRest pIntegracaoEndpoint, FabTipoAgenteClienteApi pTipoAgente, ItfUsuario pUsuario, Object... pParametros) {
         super(pTipoApicacao, pIntegracaoEndpoint,
@@ -67,7 +68,7 @@ public class IntegracaoResfullPadrao extends
         return urlReqBuild.toString();
     }
 
-    public ItfSistemaErp getDadoServico() {
+    public ItfSistemaERP getDadoServico() {
         if (dadosServico == null) {
             ItfIntegracaoERP integracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
             dadosServico = integracao.getSistemaByHashChavePublica(getIdTipoAplicacao());

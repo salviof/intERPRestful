@@ -7,13 +7,14 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenAcessoOauthServer;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenConcessaoOauthServer;
-import org.coletivojava.fw.api.objetoNativo.controller.sistemaErp.ItfSistemaErp;
+
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.arquivosConfiguracao.ConfigModulo;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringGerador;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.gestaoToken.MapaTokensGerenciados;
+import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,7 +43,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
 
     private static final ConfigModulo chavesDeAcessoErrp = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class);
 
-    public static void loadTokensPersistidos(ItfSistemaErp pSistema) {
+    public static void loadTokensPersistidos(ItfSistemaERP pSistema) {
 
         String chavesPersistidasTExto = chavesDeAcessoErrp.getRepositorioDeArquivosExternos().getTexto(pSistema.getChavePublica());
         List<TokenAcessoOauthServer> tokensValidos = new ArrayList<>();
@@ -69,7 +70,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         }
     }
 
-    public static TokenConcessaoOauthServer loadTokenConcessaoExistente(ItfSistemaErp pSistema, String pCodigo) throws ErroTentandoObterTokenAcesso {
+    public static TokenConcessaoOauthServer loadTokenConcessaoExistente(ItfSistemaERP pSistema, String pCodigo) throws ErroTentandoObterTokenAcesso {
         TokenConcessaoOauthServer tokenConcessao = TOKEN_DE_CONCESSAO_BY_CODIGO.get(pCodigo);
         if (tokenConcessao == null) {
             throw new ErroTentandoObterTokenAcesso("O Código " + pCodigo + " não foi encontrado");
@@ -87,7 +88,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         return TOKEN_DE_ACESSO_BY_CODIGO.get(pTokenAcesso);
     }
 
-    public static TokenAcessoOauthServer loadTokenExistente(ItfSistemaErp pSistema, ItfUsuario pUsuario) {
+    public static TokenAcessoOauthServer loadTokenExistente(ItfSistemaERP pSistema, ItfUsuario pUsuario) {
         if (TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
             loadTokensPersistidos(pSistema);
         }
@@ -101,7 +102,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
 
     }
 
-    public static TokenConcessaoOauthServer gerarNovoTokenCocessaoDeAcesso(ItfSistemaErp pSistema, ItfUsuario pUsuario) {
+    public static TokenConcessaoOauthServer gerarNovoTokenCocessaoDeAcesso(ItfSistemaERP pSistema, ItfUsuario pUsuario) {
         String tokenConcessao = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio();
         Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 300);
 
