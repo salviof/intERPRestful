@@ -124,7 +124,9 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         String codigoRefresh = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
         Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
         TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoRefresh, dataExpiracao, pClient_id, pIdentificadorUsuario);
-        persistirToken(pClient_id, novoToken);
+        if (!persistirToken(pClient_id, novoToken)) {
+            throw new UnsupportedOperationException("falha persistindo token");
+        }
         return novoToken;
     }
 

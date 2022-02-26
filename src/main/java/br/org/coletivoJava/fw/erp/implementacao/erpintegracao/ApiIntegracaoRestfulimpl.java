@@ -18,6 +18,7 @@ import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.ErroChamadaController;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
@@ -128,7 +129,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             sistemAtual.setDominio(urlSite.getHost());
             sistemAtual.setUrlPublicaEndPoint(urlStr + "/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
             String getaoTpkenIdentificador = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER.getClasseGestaoOauth().getSimpleName();
-            sistemAtual.setUrlRecepcaoCodigo(urlStr + "/solicitacaoAuth2Recept/" + "/code/Usuario/" + getaoTpkenIdentificador);
+            sistemAtual.setUrlRecepcaoCodigo(urlStr + "/solicitacaoAuth2Recept/code/Usuario/" + getaoTpkenIdentificador);
 
         } catch (MalformedURLException ex) {
             throw new UnsupportedOperationException("o sistema atual não possui uma url válida");
@@ -180,8 +181,10 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public ItfResposta getResposta(ItfSistemaERP pSistema, String nomeAcao, ItfBeanSimples pParametro) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro) {
+        ItfAcaoApiRest acao = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER.getAcao(UtilSBRestful.getSolicitacaoAcaoController(getSistemaAtual(), pSistemaServico, nomeAcao, pParametro));
+        return acao.getResposta();
+
     }
 
     @Override
@@ -218,7 +221,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     }
 
-    public static JsonObject buildRespostaOptions(SolicitacaoControllerERP pSolicitacao) {
+    public static JsonObject buildRespostaOptionsServico(SolicitacaoControllerERP pSolicitacao) {
         try {
             if (pSolicitacao.isAutenticadoComSucesso() && pSolicitacao.getAcaoStrNomeUnico() == null) {
                 List<ItfAcaoGerenciarEntidade> acoesDoUsuario = new ArrayList();
@@ -248,7 +251,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public ItfRespostaAcaoDoSistema getRespostaAcaoDoSistema(SolicitacaoControllerERP pSolicitacao) {
+    public ItfRespostaAcaoDoSistema gerarRespostaAcaoDoSistemaServico(SolicitacaoControllerERP pSolicitacao) {
 
         ItfAcaoDoSistema acao = null;
 
@@ -378,6 +381,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
                             }
                             resposta = SBCore.getServicoController().getResposta(acao.getEnumAcaoDoSistema(), entidade);
+                            return resposta;
                         } catch (ErroChamadaController ex) {
                             resposta.addErro("Falha localizando Ação" + acao);
                         } catch (InstantiationException | IllegalAccessException ex) {
@@ -391,7 +395,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             case "GET":
                 break;
             case "OPTIONS":
-                retornoProcessado = buildRespostaOptions(pSolicitacao);
+                retornoProcessado = buildRespostaOptionsServico(pSolicitacao);
                 resposta.setRetorno(retornoProcessado);
                 break;
             case "PUT":

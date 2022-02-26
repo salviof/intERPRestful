@@ -24,8 +24,11 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basic
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -69,7 +72,22 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
             }
         }
         chavePublicaServidor = sistemaServidor.getChavePublica();
-        urlServidorApiRest = "https://" + sistemaServidor.getDominio();
+        String porta = "";
+        String protocolo = "https";
+        if (!SBCore.isEmModoProducao()) {
+            try {
+                URL urlTEste = new URL(sistemaServidor.getUrlPublicaEndPoint());
+                int port = urlTEste.getPort();
+                if (port > 0) {
+                    porta = ":" + Integer.valueOf(port);
+                }
+                protocolo = urlTEste.getProtocol().toLowerCase();
+
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(GestaoTokenRestInterprestfull.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        urlServidorApiRest = protocolo + "://" + sistemaServidor.getDominio() + porta;
         chavePublicaCliente = sistemaCliente.getChavePublica();
         urlObterCodigoSolicitacao = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
                 + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO.toString()
@@ -99,6 +117,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
                 chamada.setTipoConexao(FabTipoConexaoRest.POST);
                 chamada.setEnderecoHost(urlServidorApiRest);
                 chamada.setPath(urlObterToken.replace(urlServidorApiRest, ""));
+                chamada.setCabecalhos(new HashMap<>());
                 JsonObjectBuilder jsonEnvioCodigoAcesso = Json.createObjectBuilder();
                 jsonEnvioCodigoAcesso.add("grant_type", FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString());
                 jsonEnvioCodigoAcesso.add("client_id", chavePublicaCliente.hashCode());

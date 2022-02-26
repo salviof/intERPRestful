@@ -93,13 +93,17 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
                     resp.getWriter().append(respostaStr);
                     return;
                 }
+
                 ItfAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
-                RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
-                resposta.addErro("A ação " + solicitacao.getAcaoStrNomeUnico() + " não foi encontrata");
-                resp.setStatus(503);
-                String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
-                resp.getWriter().append(respostaStr);
-                return;
+                if (acao == null) {
+                    RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
+                    resposta.addErro("A ação " + solicitacao.getAcaoStrNomeUnico() + " não foi encontrata");
+                    resp.setStatus(503);
+                    String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+                    resp.getWriter().append(respostaStr);
+                    return;
+                }
+
             }
         } catch (ErroTentandoObterTokenAcesso ex) {
             RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
@@ -110,7 +114,7 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
             return;
         }
 
-        ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
+        ItfRespostaAcaoDoSistema resposta = erpIntegraca.gerarRespostaAcaoDoSistemaServico(solicitacao);
         String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
 
         if (resposta.isSucesso()) {

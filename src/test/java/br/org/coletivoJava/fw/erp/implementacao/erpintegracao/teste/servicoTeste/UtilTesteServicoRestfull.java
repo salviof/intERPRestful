@@ -43,7 +43,7 @@ public class UtilTesteServicoRestfull {
                 String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
                 return respostaStr;
             }
-            ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
+            ItfRespostaAcaoDoSistema resposta = erpIntegraca.gerarRespostaAcaoDoSistemaServico(solicitacao);
             res.status(200);
             String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
             return respostaStr;
@@ -63,7 +63,7 @@ public class UtilTesteServicoRestfull {
                 return respostaStr;
             }
 
-            ItfRespostaAcaoDoSistema resposta = erpIntegraca.getRespostaAcaoDoSistema(solicitacao);
+            ItfRespostaAcaoDoSistema resposta = erpIntegraca.gerarRespostaAcaoDoSistemaServico(solicitacao);
             String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
 
             if (resposta.isSucesso()) {

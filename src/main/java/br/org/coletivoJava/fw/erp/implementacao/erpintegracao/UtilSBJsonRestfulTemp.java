@@ -66,9 +66,6 @@ public class UtilSBJsonRestfulTemp {
         public JsonIgnoreProperties.Value findPropertyIgnorals(Annotated a) {
             Class classe = a.getRawType();
 
-            for (ItfEstruturaCampoEntidade campo : MapaObjetosProjetoAtual.getEstruturaObjeto(classe).getCampos()) {
-                System.out.println(campo.getNome());
-            }
             JsonIgnoreProperties.Value ignorados = JsonIgnoreProperties.Value
                     .forIgnoredProperties("mapaCamposInstanciados",
                             "novoBeanPreparado",

@@ -185,9 +185,12 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
         String dominioDoSistema = sistemaCliente.getDominio();
         String dominioDaRequisicao = requisicao.getHeader("origin");
 
-        if (dominioDaRequisicao == null || !dominioDoSistema.equals(dominioDaRequisicao)) {
-            resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA");
-            return;
+        //todo origem explícita, analizar nescessidade já que o post não vem do browser
+        if (false) {
+            if (dominioDaRequisicao == null || !dominioDoSistema.equals(dominioDaRequisicao)) {
+                resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA");
+                return;
+            }
         }
         String emailDoEscopo = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.ESCOPO);
 

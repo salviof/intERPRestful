@@ -171,8 +171,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         String url = reposta;
         UtilTesteServicoRestfull.iniciarServico();
 
-        ItfAcaoApiRest acaoOpcoes = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(UtilSBRestful.getSolicitacao(sistemaCliente, sisRemoto,
-                FabTipoSolicitacaoRestfull.OPCOES, null, null));
+        ItfAcaoApiRest acaoOpcoes = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(UtilSBRestful.getSolicitacaoOption(sistemaCliente, sisRemoto, ""));
         ItfResposta respOpcoes = acaoOpcoes.getResposta();
 
         UsuarioSB novoUsuario = new UsuarioSB();
@@ -183,9 +182,8 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
 
         novoUsuario.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
         //UtilSBRestful.getSolicitacaoByRequest(pRequest)
-        SolicitacaoControllerERP solicitaca = UtilSBRestful.getSolicitacao(sistemaCliente, sisRemoto,
-                FabTipoSolicitacaoRestfull.CONTROLLER,
-                FabAcaoRestfullTestes.USUARIO_RESTFUL_CTR_SALVAR_MERGE.getRegistro(),
+        SolicitacaoControllerERP solicitaca = UtilSBRestful.getSolicitacaoAcaoController(sistemaCliente, sisRemoto,
+                FabAcaoRestfullTestes.USUARIO_RESTFUL_CTR_SALVAR_MERGE.getRegistro().getNomeUnico(),
                 novoUsuario);
         ItfAcaoApiRest acaoPost = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER
                 .getAcao(solicitaca);

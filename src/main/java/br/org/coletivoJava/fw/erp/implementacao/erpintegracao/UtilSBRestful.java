@@ -15,6 +15,7 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ItfAcaoGerenciarEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.Mensagens.ItfMensagem;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
@@ -78,26 +79,73 @@ public class UtilSBRestful {
 
     //(String pMetodoRestful, String pHashIdentificadorCliente,
     //String pNomeUnicoAcao, ItfUsuario pUsuario, String pCodigo, String pAtributo, JsonObject pParametros)
-    public static SolicitacaoControllerERP getSolicitacao(ItfSistemaERP pCliente, ItfSistemaERP pServico, FabTipoSolicitacaoRestfull pAcaoRestful,
+    public static SolicitacaoControllerERP getSolicitacaoAcaoController(ItfSistemaERP pCliente, ItfSistemaERP pServico,
             ItfAcaoDoSistema pAcaoSistema, ItfBeanSimples pBeanSimples) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         String acao = null;
         if (pAcaoSistema != null) {
             acao = pAcaoSistema.getNomeUnico();
         }
+
+        return getSolicitacaoAcaoController(pCliente, pServico, acao, pBeanSimples);
+    }
+
+    public static SolicitacaoControllerERP getSolicitacaoAcaoController(ItfSistemaERP pCliente, ItfSistemaERP pServico,
+            String pNomeUnicoAcao, ItfBeanSimples pBeanSimples) {
+        ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+
+        if (pNomeUnicoAcao == null) {
+            throw new UnsupportedOperationException("A ação só pode ser nula com o tipo de solicitação options");
+        }
+        if (!pNomeUnicoAcao.contains("_CTR_")) {
+            throw new UnsupportedOperationException("A ação " + pNomeUnicoAcao + " não parece ser do tipo controller");
+        }
         String codigoBeanSimples = null;
         if (pBeanSimples != null) {
             codigoBeanSimples = String.valueOf(pBeanSimples.getId());
         }
         SolicitacaoControllerERP novaSolicitacao = new SolicitacaoControllerERP(
-                pAcaoRestful.getMetodo(),
+                FabTipoSolicitacaoRestfull.CONTROLLER.getMetodo(),
                 pServico.getHashChavePublica(),
                 pCliente.getHashChavePublica(),
-                acao, SBCore.getUsuarioLogado(), codigoBeanSimples,
+                pNomeUnicoAcao, SBCore.getUsuarioLogado(), codigoBeanSimples,
                 null,
                 erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples));
 
         return novaSolicitacao;
+    }
+
+    public static SolicitacaoControllerERP getSolicitacaoOption(ItfSistemaERP pCliente, ItfSistemaERP pServico,
+            String pNomeUnicoAcao) {
+        if (pNomeUnicoAcao != null) {
+            if (!pNomeUnicoAcao.contains("_MB_")) {
+                throw new UnsupportedOperationException("A ação " + pNomeUnicoAcao + " não parece ser do tipo controller");
+            }
+        }
+        ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+        SolicitacaoControllerERP novaSolicitacao = new SolicitacaoControllerERP(
+                FabTipoSolicitacaoRestfull.OPCOES.getMetodo(),
+                pServico.getHashChavePublica(),
+                pCliente.getHashChavePublica(),
+                pNomeUnicoAcao, SBCore.getUsuarioLogado(), null,
+                null,
+                null);
+        return novaSolicitacao;
+    }
+
+    public static SolicitacaoControllerERP getSolicitacaoInserirPost(ItfSistemaERP pCliente, ItfSistemaERP pServico,
+            String pNomeUnicoAcao) {
+        throw new UnsupportedOperationException("A solicitação post não foi implementada");
+    }
+
+    public static SolicitacaoControllerERP getSolicitacaoAtualizarPut(ItfSistemaERP pCliente, ItfSistemaERP pServico,
+            String pNomeUnicoAcao) {
+        throw new UnsupportedOperationException("A solicitação put não foi implementada");
+    }
+
+    public static SolicitacaoControllerERP getSolicitacaoExcluirDelete(ItfSistemaERP pCliente, ItfSistemaERP pServico,
+            String pNomeUnicoAcao) {
+        throw new UnsupportedOperationException("A solicitação put não foi implementada");
     }
 
     public static SolicitacaoControllerERP getSolicitacaoByRequest(HttpServletRequest pRequest) throws ErroTentandoObterTokenAcesso {

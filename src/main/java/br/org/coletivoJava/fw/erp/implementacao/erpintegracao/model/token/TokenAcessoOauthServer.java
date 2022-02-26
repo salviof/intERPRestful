@@ -31,8 +31,15 @@ public class TokenAcessoOauthServer extends TokenDeAcessoExternoDinamico {
         client_id = hashChavePuvlica_client_id;
     }
 
+    private static Date getDataHoraExpiraToken(JsonObject pJson) {
+        String pTimeStamp = pJson.getString("dataHoraExpirarToken");
+        long longTimeStamp = Long.parseLong(pTimeStamp);
+        return new Date(longTimeStamp);
+    }
+
     public TokenAcessoOauthServer(JsonObject pObjetoJsonArmazenamento) {
-        super(pObjetoJsonArmazenamento.getString("token"), new Date(pObjetoJsonArmazenamento.getJsonNumber("dataHoraExpirarToken").longValue()));
+
+        super(pObjetoJsonArmazenamento.getString("access_token"), getDataHoraExpiraToken(pObjetoJsonArmazenamento));
         client_id = pObjetoJsonArmazenamento.getString("client_id");
 
         scope = pObjetoJsonArmazenamento.getString("scope");
