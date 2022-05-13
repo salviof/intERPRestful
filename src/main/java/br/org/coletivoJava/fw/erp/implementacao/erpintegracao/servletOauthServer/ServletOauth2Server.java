@@ -78,13 +78,16 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
         }
         // PODE VALIDAR TAMBÉM A CHAVE PÚBLICA DO SERVIDOR, POR MOTIVOS DE COMPATIBILIDADE DE TESTES FOI REMOVIDA A VALIDAÇÃO
         //Verifica se a origem é vinda do dominio do sistema solicitante
-        String dominioDoSistema = sistemaCliente.getDominio();
-        String dominioDaRequisicao = requisicao.getHeader("origin");
+        String dominioDoSistemaClienteResgistrado = sistemaCliente.getDominio();
+        String dominioDaRequisicao = requisicao.getHeader("referer");
 
-        if (SBCore.isEmModoProducao() && (dominioDaRequisicao == null || !dominioDoSistema.equals(dominioDaRequisicao))) {
+        if (SBCore.isEmModoProducao() && (dominioDaRequisicao == null || !dominioDaRequisicao.contains(dominioDoSistemaClienteResgistrado))) {
+            if (dominioDoSistemaClienteResgistrado.contains("localhost")) {
 
-            resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA");
-            return;
+            } else {
+                resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA [" + dominioDaRequisicao + "|" + dominioDoSistemaClienteResgistrado + "]");
+                return;
+            }
         }
 
         String emailDoEscopo = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.ESCOPO);
@@ -108,6 +111,9 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
         } catch (Throwable t) {
 
         }
+        if (SBCore.isEmModoDesenvolvimento()) {
+            sessaoAtual = SBCore.getServicoSessao().getSessaoAtual();
+        }
         if (!pUsuario.equals(sessaoAtual.getUsuario())) {
 
             if (sessaoAtual.isIdentificado()) {
@@ -115,20 +121,19 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                 sessaoAtual.encerrarSessao();
             }
             if (SBCore.isEmModoDesenvolvimento()) {
-                resp.getWriter().append("EFETUE LOGIN DE FORMA PROGRAMÁTICA,POR PADRÃO O SERVIÇO JSF NÃO É ATIVADO NO MODO TESTES");
+                resp.getWriter().append("EFETUE LOGIN DE FORMA PROGRAMÁTICA,POR PADRÃO O SERVIÇO CDI QUE GERE OS BEANS DE SESSÃO NÃO É ATIVADO NO MODO TESTES");
             } else {
                 RequestDispatcher despachadorDeRespostaParaRequisicao = requisicao
                         .getRequestDispatcher("/resources/oauth/login.xhtml?hashChavePublicaAplicacaoSolicitante=" + sistemaCliente.getHashChavePublica() + "&scopo=" + pUsuario.getEmail());
-                requisicao.setAttribute("teste", "parametro");
 
                 despachadorDeRespostaParaRequisicao.forward(requisicao, resp);
-                SBCore.getServicoSessao().getSessaoAtual().isIdentificado();
+
                 return;
             }
         }
         switch (tipoRequisicao.getEnumVinculado()) {
             case OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO:
-                boolean gerarTokenconcessao = false;
+
                 TokenConcessaoOauthServer tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(sistemaCliente, pUsuario);
 
                 if (tokenConcessaodeAcesso == null) {
@@ -187,8 +192,8 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
 
         //todo origem explícita, analizar nescessidade já que o post não vem do browser
         if (false) {
-            if (dominioDaRequisicao == null || !dominioDoSistema.equals(dominioDaRequisicao)) {
-                resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA");
+            if (dominioDaRequisicao == null || !dominioDaRequisicao.contains(dominioDoSistema)) {
+                resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA [" + dominioDaRequisicao + "|" + dominioDoSistema + "]");
                 return;
             }
         }

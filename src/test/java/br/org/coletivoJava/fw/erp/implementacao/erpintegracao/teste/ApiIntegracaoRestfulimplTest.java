@@ -196,9 +196,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         System.out.println("Usuário criado::::::::::::::::::");
         System.out.println(resp.getRetorno());
         List<UsuarioSB> usuarios = UtilSBPersistencia.getListaTodos(UsuarioSB.class, getEMTeste());
-
         assertEquals("O usuário não foi registrado", usuarios.size(), 2);
-
         System.out.println(resp);
 
         ItfRespostaWebServiceSimples respPosts = acaoPost.getResposta();

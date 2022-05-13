@@ -17,6 +17,7 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebSer
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.servicoRegistrado.FabTipoAutenticacaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.servicoRegistrado.InfoConfigRestClientIntegracao;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestao;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestaoOauth;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.ManipulaArquivo.importacao.FabTipoArquivoImportacao;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
@@ -47,7 +48,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     ACOES_EXECUTAR_CONTROLLER_ENTIDADE_EXISTENTE,
-    @InfoConsumoRestService(getPachServico = "/controllerERP/acao/executar/{0}/",
+    @InfoConsumoRestService(getPachServico = "/{0}/executar/",
             tipoConexao = FabTipoConexaoRest.POST,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             parametrosGet = {"nomeUnicoAcaoGestao", "codigoEntidade"},
@@ -75,18 +76,24 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     ACOES_EXECUTAR_DELETE,
-    @InfoConsumoRestService(getPachServico = "/acoesRestful/acaogestao/",
+    @InfoConsumoRestService(getPachServico = "/acaogestao/",
             tipoConexao = FabTipoConexaoRest.OPTIONS,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     ACOES_GET_OPCOES,
     ACOES_GET_ESTRUTURA_CAMPOS_FORMULARIO,
+    @InfoConsumoRestService(getPachServico = "/{0}/{1}",
+            tipoConexao = FabTipoConexaoRest.GET,
+            tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
+            parametrosGet = {"nomeUnicoAcaoGestao", "pagina"},
+            urlDocumentacao = "https://coletivojava.com.br",
+            adicionarAutenticacaoBearer = true)
     ACOES_GET_LISTA_ENTIDADES,
     ACOES_GET_REGISTRO_ENTIDADE;
 
-    public ItfTokenGestao getGestaoToken(SolicitacaoControllerERP pSolicitacao) {
-        return getGestaoToken(pSolicitacao.getErpServico());
+    public ItfTokenGestaoOauth getGestaoToken(SolicitacaoControllerERP pSolicitacao) {
+        return (ItfTokenGestaoOauth) getGestaoToken(pSolicitacao.getErpServico());
     }
 
     public ItfAcaoApiRest getAcao(SolicitacaoControllerERP pSolicicatacao) {
@@ -99,12 +106,12 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
         return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao);
     }
 
-    public ItfTokenGestao getGestaoToken(ItfSistemaERP pSistemaServico) {
-        return ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pSistemaServico.getHashChavePublica());
+    public ItfTokenGestaoOauth getGestaoToken(ItfSistemaERP pSistemaServico) {
+        return (ItfTokenGestaoOauth) ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pSistemaServico.getHashChavePublica());
     }
 
     @Override
-    public ItfTokenGestao getGestaoToken(ItfUsuario pUsuario) {
+    public ItfTokenGestaoOauth getGestaoToken(ItfUsuario pUsuario) {
         throw new UnsupportedOperationException("Informe o sistema chamando get GestaoDeToken(Sistema)");
     }
 

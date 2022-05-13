@@ -5,7 +5,7 @@
  */
 package br.org.coletivoJava.integracoes.json;
 
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBJsonRestfulTemp;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestFulEntityToJson;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.ConfigPercistenciaItegracaoSistemas;
 import br.org.coletivoJava.integracoes.intRestful.api.ConfiguradorCoreApiERPIntegracoes;
 
@@ -36,7 +36,7 @@ public class SerializerTest {
             System.out.println(campo.getNome());
         }
         for (UsuarioSB usr : usuarios) {
-            System.out.println(UtilSBJsonRestfulTemp.getJsonFromObjeto(usr));
+            System.out.println(UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(usr));
         }
 
     }

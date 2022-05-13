@@ -25,8 +25,7 @@ public class FabApiRestIntegracaoERPRestfullTest extends TestesApiRest {
     @Test
     public void gerarCodigo() {
         SBCore.configurar(new ConfiguradorCoreApiERPIntegracoes(), SBCore.ESTADO_APP.DESENVOLVIMENTO);
-
-        gerarCodigos(FabIntApiRestIntegracaoERPRestfull.class);
+        gerarCodigosChamadasEndpoint(FabIntApiRestIntegracaoERPRestfull.class);
     }
 
 }

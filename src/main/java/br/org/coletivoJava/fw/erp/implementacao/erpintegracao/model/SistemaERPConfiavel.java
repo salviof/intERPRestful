@@ -10,6 +10,7 @@ import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampoValidadorLogico;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampoValorLogico;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampoVerdadeiroOuFalso;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
 import jakarta.json.JsonObject;
@@ -38,6 +39,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     private int id;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_NOME)
+    @InfoCampoValorLogico(nomeCalculo = "nome Aplicação")
     private String nome;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.TEXTO_SIMPLES, label = "dominio")
@@ -56,6 +58,12 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     @Column(nullable = false)
     @InfoCampoValidadorLogico()
     private String urlPublicaEndPoint;
+
+    @InfoCampo(tipo = FabTipoAtributoObjeto.VERDADEIRO_FALSO)
+    @InfoCampoVerdadeiroOuFalso()
+    @InfoCampoValorLogico(nomeCalculo = "Conexção foi estabelecida")
+    @Transient
+    private boolean foiEstabelicidaConexao;
 
     @InfoCampoValorLogico(nomeCalculo = "Hash")
     private String hashChavePublica;
@@ -132,6 +140,14 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
 
     public void setUrlPublicaEndPoint(String urlPublicaEndPoint) {
         this.urlPublicaEndPoint = urlPublicaEndPoint;
+    }
+
+    public boolean isFoiEstabelicidaConexao() {
+        return foiEstabelicidaConexao;
+    }
+
+    public void setFoiEstabelicidaConexao(boolean foiEstabelicidaConexao) {
+        this.foiEstabelicidaConexao = foiEstabelicidaConexao;
     }
 
 }

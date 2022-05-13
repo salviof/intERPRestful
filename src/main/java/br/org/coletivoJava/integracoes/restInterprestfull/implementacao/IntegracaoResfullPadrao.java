@@ -8,7 +8,6 @@ package br.org.coletivoJava.integracoes.restInterprestfull.implementacao;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
-import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ItfFabricaIntegracaoRest;
@@ -21,10 +20,6 @@ import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonValue;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  *
@@ -33,39 +28,12 @@ import org.json.JSONObject;
 public class IntegracaoResfullPadrao extends
         AcaoApiIntegracaoComOauthAbstrato {
 
-    private SolicitacaoControllerERP solicitacao;
+    protected SolicitacaoControllerERP solicitacao;
     private ItfSistemaERP dadosServico;
 
     public IntegracaoResfullPadrao(String pTipoApicacao, ItfFabricaIntegracaoRest pIntegracaoEndpoint, FabTipoAgenteClienteApi pTipoAgente, ItfUsuario pUsuario, Object... pParametros) {
         super(pTipoApicacao, pIntegracaoEndpoint,
                 pTipoAgente, pUsuario, pParametros);
-    }
-
-    @Override
-    public String gerarUrlRequisicao() {
-        StringBuilder urlReqBuild = new StringBuilder();
-        String urlBaseLegado = super.gerarUrlRequisicao();
-
-        String urlBase = getDadoServico().getUrlPublicaEndPoint();
-
-        urlReqBuild.append(urlBase);
-        if (!urlBase.endsWith("/")) {
-            urlReqBuild.append("/");
-        }
-        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(getSoliciatacao().getAcaoStrNomeUnico())) {
-            urlReqBuild.append(solicitacao.getAcaoStrNomeUnico());
-            urlReqBuild.append("/");
-        }
-        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(solicitacao.getCodigoEntidade())) {
-            urlReqBuild.append(solicitacao.getCodigoEntidade());
-            urlReqBuild.append("/");
-        }
-        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(solicitacao.getAtributoEntidade())) {
-            urlReqBuild.append(solicitacao.getAtributoEntidade());
-            urlReqBuild.append("/");
-        }
-
-        return urlReqBuild.toString();
     }
 
     public ItfSistemaERP getDadoServico() {
@@ -122,6 +90,11 @@ public class IntegracaoResfullPadrao extends
         }
         return pRespostaWSSemTratamento;
 
+    }
+
+    @Override
+    public String getUrlServidor() {
+        return getDadoServico().getUrlPublicaEndPoint();
     }
 
 }

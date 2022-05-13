@@ -12,10 +12,13 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenA
 import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP.SLUGPUBLICACAOSERVLET;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexao;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringsMaiuculoMinusculo;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ItfAcaoGerenciarEntidade;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
 import com.super_bits.modulosSB.SBCore.modulos.Mensagens.ItfMensagem;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
@@ -23,13 +26,14 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basic
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.stream.Collectors;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -90,6 +94,33 @@ public class UtilSBRestful {
         return getSolicitacaoAcaoController(pCliente, pServico, acao, pBeanSimples);
     }
 
+    public static SolicitacaoControllerERP getSolicitacaoAcaoListagemDeEntidade(ItfSistemaERP pCliente, ItfSistemaERP pServico,
+            String pNomeUnicoAcao, ItfBeanSimples pBeanSimples) {
+        ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+
+        if (pNomeUnicoAcao == null) {
+            throw new UnsupportedOperationException("A ação só pode ser nula com o tipo de solicitação options");
+        }
+        FabTipoAcaoSistemaGenerica tipoGenerico = FabTipoAcaoSistemaGenerica.getAcaoGenericaByNome(pNomeUnicoAcao);
+        if (!tipoGenerico.equals(FabTipoAcaoSistemaGenerica.FORMULARIO_LISTAR)) {
+            throw new UnsupportedOperationException("A ação " + pNomeUnicoAcao + " não parece ser do tipo lista");
+        }
+
+        String codigoBeanSimples = null;
+        if (pBeanSimples != null) {
+            codigoBeanSimples = String.valueOf(pBeanSimples.getId());
+        }
+        SolicitacaoControllerERP novaSolicitacao = new SolicitacaoControllerERP(
+                FabTipoSolicitacaoRestfull.LISTA_DE_ENTIDADE.getMetodo(),
+                pServico.getHashChavePublica(),
+                pCliente.getHashChavePublica(),
+                pNomeUnicoAcao, SBCore.getUsuarioLogado(), codigoBeanSimples,
+                null,
+                erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples));
+
+        return novaSolicitacao;
+    }
+
     public static SolicitacaoControllerERP getSolicitacaoAcaoController(ItfSistemaERP pCliente, ItfSistemaERP pServico,
             String pNomeUnicoAcao, ItfBeanSimples pBeanSimples) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
@@ -117,9 +148,9 @@ public class UtilSBRestful {
 
     public static SolicitacaoControllerERP getSolicitacaoOption(ItfSistemaERP pCliente, ItfSistemaERP pServico,
             String pNomeUnicoAcao) {
-        if (pNomeUnicoAcao != null) {
+        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pNomeUnicoAcao)) {
             if (!pNomeUnicoAcao.contains("_MB_")) {
-                throw new UnsupportedOperationException("A ação " + pNomeUnicoAcao + " não parece ser do tipo controller");
+                throw new UnsupportedOperationException("A ação " + pNomeUnicoAcao + " não parece ser do tipo Gestão ManagedBean");
             }
         }
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
@@ -155,9 +186,18 @@ public class UtilSBRestful {
         String codigoEntidade = getCodigoEntidade(pRequest);
         String atributoEntidade = null;
         JsonObject json = null;
-
-        token = getTokenAcesso(pRequest);
-        usuario = autenticarUsuario(token);
+        try {
+            token = getTokenAcesso(pRequest);
+            usuario = getUsuario(token);
+        } catch (Throwable t) {
+            throw new ErroTentandoObterTokenAcesso("Token de acesso não identificado, certificque a presença do  header Authorization com o valor: Bearer xxxxxmeutokenAlfanumericoregistradoxxxx");
+        }
+        if (usuario == null) {
+            throw new ErroTentandoObterTokenAcesso("Token de acesso não identificado, certificque a presença do  header Authorization com o valor: Bearer xxxxxmeutokenAlfanumericoregistradoxxxx");
+        }
+        if (!token.isTokenValido()) {
+            throw new ErroTentandoObterTokenAcesso("Token de acesso expirou");
+        }
         acaoDoSistemaEnum = getNomeSlugAcao(pRequest);
         token.getObjetoJsonResposta();
         String corpoRequisicaoTesxto = getCorpoRequisicao(pRequest);
@@ -193,20 +233,7 @@ public class UtilSBRestful {
 
     }
 
-    private static ItfUsuario autenticarUsuario(TokenAcessoOauthServer pToken) throws ErroTentandoObterTokenAcesso {
-        ItfUsuario usuario = getUsuario(pToken);
-        SBCore.getServicoSessao().getSessaoAtual().setUsuario(usuario);
-        if (pToken == null) {
-            throw new ErroTentandoObterTokenAcesso("Token não existe");
-        }
-        if (!pToken.isTokenValido()) {
-            throw new ErroTentandoObterTokenAcesso("Este token não é mais válido");
-        }
-        return usuario;
-
-    }
-
-    public static String buildTextoJsonResposta(ItfRespostaAcaoDoSistema resposta) throws ServletException {
+    public static String buildTextoJsonResposta(ItfRespostaAcaoDoSistema resposta) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         JsonArrayBuilder mensagens = Json.createArrayBuilder();
         for (ItfMensagem msg : resposta.getMensagens()) {
@@ -224,6 +251,24 @@ public class UtilSBRestful {
 
         if (resposta.getRetorno() instanceof JsonObject) {
             jsonRespconstrutor.add("retorno", (JsonObject) resposta.getRetorno());
+        } else if (resposta.getRetorno() instanceof List) {
+            List lista = (List) resposta.getRetorno();
+            JsonArrayBuilder array = Json.createArrayBuilder();
+            for (Object item : lista) {
+                if (item instanceof ItfBeanSimples) {
+                    JsonObject itemJson = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) item);
+                    if (itemJson.containsKey("@id")) {
+                        JsonObjectBuilder itemEdicao = Json.createObjectBuilder(itemJson);
+                        itemEdicao.remove("@id");
+                        itemJson = itemEdicao.build();
+                    }
+
+                    array.add(itemJson);
+                }
+            }
+            jsonRespconstrutor.add("retorno", array);
+            String repostaTexto = UtilSBCoreJson.getTextoByJsonObjeect(jsonRespconstrutor.build());
+            return repostaTexto;
         } else if (resposta.getRetorno() instanceof ItfBeanSimples) {
             JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) resposta.getRetorno());
             jsonRespconstrutor.add("retorno", retorno);
@@ -241,4 +286,5 @@ public class UtilSBRestful {
         return respostaTexto;
 
     }
+
 }

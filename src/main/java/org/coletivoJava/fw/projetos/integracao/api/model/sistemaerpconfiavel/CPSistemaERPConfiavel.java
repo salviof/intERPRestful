@@ -5,7 +5,7 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.Info
 
 @InfoReferenciaEntidade(tipoObjeto = SistemaERPConfiavel.class)
 public enum CPSistemaERPConfiavel {
-	_ID, _NOME, _DOMINIO, _URLRECEPCAOCODIGO, _CHAVEPUBLICA, _URLPUBLICAENDPOINT, _HASHCHAVEPUBLICA, _COMOJSON;
+	_ID, _NOME, _DOMINIO, _URLRECEPCAOCODIGO, _CHAVEPUBLICA, _URLPUBLICAENDPOINT, _FOIESTABELICIDACONEXAO, _HASHCHAVEPUBLICA, _COMOJSON;
 
 	public static final String id = "id";
 	public static final String nome = "nome";
@@ -13,6 +13,7 @@ public enum CPSistemaERPConfiavel {
 	public static final String urlrecepcaocodigo = "urlRecepcaoCodigo";
 	public static final String chavepublica = "chavePublica";
 	public static final String urlpublicaendpoint = "urlPublicaEndPoint";
+	public static final String foiestabelicidaconexao = "foiEstabelicidaConexao";
 	public static final String hashchavepublica = "hashChavePublica";
 	public static final String comojson = "comoJson";
 }

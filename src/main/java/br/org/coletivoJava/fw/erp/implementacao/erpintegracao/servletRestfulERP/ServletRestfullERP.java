@@ -10,28 +10,16 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ErroTentandoObterTokenAcesso;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
-import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
-import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
-import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.dto.DTO_SBGENERICO;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.UtilSBController;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
-import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabricaAcoes;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.qualificadoresCDI.sessao.QlSessaoFacesContext;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfSessao;
+import com.super_bits.modulosSB.SBCore.modulos.servicosCore.ItfServicoControllerExecucao;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.persistence.EntityManager;
+import javax.inject.Inject;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -46,44 +34,21 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
     public static final String SLUGPUBLICACAOSERVLET = "acoesRestful";
     private static ItfIntegracaoERP erpIntegraca = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
-    public static ItfRespostaAcaoDoSistema getResposta(SolicitacaoControllerERP pSolicitacao) {
-        ItfFabricaAcoes fabAcao = SBCore.getFabricaByNOME_UNICO(pSolicitacao.getAcaoStrNomeUnico());
-        ItfAcaoDoSistema acao = fabAcao.getRegistro();
-        if (acao.isUmaAcaoController()) {
-            Method metodo = UtilSBController.getMetodoByAcaoController(acao.getComoController());
-            String tipoMetodoParametro = metodo.getParameterTypes()[0].getSimpleName();
+    @Inject
+    @QlSessaoFacesContext
+    private ItfSessao sessaoAtual;
 
-            JsonObject jsonSolicitacao = UtilSBCoreJson.getJsonObjectByTexto(pSolicitacao.getCorpoParametros());
-            JsonArray parametros = jsonSolicitacao.getJsonArray("parametros");
-            if (!parametros.isEmpty()) {
-                ItfBeanSimples objetoParametro;
-                JsonObject parametro = (JsonObject) parametros.get(0);
-                String nomeEntidade = parametro.getString("entidade");
-                String codigoEntidadeStr = parametro.getString("id");
-                if (codigoEntidadeStr != null) {
-                    int codigoEntidade = Integer.valueOf(codigoEntidadeStr);
-                    EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
-                    Class entidade = MapaObjetosProjetoAtual.getClasseDoObjetoByNome(nomeEntidade);
-                    objetoParametro = (ItfBeanSimples) UtilSBPersistencia.getRegistroByID(entidade, codigoEntidade, em);
-                    DTO_SBGENERICO teste;
-                    try {
-                        ItfRespostaAcaoDoSistema resp = (ItfRespostaAcaoDoSistema) metodo.invoke(null, objetoParametro);
-                        return resp;
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                        Logger.getLogger(ServletRestfullERP.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-            }
-
-        }
-        return null;
-    }
+    @Inject
+    private ItfServicoControllerExecucao entregaJson;
 
     private void processarSolicitacao(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         SolicitacaoControllerERP solicitacao;
         try {
             solicitacao = UtilSBRestful.getSolicitacaoByRequest(req);
+
+            if (solicitacao != null && solicitacao.getUsuarioSolicitante() != null) {
+                sessaoAtual.setUsuario(solicitacao.getUsuarioSolicitante());
+            }
             if (!solicitacao.getMetodo().equals("OPTIONS")) {
                 if (solicitacao.getAcaoStrNomeUnico() == null) {
                     RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
@@ -114,22 +79,9 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
             return;
         }
 
-        ItfRespostaAcaoDoSistema resposta = erpIntegraca.gerarRespostaAcaoDoSistemaServico(solicitacao);
-        String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
-
-        if (resposta.isSucesso()) {
-            resp.setStatus(200);
-        } else {
-            if (!UtilSBCoreStringValidador.isNuloOuEmbranco(solicitacao.getAcaoStrNomeUnico())) {
-                ItfAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
-                if (!SBCore.getServicoPermissao().isAcaoPermitidaUsuario(solicitacao.getUsuarioSolicitante(), acao)) {
-                    resp.setStatus(401);
-                    resp.getWriter().append(respostaStr);
-                }
-            } else {
-                resp.setStatus(500);
-            }
-        }
+        RequestDispatcher despachadorDeRespostaParaRequisicao = req.getRequestDispatcher("/resources/restful/respostaController.xhtml");
+        req.setAttribute("solicitacao", solicitacao);
+        despachadorDeRespostaParaRequisicao.forward(req, resp);
 
     }
 
@@ -137,14 +89,6 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
     public void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         processarSolicitacao(req, resp);
 
-    }
-
-    private void enviarAcessoNegado(ErroTentandoObterTokenAcesso pErro, HttpServletResponse pREsposta) throws ServletException {
-        try {
-            pREsposta.sendError(401, pErro.getMessage());
-        } catch (IOException ex) {
-            throw new ServletException("Erro registrando resposta código 401");
-        }
     }
 
     @Override

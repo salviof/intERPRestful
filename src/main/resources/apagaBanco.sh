@@ -1,3 +1,3 @@
 #!/bin/bash
 source ./SBProjeto.prop
-mysqladmin -u root -psenhaDev#123 drop $NOME_BANCO -f
+docker exec  devopsTestes1   /bin/bash -c  'mysqladmin -uroot -psenhaDev#123 drop '$NOME_BANCO' -f '

@@ -118,6 +118,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
                 chamada.setEnderecoHost(urlServidorApiRest);
                 chamada.setPath(urlObterToken.replace(urlServidorApiRest, ""));
                 chamada.setCabecalhos(new HashMap<>());
+                Object teste = Json.createObjectBuilder();
                 JsonObjectBuilder jsonEnvioCodigoAcesso = Json.createObjectBuilder();
                 jsonEnvioCodigoAcesso.add("grant_type", FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString());
                 jsonEnvioCodigoAcesso.add("client_id", chavePublicaCliente.hashCode());

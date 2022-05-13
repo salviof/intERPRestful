@@ -9,6 +9,9 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros.ParametroListaRestful;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros.ParametroRestful;
+import com.super_bits.modulosSB.SBCore.modulos.erp.conversao.ItfConversorERRestfullToJson;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
@@ -17,6 +20,7 @@ import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimple
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.ErroChamadaController;
@@ -25,10 +29,10 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ItfAcaoGerenciarEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
 import com.super_bits.modulosSB.SBCore.modulos.chavesPublicasePrivadas.RepositorioChavePublicaPrivada;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaDeEntidade;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.estrutura.ItfEstruturaCampoEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
@@ -36,14 +40,18 @@ import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import org.coletivojava.fw.api.tratamentoErros.FabErro;
+import org.coletivojava.fw.utilCoreBase.UtilSBCoreReflexaoAPIERPRestFull;
 
 @ApiIntegracaoRestful
 public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
@@ -109,7 +117,8 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     @Override
     public ItfSistemaERPAtual getSistemaAtual() {
-
+        MapaObjetosProjetoAtual.adcionarObjeto(ParametroListaRestful.class);
+        MapaObjetosProjetoAtual.adcionarObjeto(ParametroRestful.class);
         SistemaERPAtual sistemAtual = new SistemaERPAtual();
         sistemAtual.setNome(SBCore.getGrupoProjeto());
 
@@ -182,8 +191,44 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     @Override
     public ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro) {
-        ItfAcaoApiRest acao = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER.getAcao(UtilSBRestful.getSolicitacaoAcaoController(getSistemaAtual(), pSistemaServico, nomeAcao, pParametro));
-        return acao.getResposta();
+
+        FabTipoAcaoSistemaGenerica tipoAcao = FabTipoAcaoSistemaGenerica.getAcaoGenericaByNome(nomeAcao);
+        switch (tipoAcao) {
+            case FORMULARIO_NOVO_REGISTRO:
+                break;
+            case FORMULARIO_EDITAR:
+                break;
+            case FORMULARIO_PERSONALIZADO:
+                break;
+            case FORMULARIO_VISUALIZAR:
+                break;
+            case FORMULARIO_LISTAR:
+
+                ItfAcaoApiRest acaoListagem = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_LISTA_ENTIDADES.getAcao(UtilSBRestful.getSolicitacaoAcaoListagemDeEntidade(getSistemaAtual(), pSistemaServico, nomeAcao, pParametro));
+                return acaoListagem.getResposta();
+
+            case FORMULARIO_MODAL:
+                break;
+            case SELECAO_DE_ACAO:
+                break;
+            case CONTROLLER_SALVAR_EDICAO:
+            case CONTROLLER_SALVAR_NOVO:
+            case CONTROLLER_SALVAR_MODO_MERGE:
+            case CONTROLLER_PERSONALIZADO:
+            case CONTROLLER_ATIVAR_DESATIVAR:
+            case CONTROLLER_ATIVAR:
+            case CONTROLLER_REMOVER:
+            case CONTROLLER_DESATIVAR:
+                ItfAcaoApiRest acao = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER.getAcao(UtilSBRestful.getSolicitacaoAcaoController(getSistemaAtual(), pSistemaServico, nomeAcao, pParametro));
+                return acao.getResposta();
+
+            case GERENCIAR_DOMINIO:
+                break;
+            default:
+                throw new AssertionError();
+        }
+
+        throw new UnsupportedOperationException("Tipo de ação não detectado");
 
     }
 
@@ -208,16 +253,42 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public JsonObject gerarConversaoObjetoToJson(ItfSistemaERP pSistema, ItfBeanSimples pJson) {
+    public JsonObject gerarConversaoObjetoToJson(ItfSistemaERP pSistema, ItfBeanSimples pBeanSimples) {
+        // ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(pEntidade, 0);
+        // ERPIntegracaoSistemasApi.RESTFUL.getDTO(pBeanSimples, pItefaceObjeto);
+        if (pBeanSimples == null) {
+            return JsonObject.EMPTY_JSON_OBJECT;
+        }
+        String caminhoImplementacaoConversor = UtilSBCoreReflexaoAPIERPRestFull.gerarCaminhoCompletoClasseObjetoToJson(pSistema, UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pBeanSimples.getClass().getSimpleName()));
+        boolean temImplementacao = false;
+        Class classeConversor = null;
+        try {
+            classeConversor = pBeanSimples.getClass().getClassLoader().loadClass(caminhoImplementacaoConversor);
+            if (classeConversor != null) {
+                temImplementacao = true;
+            }
+            try {
+                Constructor cstructor = classeConversor.getConstructor(ItfSistemaERP.class);
+                ItfConversorERRestfullToJson conversor = (ItfConversorERRestfullToJson) cstructor.newInstance(pSistema);
+                return conversor.getJson(pBeanSimples);
+            } catch (InstantiationException | IllegalAccessException ex) {
+                SBCore.RelatarErro(FabErro.SOLICITAR_REPARO, "Falha instanciando conversor " + classeConversor, ex);
+            } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+                Logger.getLogger(ApiIntegracaoRestfulimpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
-        JsonObject json = UtilSBJsonRestfulTemp.getJsonFromObjeto(pJson);
+        } catch (ClassNotFoundException ex) {
+            temImplementacao = false;
+        }
+
+        JsonObject json = UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pBeanSimples);
         return json;
 
     }
 
     @Override
     public JsonObject gerarConversaoObjetoToJson(ItfBeanSimples pJson) {
-        return UtilSBJsonRestfulTemp.getJsonFromObjeto(pJson);
+        return UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pJson);
 
     }
 
@@ -273,12 +344,17 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                 resposta = new RespostaAcaoDoSistema(acao);
             }
         }
-
+        String metodo = pSolicitacao.getMetodo();
         if (resposta == null) {
-            resposta = new RespostaAcaoDoSistema();
+            if (metodo.equals("OPTIONS")) {
+                resposta = new RespostaAcaoDoSistema();
+            } else {
+                resposta = new RespostaAcaoDoSistema();
+                resposta.addErro("Apenas o método OPTIONS suporta AÇÃO nula");
+                return resposta;
+            }
         }
 
-        String metodo = pSolicitacao.getMetodo();
         JsonObject retornoProcessado;
         JsonObject parametroSolicitacao = null;
         if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getCorpoParametros())) {
@@ -292,9 +368,15 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                     classeEntidade = acao.getAcaoDeGestaoEntidade().getClasseRelacionada();
                 }
                 EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
-                if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getCodigoEntidade())) {
+                try {
+                    if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getCodigoEntidade()) || pSolicitacao.getCodigoEntidade().equals("0")) {
+                        try {
+                            entidade = (ItfBeanSimples) classeEntidade.newInstance();
+                        } catch (InstantiationException | IllegalAccessException ex) {
+                            SBCore.RelatarErro(FabErro.SOLICITAR_REPARO, "Falha instanciando nova entidade" + entidade, ex);
+                        }
 
-                    if (!pSolicitacao.getCodigoEntidade().equals("0")) {
+                    } else {
 
                         int codigo = Integer.valueOf(pSolicitacao.getCodigoEntidade());
                         entidade = UtilSBPersistencia.getRegistroByID(classeEntidade, codigo, em);
@@ -307,93 +389,69 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                             }
                         }
 
-                    } else {
-                        try {
-                            entidade = (ItfBeanSimples) classeEntidade.newInstance();
-                            EstruturaDeEntidade estrutura = MapaObjetosProjetoAtual.getEstruturaObjeto(classeEntidade);
-                            for (ItfEstruturaCampoEntidade campo : estrutura.getCampos()) {
-                                try {
-                                    if (parametroSolicitacao.containsKey(campo.getNomeDeclarado()) && !parametroSolicitacao.isNull(campo.getNomeDeclarado())) {
-                                        switch (campo.getFabricaTipoAtributo().getTipoPrimitivo()) {
-                                            case INTEIRO:
-                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
-                                                        .setValor(parametroSolicitacao.getInt(campo.getNomeDeclarado()));
-                                                break;
-                                            case NUMERO_LONGO:
-                                                if (parametroSolicitacao.containsKey(campo.getNomeDeclarado())) {
-                                                    entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
-                                                            .setValor(parametroSolicitacao.getJsonNumber(campo.getNomeDeclarado()).longValue());
-                                                } else {
-                                                    System.out.println("Teste");
-                                                }
-
-                                                break;
-                                            case LETRAS:
-
-                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
-                                                        .setValor(parametroSolicitacao.getString(campo.getNomeDeclarado()));
-
-                                                break;
-                                            case DATAS:
-                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
-                                                        .setValor(new Date(parametroSolicitacao.getJsonNumber(campo.getNomeDeclarado()).longValue()));
-                                                break;
-                                            case BOOLEAN:
-                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
-                                                        .setValor(parametroSolicitacao.getBoolean(campo.getNomeDeclarado()));
-                                                break;
-                                            case DECIMAL:
-                                                entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado())
-                                                        .setValor(parametroSolicitacao.getJsonNumber(campo.getNomeDeclarado()).doubleValue());
-                                                break;
-                                            case ENTIDADE:
-
-                                                switch (campo.getFabricaTipoAtributo()) {
-                                                    case OBJETO_DE_UMA_LISTA:
-                                                        ItfCampoInstanciado cp = entidade.getCampoInstanciadoByNomeOuAnotacao(campo.getNomeDeclarado());
-
-                                                        Class entidadeFilho = MapaObjetosProjetoAtual.getClasseDoObjetoByNome(campo.getClasseCampoDeclaradoOuTipoLista());
-                                                        ItfBeanSimples objeto = (ItfBeanSimples) UtilSBPersistencia.
-                                                                getRegistroByID(entidadeFilho, parametroSolicitacao.getJsonObject(campo.getNomeDeclarado())
-                                                                        .getInt("id"), em);
-                                                        cp.setValor(objeto);
-                                                        break;
-                                                    case LISTA_OBJETOS_PARTICULARES:
-                                                    case LISTA_OBJETOS_PUBLICOS:
-                                                        System.out.println("Listas ainda não foram definidas");
-                                                    default:
-                                                        throw new AssertionError(campo.getFabricaTipoAtributo().name());
-
-                                                }
-
-                                                break;
-
-                                            case OUTROS_OBJETOS:
-                                                break;
-                                            default:
-                                                throw new AssertionError(campo.getFabricaTipoAtributo().getTipoPrimitivo().name());
-
-                                        }
-                                    }
-                                } catch (Throwable t) {
-                                    System.out.println("Falha interpretando " + campo.getNomeDeclarado());
-                                }
-
-                            }
-                            resposta = SBCore.getServicoController().getResposta(acao.getEnumAcaoDoSistema(), entidade);
-                            return resposta;
-                        } catch (ErroChamadaController ex) {
-                            resposta.addErro("Falha localizando Ação" + acao);
-                        } catch (InstantiationException | IllegalAccessException ex) {
-                            resposta.addErro("Iniciando novo Objeto" + acao);
-                        }
+                    }
+                } finally {
+                    UtilSBPersistencia.fecharEM(em);
+                }
+                UtilSBRestFulJsonToEntity.aplicarAtributosJsonEmEntidade(entidade, parametroSolicitacao);
+                 {
+                    try {
+                        resposta = SBCore.getServicoController().getResposta(acao.getEnumAcaoDoSistema(), entidade);
+                    } catch (ErroChamadaController ex) {
+                        Logger.getLogger(ApiIntegracaoRestfulimpl.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                UtilSBPersistencia.fecharEM(em);
-                break;
+                return resposta;
 
             case "GET":
-                break;
+                pSolicitacao.getAcaoStrNomeUnico();
+
+                switch (acao.getTipoAcaoGenerica()) {
+                    case FORMULARIO_NOVO_REGISTRO:
+                    case FORMULARIO_EDITAR:
+                    case FORMULARIO_PERSONALIZADO:
+                    case FORMULARIO_VISUALIZAR:
+                        resposta = new RespostaAcaoDoSistema();
+                        resposta.addErro("O retorno de estrutura de formulários ainda não foi implementado");
+                        return resposta;
+
+                    case FORMULARIO_LISTAR:
+                        EntityManager emLista = UtilSBPersistencia.getEntyManagerPadraoNovo();
+                        try {
+                            Class entidadeListagem = acao.getComoAcaoDeEntidade().getClasseRelacionada();
+                            List lista = UtilSBPersistencia.getListaTodos(entidadeListagem, emLista);
+
+                            resposta.setRetorno(lista);
+                            return resposta;
+                        } finally {
+                            UtilSBPersistencia.fecharEM(emLista);
+                        }
+
+                    case FORMULARIO_MODAL:
+                        break;
+                    case SELECAO_DE_ACAO:
+                        resposta = new RespostaAcaoDoSistema();
+                        resposta.addErro("Este tipo de ação não foi implementado");
+                        return resposta;
+
+                    case CONTROLLER_SALVAR_EDICAO:
+                    case CONTROLLER_SALVAR_NOVO:
+                    case CONTROLLER_SALVAR_MODO_MERGE:
+                    case CONTROLLER_PERSONALIZADO:
+                    case CONTROLLER_ATIVAR_DESATIVAR:
+                    case CONTROLLER_ATIVAR:
+                    case CONTROLLER_REMOVER:
+                    case CONTROLLER_DESATIVAR:
+                        resposta = new RespostaAcaoDoSistema();
+                        resposta.addErro("Ação " + pSolicitacao.getAcaoStrNomeUnico() + "do tipo controller suporta apenas PUT e POST");
+                        return resposta;
+                    case GERENCIAR_DOMINIO:
+                        break;
+
+                    default:
+                        throw new AssertionError();
+                }
+
             case "OPTIONS":
                 retornoProcessado = buildRespostaOptionsServico(pSolicitacao);
                 resposta.setRetorno(retornoProcessado);
@@ -410,6 +468,14 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     @Override
     public String executarAcaoPacoteServico() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getRespostaJsonString(ItfRespostaAcaoDoSistema pResposta
+    ) {
+
+        return UtilSBRestful.buildTextoJsonResposta(pResposta);
+
     }
 
 }

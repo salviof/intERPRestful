@@ -18,24 +18,26 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.introspect.ObjectIdInfo;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
-import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.estrutura.ItfEstruturaCampoEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
 import jakarta.json.JsonObject;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.coletivojava.fw.api.tratamentoErros.FabErro;
-import org.json.JSONObject;
 
 /**
  *
  * @author sfurbino
  */
-public class UtilSBJsonRestfulTemp {
+public class UtilSBRestFulEntityToJson {
 
-    public static JsonObject getJsonFromObjeto(ItfBeanSimples beanSimples) {
+    private static Map<Class, String> mapaNomesClassesConversaoToJson = new HashMap<>();
+    private static Map<Class, String> mapaNomesClassesJsonToObjeto = new HashMap<>();
+    private static Map<Class, Class> mapaConversorEntidadeToJson = new HashMap<>();
+    private static Map<Class, Class> mapaConversorJsonToEntidade = new HashMap<>();
+
+    public static JsonObject getJsonFromObjetoGenerico(ItfBeanSimples beanSimples) {
         if (beanSimples == null) {
             return null;
         }
@@ -51,7 +53,7 @@ public class UtilSBJsonRestfulTemp {
         try {
             json = mapper.writer().withDefaultPrettyPrinter().writeValueAsString(beanSimples);
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(UtilSBJsonRestfulTemp.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UtilSBRestFulEntityToJson.class.getName()).log(Level.SEVERE, null, ex);
         }
         return UtilSBCoreJson.getJsonObjectByTexto(json);
     }
