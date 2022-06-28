@@ -70,7 +70,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
             adicionarAutenticacaoBearer = true)
     ACOES_EXECUTAR_ATUALIZAR_ENTIDADE,
     @InfoConsumoRestService(getPachServico = "/acoesRestful/acaogestao/{0}",
-            tipoConexao = FabTipoConexaoRest.DELET,
+            tipoConexao = FabTipoConexaoRest.DELETE,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             parametrosGet = {"identidade"},
             urlDocumentacao = "https://coletivojava.com.br",
