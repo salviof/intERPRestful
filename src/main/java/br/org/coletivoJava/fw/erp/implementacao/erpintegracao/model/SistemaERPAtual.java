@@ -24,4 +24,9 @@ public class SistemaERPAtual extends SistemaERPConfiavel implements ItfSistemaER
         this.chavePrivada = chavePrivada;
     }
 
+    @Override
+    public String getUrlRecepcaoCodigo() {
+        return super.getUrlRecepcaoCodigo(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
+
 }

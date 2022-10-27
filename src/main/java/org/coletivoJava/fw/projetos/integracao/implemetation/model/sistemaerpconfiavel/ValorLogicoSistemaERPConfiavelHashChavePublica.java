@@ -1,5 +1,7 @@
 package org.coletivoJava.fw.projetos.integracao.implemetation.model.sistemaerpconfiavel;
 
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.calculos.ValorLogicoCalculoGenerico;
 import org.coletivoJava.fw.projetos.integracao.api.model.sistemaerpconfiavel.ValorLogicoSistemaERPConfiavel;
 import org.coletivoJava.fw.projetos.integracao.api.model.sistemaerpconfiavel.ValoresLogicosSistemaERPConfiavel;
@@ -7,10 +9,24 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstancia
 
 @ValorLogicoSistemaERPConfiavel(calculo = ValoresLogicosSistemaERPConfiavel.HASHCHAVEPUBLICA)
 public class ValorLogicoSistemaERPConfiavelHashChavePublica
-		extends
-			ValorLogicoCalculoGenerico {
+        extends
+        ValorLogicoCalculoGenerico {
 
-	ValorLogicoSistemaERPConfiavelHashChavePublica(ItfCampoInstanciado pCampo) {
-		super(pCampo);
-	}
+    public ValorLogicoSistemaERPConfiavelHashChavePublica(ItfCampoInstanciado pCampo) {
+        super(pCampo);
+    }
+
+    @Override
+    public Object getValor(Object... pEntidade) {
+
+        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(getSistema().getChavePublica())) {
+            getSistema().setHashChavePublica(String.valueOf(getSistema().getChavePublica().hashCode()));
+        }
+
+        return getSistema().getHashChavePublica();
+    }
+
+    public SistemaERPConfiavel getSistema() {
+        return (SistemaERPConfiavel) getCampoInst().getObjetoDoAtributo();
+    }
 }

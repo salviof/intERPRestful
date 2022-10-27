@@ -47,7 +47,8 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     private String dominio;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Endereço Recepção Código Autorização")
-    @Column(nullable = false)
+    @Column(nullable = true)
+    @Deprecated
     private String urlRecepcaoCodigo;
 
     @Column(length = 8000)
@@ -78,7 +79,12 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
         return chavePublica;
     }
 
+    /**
+     *
+     * @return @deprecated TODO mover para SistemaERPAtual
+     */
     @Override
+    @Deprecated
     public String getUrlRecepcaoCodigo() {
         return urlRecepcaoCodigo;
     }
@@ -107,6 +113,12 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
         this.dominio = dominio;
     }
 
+    /**
+     *
+     * @param urlRecepcaoCodigo
+     * @return @deprecated TODO mover para SistemaERPAtual
+     */
+    @Deprecated
     public void setUrlRecepcaoCodigo(String urlRecepcaoCodigo) {
         this.urlRecepcaoCodigo = urlRecepcaoCodigo;
     }

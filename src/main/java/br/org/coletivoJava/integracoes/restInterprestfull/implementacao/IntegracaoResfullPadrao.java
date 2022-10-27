@@ -8,6 +8,7 @@ package br.org.coletivoJava.integracoes.restInterprestfull.implementacao;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
+import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ItfFabricaIntegracaoRest;
@@ -66,25 +67,33 @@ public class IntegracaoResfullPadrao extends
     protected RespostaWebServiceSimples buildResposta(RespostaWebServiceSimples pRespostaWSSemTratamento) {
         if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pRespostaWSSemTratamento.getRetorno())) {
             pRespostaWSSemTratamento.getMensagens();
-            JsonObject respostaJson = UtilSBCoreJson.getJsonObjectByTexto(pRespostaWSSemTratamento.getRetorno().toString());
-            if (respostaJson.containsKey("resultado")) {
+            try {
+                JsonObject respostaJson = UtilSBCoreJson.getJsonObjectByTexto(pRespostaWSSemTratamento.getRetorno().toString());
+                if (respostaJson.containsKey("resultado")) {
 
-                String resultado = respostaJson.getString("resultado");
-                JsonArray mensagensJson = respostaJson.getJsonArray("mensagem");
-                mensagensJson.stream().forEach(msg -> {
-                    JsonObject mensagemJson = msg.asJsonObject();
-                    String tipo = mensagemJson.getString("tipoMensagem");
-                    if (tipo.equals(FabMensagens.ERRO.toString())
-                            || tipo.equals(FabMensagens.ERRO_FATAL.toString())) {
-                        pRespostaWSSemTratamento.addErro(msg.asJsonObject().getString("mensagem"));
-                    } else {
-                        pRespostaWSSemTratamento.addAviso(msg.asJsonObject().getString("mensagem"));
+                    String resultado = respostaJson.getString("resultado");
+                    JsonArray mensagensJson = respostaJson.getJsonArray("mensagem");
+                    mensagensJson.stream().forEach(msg -> {
+                        JsonObject mensagemJson = msg.asJsonObject();
+                        String tipo = mensagemJson.getString("tipoMensagem");
+                        if (tipo.equals(FabMensagens.ERRO.toString())
+                                || tipo.equals(FabMensagens.ERRO_FATAL.toString())) {
+                            pRespostaWSSemTratamento.addErro(msg.asJsonObject().getString("mensagem"));
+                        } else {
+                            pRespostaWSSemTratamento.addAviso(msg.asJsonObject().getString("mensagem"));
 
-                    }
+                        }
 
-                });
+                    });
 
+                }
+            } catch (Throwable t) {
+                //SErvidor não respondeu com json resposta operação
+                if (SBCore.isEmModoDesenvolvimento()) {
+                    System.out.println("O webservice não respondeu com o json de resposta para ação executada em " + getUrlServidor());
+                }
             }
+
             System.out.println(pRespostaWSSemTratamento.getResultado());
 
         }

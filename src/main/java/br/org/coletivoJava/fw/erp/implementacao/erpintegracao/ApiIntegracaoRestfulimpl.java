@@ -32,6 +32,7 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAc
 import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
 import com.super_bits.modulosSB.SBCore.modulos.chavesPublicasePrivadas.RepositorioChavePublicaPrivada;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
+import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaCampo;
 import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaDeEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.estrutura.ItfEstruturaCampoEntidade;
@@ -45,8 +46,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -143,7 +146,24 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         } catch (MalformedURLException ex) {
             throw new UnsupportedOperationException("o sistema atual não possui uma url válida");
         }
+        if (SBCore.isEmModoDesenvolvimento()) {
+            System.out.println("---------------------- SISTEMA ATUAL CONEXÇÃO ERP ---------------------------------");
+            System.out.println("- Nome Aplicacao:");
+            System.out.println(sistemAtual.getNome());
 
+            System.out.println("- Domínio");
+            System.out.println(sistemAtual.getDominio());
+            System.out.println("- Url acesso ao Endpoint");
+            sistemAtual.getUrlPublicaEndPoint();
+            System.out.println("- Url recepção código de  permição para obter token via post");
+            sistemAtual.getUrlRecepcaoCodigo();
+
+            System.out.println("- Hash chave pública");
+            System.out.println(sistemAtual.getHashChavePublica());
+            System.out.println("- Chave Pública");
+            System.out.println(sistemAtual.getChavePublica());
+
+        }
         return sistemAtual;
     }
 
@@ -418,8 +438,57 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                     case FORMULARIO_LISTAR:
                         EntityManager emLista = UtilSBPersistencia.getEntyManagerPadraoNovo();
                         try {
+                            List lista = new ArrayList<>();
                             Class entidadeListagem = acao.getComoAcaoDeEntidade().getClasseRelacionada();
-                            List lista = UtilSBPersistencia.getListaTodos(entidadeListagem, emLista);
+                            if (pSolicitacao.getParametrosDeUrl() == null || pSolicitacao.getParametrosDeUrl().isEmpty()) {
+                                lista = UtilSBPersistencia.getListaTodos(entidadeListagem, emLista);
+                            } else {
+                                ConsultaDinamicaDeEntidade consultaDinamica = new ConsultaDinamicaDeEntidade(entidadeListagem, emLista);
+                                EstruturaDeEntidade estutura = MapaObjetosProjetoAtual.getEstruturaObjeto(entidadeListagem);
+                                try {
+                                    for (Map.Entry<String, String> chaves : pSolicitacao.getParametrosDeUrl().entrySet()) {
+                                        String valor = chaves.getValue();
+                                        EstruturaCampo estruturaCampo = estutura.getCampoByNomeDeclarado(chaves.getKey());
+                                        switch (estruturaCampo.getTipoPrimitivoDoValor()) {
+                                            case INTEIRO:
+                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), chaves.getValue());
+                                                break;
+                                            case NUMERO_LONGO:
+                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), chaves.getValue());
+                                                break;
+                                            case LETRAS:
+                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), chaves.getValue());
+                                                break;
+                                            case DATAS:
+                                                Date data = new Date(Long.valueOf(valor));
+                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), data);
+                                                break;
+                                            case BOOLEAN:
+                                                if (valor.equals("1") || valor.equals("true") || valor.equals("sim") || valor.equals("verdadeiro")) {
+                                                    consultaDinamica.addCondicaoPositivo(chaves.getKey());
+                                                } else {
+                                                    consultaDinamica.addCondicaoNegativo(chaves.getKey());
+                                                }
+                                                break;
+                                            case DECIMAL:
+                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), Double.valueOf(chaves.getValue()));
+                                                break;
+                                            case ENTIDADE:
+                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey() + "_id", chaves.getKey());
+                                                break;
+                                            case OUTROS_OBJETOS:
+                                                break;
+                                            default:
+                                                throw new AssertionError(estruturaCampo.getTipoPrimitivoDoValor().name());
+
+                                        }
+
+                                    }
+                                } catch (Throwable t) {
+                                    resposta.addErro("Falha configurando parametros de pesquisa: " + t.getMessage());
+                                }
+                                lista = consultaDinamica.resultadoRegistros();
+                            }
 
                             resposta.setRetorno(lista);
                             return resposta;

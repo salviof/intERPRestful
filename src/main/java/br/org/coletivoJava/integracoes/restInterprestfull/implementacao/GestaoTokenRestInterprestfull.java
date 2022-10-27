@@ -59,16 +59,16 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
             final FabTipoAgenteClienteApi pTipoAgente, final ItfUsuario pUsuario, String pIdentificadorServico) {
         super(FabIntApiRestIntegracaoERPRestfull.class, pTipoAgente, pUsuario, pIdentificadorServico);
         ItfSistemaERP sistemaServidor = integracaoERP.getSistemaByHashChavePublica(pIdentificadorServico);
-        ItfSistemaERP sistemaCliente = integracaoERP.getSistemaAtual();
+        ItfSistemaERP sistemaLocal = integracaoERP.getSistemaAtual();
         if (SBCore.isEmModoDesenvolvimento()) {
-            if (sistemaCliente.getHashChavePublica().equals(pIdentificadorServico)) {
+            if (sistemaLocal.getHashChavePublica().equals(pIdentificadorServico)) {
                 //detectado ambiente de teste
                 List<SistemaERPConfiavel> sistemasRegistrados = UtilSBPersistencia.getListaTodos(SistemaERPConfiavel.class);
                 if (sistemasRegistrados.size() != 2) {
                     throw new UnsupportedOperationException("para homologar a couminicação ERP usando um sistema unicico como cliente e servidor, devem existir ");
                 }
                 Optional<SistemaERPConfiavel> sistemaClientePesquisa = sistemasRegistrados.stream().filter(sis -> !sis.getHashChavePublica().equals(pIdentificadorServico)).findFirst();
-                sistemaCliente = sistemaClientePesquisa.get();
+                sistemaLocal = sistemaClientePesquisa.get();
             }
         }
         chavePublicaServidor = sistemaServidor.getChavePublica();
@@ -87,23 +87,25 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
                 Logger.getLogger(GestaoTokenRestInterprestfull.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
         urlServidorApiRest = protocolo + "://" + sistemaServidor.getDominio() + porta;
-        chavePublicaCliente = sistemaCliente.getChavePublica();
+        chavePublicaCliente = sistemaLocal.getChavePublica();
         urlObterCodigoSolicitacao = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
                 + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO.toString()
                 + "/" + sistemaServidor.getChavePublica().hashCode()
                 + "/" + chavePublicaCliente.hashCode()
-                + "/" + URLEncoder.encode(sistemaCliente.getUrlRecepcaoCodigo())
+                + "/" + URLEncoder.encode(sistemaLocal.getUrlRecepcaoCodigo())
                 + "/" + pUsuario.getEmail();
 
         urlObterToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
                 + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
                 + "/" + sistemaServidor.getHashChavePublica()
-                + "/" + sistemaCliente.getHashChavePublica()
-                + "/" + URLEncoder.encode(sistemaCliente.getUrlRecepcaoCodigo())
+                + "/" + sistemaLocal.getHashChavePublica()
+                + "/" + URLEncoder.encode(sistemaLocal.getUrlRecepcaoCodigo())
                 + "/" + pUsuario.getEmail();
-        urlRetornoReceberCodigoSolicitao = sistemaCliente.getUrlRecepcaoCodigo();
-        urlRetornoSucessoObterToken = "https://" + sistemaCliente.getDominio();
+        urlRetornoReceberCodigoSolicitao = sistemaLocal.getUrlRecepcaoCodigo();
+
+        urlRetornoSucessoObterToken = "https://" + sistemaLocal.getDominio();
     }
 
     @Override
@@ -181,7 +183,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
 
     @Override
     public String getUrlRetornoReceberCodigoSolicitacao() {
-        return urlRetornoSucessoObterToken;
+        return urlRetornoReceberCodigoSolicitao;
     }
 
     @Override

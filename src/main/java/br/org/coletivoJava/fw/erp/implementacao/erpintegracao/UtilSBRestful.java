@@ -31,8 +31,15 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
@@ -204,14 +211,24 @@ public class UtilSBRestful {
         if (!UtilSBCoreStringValidador.isNuloOuEmbranco(corpoRequisicaoTesxto)) {
             json = UtilSBCoreJson.getJsonObjectByTexto(corpoRequisicaoTesxto);
         }
-
+        String metodo = pRequest.getMethod();
+        HashMap parametorsRequisicao = new HashMap();
+        if (metodo.toUpperCase().equals("GET")) {
+            pRequest.getParameterMap().keySet().stream().forEach(atr -> {
+                try {
+                    parametorsRequisicao.put(atr, URLDecoder.decode(pRequest.getParameterMap().get(atr)[0], StandardCharsets.UTF_8.toString()));
+                } catch (Throwable ex) {
+                    Logger.getLogger(UtilSBRestful.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+        }
         ItfIntegracaoERP servicoRestful = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         ItfSistemaERPAtual servidor = servicoRestful.getSistemaAtual();
 
         SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(
                 pRequest.getMethod(),
                 servidor.getHashChavePublica(),
-                token.getClient_id(), acaoDoSistemaEnum, usuario, codigoEntidade, atributoEntidade, json);
+                token.getClient_id(), acaoDoSistemaEnum, usuario, codigoEntidade, atributoEntidade, json, parametorsRequisicao);
 
         return solicitacao;
 

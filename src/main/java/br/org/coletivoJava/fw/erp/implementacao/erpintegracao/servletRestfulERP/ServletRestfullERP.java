@@ -75,6 +75,7 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
             resposta.addErro("Autenticação negada ");
             resp.setStatus(401);
             String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+
             resp.getWriter().append(respostaStr);
             return;
         }

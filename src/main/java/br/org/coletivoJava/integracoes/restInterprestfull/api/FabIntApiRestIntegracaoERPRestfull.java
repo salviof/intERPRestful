@@ -96,6 +96,19 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
         return (ItfTokenGestaoOauth) getGestaoToken(pSolicitacao.getErpServico());
     }
 
+    /**
+     * Utilize getAcao(SolicitacaoControllerERP pSolicicatacao)
+     *
+     * @param parametros
+     * @return
+     * @deprecated
+     */
+    @Override
+    @Deprecated
+    public ItfAcaoApiRest getAcao(Object... parametros) {
+        return ItfFabricaIntegracaoRest.super.getAcao(parametros); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
+
     public ItfAcaoApiRest getAcao(SolicitacaoControllerERP pSolicicatacao) {
         ItfIntegracaoERP resp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         //pSolicicatacao.getErpServico()
@@ -113,6 +126,10 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
     @Override
     public ItfTokenGestaoOauth getGestaoToken(ItfUsuario pUsuario) {
         throw new UnsupportedOperationException("Informe o sistema chamando get GestaoDeToken(Sistema)");
+    }
+
+    public static ItfTokenGestaoOauth getGestaoTokenOpcoes(ItfSistemaERP pSistemaServico) {
+        return FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getGestaoToken(pSistemaServico);
     }
 
 }

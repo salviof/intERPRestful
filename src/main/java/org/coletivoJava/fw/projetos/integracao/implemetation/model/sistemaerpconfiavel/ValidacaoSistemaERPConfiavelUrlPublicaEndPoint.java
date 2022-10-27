@@ -7,8 +7,10 @@ import org.coletivoJava.fw.projetos.integracao.api.model.sistemaerpconfiavel.Val
 import org.coletivoJava.fw.projetos.integracao.api.model.sistemaerpconfiavel.ValidadoresSistemaERPConfiavel;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.validador.ErroValidacao;
+import com.super_bits.modulosSB.SBCore.modulos.view.widgetsFormulario.WidgetsFormulario;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 @ValidadorSistemaERPConfiavel(validador = ValidadoresSistemaERPConfiavel.URLPUBLICAENDPOINT)
 public class ValidacaoSistemaERPConfiavelUrlPublicaEndPoint extends ValidacaoGenerica<SistemaERPConfiavel> {
@@ -19,8 +21,7 @@ public class ValidacaoSistemaERPConfiavelUrlPublicaEndPoint extends ValidacaoGen
     }
 
     @Override
-    public Object validar(Object pValor) throws ErroValidacao {
-
+    public List<WidgetsFormulario> validar(Object pValor) throws ErroValidacao {
         String urlStr = (String) pValor;
         try {
             URL url = new URL(urlStr);
@@ -31,7 +32,7 @@ public class ValidacaoSistemaERPConfiavelUrlPublicaEndPoint extends ValidacaoGen
         } catch (MalformedURLException ex) {
             throw new ErroValidacao("Url inválida");
         }
-        return pValor;
+        return null;
     }
 
     public SistemaERPConfiavel getSistemaERPConfiavel() {

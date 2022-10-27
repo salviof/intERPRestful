@@ -4,11 +4,13 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
+import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.arquivosConfiguracao.ItfFabConfigModulo;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.tipoModulos.integracaoOauth.FabPropriedadeModuloIntegracaoOauth;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.tipoModulos.integracaoOauth.InfoPropriedadeConfigRestIntegracao;
 import com.super_bits.modulosSB.SBCore.modulos.chavesPublicasePrivadas.RepositorioChavePublicaPrivada;
+import com.super_bits.modulosSB.webPaginas.ConfigGeral.FabConfigModuloWebAppGenerico;
 import java.security.KeyPairGenerator;
 import java.util.Map;
 
@@ -35,7 +37,12 @@ public enum FabConfigModuloWebERPChaves implements ItfFabConfigModulo {
                 return identificador;
             }
             case SITE_URL:
-                return "http://localhost:8086";
+                if (SBCore.isEmModoDesenvolvimento()) {
+                    // ServicoRecepcaoOauthTestes utiliza a porta 766
+                    return "http://localhost:7666";
+                }
+
+                return SBCore.getConfigModulo(FabConfigModuloWebAppGenerico.class).getPropriedade(FabConfigModuloWebAppGenerico.URL_DOMINIO_APLICACAO);
 
             default:
                 throw new AssertionError(this.name());

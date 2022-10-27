@@ -26,6 +26,7 @@ import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonValue;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
 
     public static void loadTokensPersistidos(ItfSistemaERP pSistema) {
 
-        String chavesPersistidasTExto = chavesDeAcessoErrp.getRepositorioDeArquivosExternos().getTexto(pSistema.getChavePublica());
+        String chavesPersistidasTExto = chavesDeAcessoErrp.getRepositorioDeArquivosExternos().getTexto(pSistema.getHashChavePublica());
         List<TokenAcessoOauthServer> tokensValidos = new ArrayList<>();
         if (!TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
             TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.put(pSistema.getChavePublica(), new HashMap<>());
@@ -151,6 +152,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
             for (TokenAcessoOauthServer tokenValido : tokensValidos) {
                 jsonArraybuilder.add(tokenValido.getObjetoJsonArmazenamento());
             }
+
             chavesDeAcessoErrp.getRepositorioDeArquivosExternos().putConteudoRecursoExterno(pHashClientidentificador, jsonArraybuilder.build().toString());
             TOKEN_DE_ACESSO_BY_CODIGO.put(pToken.getToken(), pToken);
             return true;

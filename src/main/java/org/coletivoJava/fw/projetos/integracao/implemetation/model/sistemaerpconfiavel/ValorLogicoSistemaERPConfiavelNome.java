@@ -19,9 +19,10 @@ public class ValorLogicoSistemaERPConfiavelNome
 
     @Override
     public Object getValor(Object... pEntidade) {
-
-        String nome = UtilSBCoreReflexaoAPIERPRestFull.getSlugAplicacao(getSistema());
-        getSistema().setNome(nome);
+        if (getSistema().getNome() == null || getSistema().getNome().isEmpty()) {
+            String nome = UtilSBCoreReflexaoAPIERPRestFull.getSlugAplicacao(getSistema());
+            getSistema().setNome(nome);
+        }
         return getSistema().getNome();
     }
 

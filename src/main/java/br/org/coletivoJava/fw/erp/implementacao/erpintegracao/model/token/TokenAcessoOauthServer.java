@@ -61,7 +61,7 @@ public class TokenAcessoOauthServer extends TokenDeAcessoExternoDinamico {
             objectBuilder.add("refresh_token", refresh_token);
             objectBuilder.add("access_token", getToken());
             objectBuilder.add("dataHoraExpirarToken", Long.toString(getDataHoraExpira().getTime()));
-            objectBuilder.add("scope", SBCore.getUsuarioLogado().getEmail());
+            objectBuilder.add("scope", getScope());
             objetoJsonArmazenamento = objectBuilder.build();
         }
 

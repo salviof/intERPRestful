@@ -70,8 +70,11 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
         }
 
         //FacesContext contexto = FacesContext.getCurrentInstance();
-        String hashChave = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_CLIENTE);
-        ItfSistemaERP sistemaCliente = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChave);
+        String hashChaveCliente = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_CLIENTE);
+        String hashChaveServicoRecurso = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_RECURSOS);
+
+        //TODO verifica se o rash servico recurso é o hash do servidor atual
+        ItfSistemaERP sistemaCliente = integracaoEntreSistemas.getSistemaByHashChavePublica(hashChaveCliente);
         if (sistemaCliente == null) {
             resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO CLIENTE NÃO FOI REGISTRADA");
             return;
