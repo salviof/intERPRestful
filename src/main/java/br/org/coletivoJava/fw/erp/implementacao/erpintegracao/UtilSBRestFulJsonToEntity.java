@@ -15,6 +15,7 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,9 +43,9 @@ public class UtilSBRestFulJsonToEntity {
 
                     break;
                 case LETRAS:
-
+                    String valorstr = ((JsonString) pValorJson).getString();
                     pEntidade.getCampoInstanciadoByNomeOuAnotacao(pChave)
-                            .setValor(pValorJson);
+                            .setValor(valorstr);
 
                     break;
                 case DATAS:
@@ -140,9 +141,10 @@ public class UtilSBRestFulJsonToEntity {
 
         pJsonAtributosAtualizadosObjeto.asJsonObject().keySet().stream().forEach(nomeAtributo -> {
             if (nomeAtributo != null && !nomeAtributo.contains("@")) {
+                JsonValue valor = pJsonAtributosAtualizadosObjeto.get(nomeAtributo);
                 ItfCampoInstanciado campoInstanciado = pEntidade.getCampoInstanciadoByNomeOuAnotacao(nomeAtributo);
                 if (!campoInstanciado.isCampoNaoInstanciado()) {
-                    aplicarValor(pEntidade, nomeAtributo, pJsonAtributosAtualizadosObjeto.get(nomeAtributo));
+                    aplicarValor(pEntidade, nomeAtributo, valor);
                 }
             }
 

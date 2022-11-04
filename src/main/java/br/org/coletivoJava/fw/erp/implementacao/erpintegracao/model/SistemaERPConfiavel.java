@@ -34,12 +34,12 @@ import javax.persistence.Transient;
 public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaERP {
 
     @Id
-    @InfoCampo(tipo = FabTipoAtributoObjeto.ID, somenteLeitura = true)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.ID)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_NOME)
-    @InfoCampoValorLogico(nomeCalculo = "nome Aplicação")
+    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_NOME, somenteLeitura = false)
+    @InfoCampoValorLogico(nomeCalculo = "nome Aplicação", somenteLeitura = false)
     private String nome;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.TEXTO_SIMPLES, label = "dominio")
@@ -47,7 +47,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     private String dominio;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Endereço Recepção Código Autorização")
-    @Column(nullable = true)
+    @Column(nullable = true, length = 2000)
     @Deprecated
     private String urlRecepcaoCodigo;
 
@@ -56,7 +56,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     private String chavePublica;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Url endpoint Restful")
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2000)
     @InfoCampoValidadorLogico()
     private String urlPublicaEndPoint;
 

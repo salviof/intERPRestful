@@ -142,6 +142,9 @@ public class UtilSBRestful {
         if (pBeanSimples != null) {
             codigoBeanSimples = String.valueOf(pBeanSimples.getId());
         }
+
+        UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pBeanSimples);
+
         SolicitacaoControllerERP novaSolicitacao = new SolicitacaoControllerERP(
                 FabTipoSolicitacaoRestfull.CONTROLLER.getMetodo(),
                 pServico.getHashChavePublica(),

@@ -385,7 +385,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                 ItfBeanSimples entidade = null;
                 Class<? extends EntidadeSimples> classeEntidade = null;
                 if (acao != null) {
-                    classeEntidade = acao.getAcaoDeGestaoEntidade().getClasseRelacionada();
+                    classeEntidade = acao.getComoAcaoDeEntidade().getClasseRelacionada();
                 }
                 EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
                 try {

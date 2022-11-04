@@ -44,6 +44,7 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
     private void processarSolicitacao(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         SolicitacaoControllerERP solicitacao;
         try {
+
             solicitacao = UtilSBRestful.getSolicitacaoByRequest(req);
 
             if (solicitacao != null && solicitacao.getUsuarioSolicitante() != null) {
