@@ -64,7 +64,7 @@ public class IntegracaoResfullPadrao extends
     }
 
     @Override
-    protected RespostaWebServiceSimples buildResposta(RespostaWebServiceSimples pRespostaWSSemTratamento) {
+    protected RespostaWebServiceSimples gerarRespostaTratamentoFino(RespostaWebServiceSimples pRespostaWSSemTratamento) {
         if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pRespostaWSSemTratamento.getRetorno())) {
             pRespostaWSSemTratamento.getMensagens();
             try {
