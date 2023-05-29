@@ -148,13 +148,13 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
     }
 
     @Override
-    public ItfTokenDeAcessoExterno extrairToken(org.json.simple.JSONObject pJson) {
-        String tk = (String) pJson.get("access_token");
+    public ItfTokenDeAcessoExterno extrairToken(JsonObject pJson) {
+        String tk = pJson.getString("access_token");
         InfoTokenOauth2 tokenGerado = new InfoTokenOauth2(tk);
-        tokenGerado.setTokenRefresh((String) pJson.get("refresh_token"));
-        String expiraStr = String.valueOf(pJson.get("dataHoraExpirarToken"));
+        tokenGerado.setTokenRefresh(pJson.getString("refresh_token"));
+        String expiraStr = String.valueOf(pJson.getString("dataHoraExpirarToken"));
         tokenGerado.setDataHoraExpirarToken(new Date(Long.valueOf(expiraStr)));
-        tokenGerado.setScope((String) pJson.get("scope"));
+        tokenGerado.setScope(pJson.getString("scope"));
         return tokenGerado;
     }
 

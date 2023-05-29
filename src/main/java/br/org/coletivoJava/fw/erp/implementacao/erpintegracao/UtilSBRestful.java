@@ -12,10 +12,12 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenA
 import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP.SLUGPUBLICACAOSERVLET;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJsonRest;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexao;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringsMaiuculoMinusculo;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
@@ -253,26 +255,15 @@ public class UtilSBRestful {
 
     }
 
-    public static String buildTextoJsonResposta(ItfRespostaAcaoDoSistema resposta) {
+    public static String buildTextoJsonResposta(ItfRespostaAcaoDoSistema pResposta) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
-        JsonArrayBuilder mensagens = Json.createArrayBuilder();
-        for (ItfMensagem msg : resposta.getMensagens()) {
-            JsonObjectBuilder msgJsonBuilder = Json.createObjectBuilder();
-            msgJsonBuilder.add("tipoMensagem", msg.getTipoDeMensagem().name());
-            msgJsonBuilder.add("tipoAgente", msg.getTipoDeMensagem().name());
-            msgJsonBuilder.add("mensagem", msg.getMenssagem());
-            mensagens.add(msgJsonBuilder.build());
-        }
 
-        JsonObjectBuilder jsonRespconstrutor = Json.createObjectBuilder();
-        jsonRespconstrutor.add("resultado", resposta.getResultado().name());
-        jsonRespconstrutor.add("sucesso", resposta.isSucesso());
-        jsonRespconstrutor.add("mensagem", mensagens);
+        JsonObjectBuilder jsonRespconstrutor = UtilSBCoreJsonRest.getRespostaJsonBuilderBase(pResposta.isSucesso(), pResposta.getResultado(), pResposta.getMensagens());
 
-        if (resposta.getRetorno() instanceof JsonObject) {
-            jsonRespconstrutor.add("retorno", (JsonObject) resposta.getRetorno());
-        } else if (resposta.getRetorno() instanceof List) {
-            List lista = (List) resposta.getRetorno();
+        if (pResposta.getRetorno() instanceof JsonObject) {
+            jsonRespconstrutor.add("retorno", (JsonObject) pResposta.getRetorno());
+        } else if (pResposta.getRetorno() instanceof List) {
+            List lista = (List) pResposta.getRetorno();
             JsonArrayBuilder array = Json.createArrayBuilder();
             for (Object item : lista) {
                 if (item instanceof ItfBeanSimples) {
@@ -289,14 +280,14 @@ public class UtilSBRestful {
             jsonRespconstrutor.add("retorno", array);
             String repostaTexto = UtilSBCoreJson.getTextoByJsonObjeect(jsonRespconstrutor.build());
             return repostaTexto;
-        } else if (resposta.getRetorno() instanceof ItfBeanSimples) {
-            JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) resposta.getRetorno());
+        } else if (pResposta.getRetorno() instanceof ItfBeanSimples) {
+            JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) pResposta.getRetorno());
             jsonRespconstrutor.add("retorno", retorno);
         } else {
             jsonRespconstrutor.add("retorno", "");
         }
 
-        if (UtilSBCoreStringValidador.isNuloOuEmbranco(resposta.getUrlDestino())) {
+        if (UtilSBCoreStringValidador.isNuloOuEmbranco(pResposta.getUrlDestino())) {
             jsonRespconstrutor.add("urlDestino", JsonValue.NULL);
         } else {
             jsonRespconstrutor.add(SLUGPUBLICACAOSERVLET, BigDecimal.ONE);

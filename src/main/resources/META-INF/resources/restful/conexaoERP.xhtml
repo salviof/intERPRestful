@@ -12,7 +12,7 @@
     </cc:interface>
     <!-- IMPLEMENTATION -->
     <cc:implementation>
-        <h:panelGroup rendered="#{!cc.attrs.mostrarBotao}" >
+        <h:panelGroup rendered="#{!cc.attrs.mostrarBotao}"   >
             #{servicoSessaoOauth.abrirJanelaConexao(cc.attrs.nomeAplicacao)}
         </h:panelGroup>
         <h:panelGroup rendered="#{cc.attrs.mostrarBotao}" >
