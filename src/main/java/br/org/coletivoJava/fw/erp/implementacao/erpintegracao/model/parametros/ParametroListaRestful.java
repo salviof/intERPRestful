@@ -16,6 +16,7 @@ public class ParametroListaRestful extends ParametroRestful {
 
     private int pagina = 0;
     private Map<String, Object> parametros;
+    private String atributo;
 
     public ParametroListaRestful() {
         super(ParametroListaRestful.class.getSimpleName());
@@ -35,6 +36,14 @@ public class ParametroListaRestful extends ParametroRestful {
 
     public void setParametros(Map<String, Object> parametros) {
         this.parametros = parametros;
+    }
+
+    public String getAtributo() {
+        return atributo;
+    }
+
+    public void setAtributo(String atributo) {
+        this.atributo = atributo;
     }
 
 }

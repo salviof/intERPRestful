@@ -83,7 +83,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
             adicionarAutenticacaoBearer = true)
     ACOES_GET_OPCOES,
     ACOES_GET_ESTRUTURA_CAMPOS_FORMULARIO,
-    @InfoConsumoRestService(getPachServico = "/{0}/{1}",
+    @InfoConsumoRestService(getPachServico = "/{0}/{1}/{02}",
             tipoConexao = FabTipoConexaoRest.GET,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             parametrosGet = {"nomeUnicoAcaoGestao", "pagina"},
@@ -120,6 +120,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
     }
 
     public ItfTokenGestaoOauth getGestaoToken(ItfSistemaERP pSistemaServico) {
+
         return (ItfTokenGestaoOauth) ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pSistemaServico.getHashChavePublica());
     }
 

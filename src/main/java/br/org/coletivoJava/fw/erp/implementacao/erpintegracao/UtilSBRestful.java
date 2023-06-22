@@ -8,6 +8,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros.ParametroListaRestful;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenAcessoOauthServer;
 import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP.SLUGPUBLICACAOSERVLET;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
@@ -22,10 +23,13 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
 import com.super_bits.modulosSB.SBCore.modulos.Mensagens.ItfMensagem;
+import com.super_bits.modulosSB.SBCore.modulos.comunicacao.FabTipoComunicacao;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
+import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabrica;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
+import com.super_bits.modulosSB.webPaginas.controller.servlets.FabTipoInformacaoUrl;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonBuilderFactory;
@@ -68,14 +72,21 @@ public class UtilSBRestful {
 
         String[] partes = caminhoChamada.split("/");
         if (partes.length >= 4) {
-            String slugAcao = partes[3];
-            return slugAcao;
+            String slugEntidade = partes[3];
+            return slugEntidade;
         }
         return null;
     }
 
     public static String getAtributoEntidade(HttpServletRequest pRequest) {
 
+        String caminhoChamada = pRequest.getRequestURI();
+
+        String[] partes = caminhoChamada.split("/");
+        if (partes.length >= 5) {
+            String slugAtributo = partes[4];
+            return slugAtributo;
+        }
         return null;
     }
 
@@ -119,12 +130,16 @@ public class UtilSBRestful {
         if (pBeanSimples != null) {
             codigoBeanSimples = String.valueOf(pBeanSimples.getId());
         }
+        String atributo = null;
+        if (pBeanSimples instanceof ParametroListaRestful) {
+            atributo = ((ParametroListaRestful) pBeanSimples).getAtributo();
+        }
         SolicitacaoControllerERP novaSolicitacao = new SolicitacaoControllerERP(
                 FabTipoSolicitacaoRestfull.LISTA_DE_ENTIDADE.getMetodo(),
                 pServico.getHashChavePublica(),
                 pCliente.getHashChavePublica(),
                 pNomeUnicoAcao, SBCore.getUsuarioLogado(), codigoBeanSimples,
-                null,
+                atributo,
                 erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples));
 
         return novaSolicitacao;
@@ -192,11 +207,16 @@ public class UtilSBRestful {
     }
 
     public static SolicitacaoControllerERP getSolicitacaoByRequest(HttpServletRequest pRequest) throws ErroTentandoObterTokenAcesso {
+        System.out.println("Processando requisição RESTfull:");
+        System.out.println(pRequest.getRequestURI());
         TokenAcessoOauthServer token = null;
         ItfUsuario usuario = null;
         String acaoDoSistemaEnum = null;
         String codigoEntidade = getCodigoEntidade(pRequest);
-        String atributoEntidade = null;
+        System.out.println("Código Entidade=" + codigoEntidade);
+
+        String atributoEntidade = getAtributoEntidade(pRequest);
+        System.out.println("Atributo=" + atributoEntidade);
         JsonObject json = null;
         try {
             token = getTokenAcesso(pRequest);
@@ -222,6 +242,9 @@ public class UtilSBRestful {
             pRequest.getParameterMap().keySet().stream().forEach(atr -> {
                 try {
                     parametorsRequisicao.put(atr, URLDecoder.decode(pRequest.getParameterMap().get(atr)[0], StandardCharsets.UTF_8.toString()));
+                    if (parametorsRequisicao.get(atr) instanceof String) {
+                        parametorsRequisicao.put(atr, parametorsRequisicao.get(atr).toString().replace("\"", ""));
+                    }
                 } catch (Throwable ex) {
                     Logger.getLogger(UtilSBRestful.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -284,7 +307,24 @@ public class UtilSBRestful {
             JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) pResposta.getRetorno());
             jsonRespconstrutor.add("retorno", retorno);
         } else {
-            jsonRespconstrutor.add("retorno", "");
+            if (pResposta.getRetorno() instanceof Integer) {
+                jsonRespconstrutor.add("retorno", (int) pResposta.getRetorno());
+            }
+            if (pResposta.getRetorno() instanceof Long) {
+                jsonRespconstrutor.add("retorno", (long) pResposta.getRetorno());
+            }
+            if (pResposta.getRetorno() instanceof String) {
+                jsonRespconstrutor.add("retorno", (String) pResposta.getRetorno());
+            }
+            if (pResposta.getRetorno() instanceof Double) {
+                jsonRespconstrutor.add("retorno", (Double) pResposta.getRetorno());
+            }
+            if (pResposta.getRetorno() instanceof ItfFabrica) {
+                ItfFabrica item = (ItfFabrica) pResposta.getRetorno();
+                JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) item.getRegistro());
+                jsonRespconstrutor.add("retorno", retorno);
+            }
+
         }
 
         if (UtilSBCoreStringValidador.isNuloOuEmbranco(pResposta.getUrlDestino())) {

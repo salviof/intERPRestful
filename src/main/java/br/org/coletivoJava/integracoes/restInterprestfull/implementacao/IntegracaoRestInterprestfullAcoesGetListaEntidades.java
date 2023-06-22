@@ -33,8 +33,12 @@ public class IntegracaoRestInterprestfullAcoesGetListaEntidades
         String pNomeAcao = sl.getAcaoStrNomeUnico();
         JsonObject parametrosLista = UtilSBCoreJson.getJsonObjectByTexto(sl.getCorpoParametros());
         int pagina = parametrosLista.getInt("pagina");
+        if (sl.getAtributoEntidade() == null) {
+            parametros = new Object[]{pNomeAcao, pagina};
+        } else {
+            parametros = new Object[]{pNomeAcao, pagina, sl.getAtributoEntidade()};
+        }
 
-        parametros = new Object[]{pNomeAcao, pagina};
         super.executarAcao();
     }
 

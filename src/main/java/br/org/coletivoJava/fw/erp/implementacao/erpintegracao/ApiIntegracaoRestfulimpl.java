@@ -14,6 +14,7 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros.P
 import com.super_bits.modulosSB.SBCore.modulos.erp.conversao.ItfConversorERRestfullToJson;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
+import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.consultaDinamica.ConsultaDinamicaDeEntidade;
 import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
@@ -197,16 +198,9 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     @Override
     public ItfSistemaERP getSistemaByHashChavePublica(String pHashChavePuvlica) {
-        EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
-        ConsultaDinamicaDeEntidade novaConsulta = new ConsultaDinamicaDeEntidade(SistemaERPConfiavel.class, em);
-        novaConsulta.addcondicaoCampoIgualA("hashChavePublica", pHashChavePuvlica);
-        List<SistemaERPConfiavel> sistemaConfiavel = novaConsulta.resultadoRegistros();
-        UtilSBPersistencia.fecharEM(em);
-        if (sistemaConfiavel.isEmpty()) {
-            return null;
-        } else {
-            return sistemaConfiavel.get(0);
-        }
+
+        return MapaSistemasConfiaveis.getSistemaByHashChavePublica(pHashChavePuvlica);
+
     }
 
     @Override
@@ -445,13 +439,21 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                             } else {
                                 ConsultaDinamicaDeEntidade consultaDinamica = new ConsultaDinamicaDeEntidade(entidadeListagem, emLista);
                                 EstruturaDeEntidade estutura = MapaObjetosProjetoAtual.getEstruturaObjeto(entidadeListagem);
+
                                 try {
                                     for (Map.Entry<String, String> chaves : pSolicitacao.getParametrosDeUrl().entrySet()) {
                                         String valor = chaves.getValue();
                                         EstruturaCampo estruturaCampo = estutura.getCampoByNomeDeclarado(chaves.getKey());
+                                        System.out.println("pesauisando via RESTfull");
+                                        System.out.println(chaves.getKey());
+                                        System.out.println(chaves.getValue());
+                                        System.out.println(estruturaCampo.getTipoPrimitivoDoValor());
+                                        String valorStr = chaves.getValue().toString();
                                         switch (estruturaCampo.getTipoPrimitivoDoValor()) {
                                             case INTEIRO:
-                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), chaves.getValue());
+
+                                                Integer valorInteiro = Integer.valueOf(valorStr);
+                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), valorInteiro);
                                                 break;
                                             case NUMERO_LONGO:
                                                 consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), chaves.getValue());
@@ -488,9 +490,21 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                     resposta.addErro("Falha configurando parametros de pesquisa: " + t.getMessage());
                                 }
                                 lista = consultaDinamica.resultadoRegistros();
+                                if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getAtributoEntidade())) {
+                                    if (lista.isEmpty()) {
+                                        resposta.addErro("Impossível acessar os atributos pois nenhuma entidade foi encontrada");
+                                    }
+                                    if (lista.size() > 1) {
+                                        resposta.addErro("Impossível acessar o atributo, pois a pesquisa retornou mais de um registro");
+                                    }
+                                    if (lista.size() == 1) {
+                                        resposta.setRetorno(((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).getValor());
+                                    }
+                                } else {
+                                    resposta.setRetorno(lista);
+                                }
                             }
 
-                            resposta.setRetorno(lista);
                             return resposta;
                         } finally {
                             UtilSBPersistencia.fecharEM(emLista);
