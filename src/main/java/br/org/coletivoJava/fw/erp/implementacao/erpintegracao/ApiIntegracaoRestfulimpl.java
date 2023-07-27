@@ -4,7 +4,6 @@ import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimplesSomenteLeitura;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.repositorioLinkEntidades.RepositorioLinkEntidadesGenerico;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.ApiIntegracaoRestful;
-import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
@@ -22,12 +21,14 @@ import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringFiltros;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.ErroChamadaController;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoSecundaria;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ItfAcaoGerenciarEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
@@ -56,6 +57,9 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import org.coletivojava.fw.api.tratamentoErros.FabErro;
 import org.coletivojava.fw.utilCoreBase.UtilSBCoreReflexaoAPIERPRestFull;
+import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaErpChaveLocal;
+import java.util.HashMap;
 
 @ApiIntegracaoRestful
 public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
@@ -118,9 +122,13 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     public String gerarTokenUsuarioLogado(ItfSistemaERP pSistema) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    private static ItfSistemaERPLocal chaveLocalPadrao;
 
     @Override
-    public ItfSistemaERPAtual getSistemaAtual() {
+    public ItfSistemaERPLocal getSistemaAtual() {
+        if (chaveLocalPadrao != null) {
+            return chaveLocalPadrao;
+        }
         MapaObjetosProjetoAtual.adcionarObjeto(ParametroListaRestful.class);
         MapaObjetosProjetoAtual.adcionarObjeto(ParametroRestful.class);
         SistemaERPAtual sistemAtual = new SistemaERPAtual();
@@ -147,39 +155,23 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         } catch (MalformedURLException ex) {
             throw new UnsupportedOperationException("o sistema atual não possui uma url válida");
         }
+        chaveLocalPadrao = sistemAtual;
         if (SBCore.isEmModoDesenvolvimento()) {
-            System.out.println("---------------------- SISTEMA ATUAL CONEXÇÃO ERP ---------------------------------");
-            System.out.println("- Nome Aplicacao:");
-            System.out.println(sistemAtual.getNome());
-
-            System.out.println("- Domínio");
-            System.out.println(sistemAtual.getDominio());
-            System.out.println("- Url acesso ao Endpoint");
-            sistemAtual.getUrlPublicaEndPoint();
-            System.out.println("- Url recepção código de  permição para obter token via post");
-            sistemAtual.getUrlRecepcaoCodigo();
-
-            System.out.println("- Hash chave pública");
-            System.out.println(sistemAtual.getHashChavePublica());
-            System.out.println("- Chave Pública");
-            System.out.println(sistemAtual.getChavePublica());
+            System.out.println("---------------------- OBTENDO DADOS SISTEMA ATUAL CONEXÇÃO ERP ---------------------------------");
+            printSistema(sistemAtual);
 
         }
         return sistemAtual;
     }
 
-    @Override
-    public ItfSistemaERP getSistemaByChavePublica(String pChavePublica) {
-        EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
-        ConsultaDinamicaDeEntidade novaConsulta = new ConsultaDinamicaDeEntidade(SistemaERPConfiavel.class, em);
-        novaConsulta.addcondicaoCampoIgualA("chavePublica", pChavePublica);
-        List<SistemaERPConfiavel> sistemaConfiavel = novaConsulta.resultadoRegistros();
-        UtilSBPersistencia.fecharEM(em);
-        if (sistemaConfiavel.isEmpty()) {
-            return null;
-        } else {
-            return sistemaConfiavel.get(0);
-        }
+    private static void printSistema(SistemaERPConfiavel pSistema) {
+        System.out.println("______________________________________________");
+        System.out.println("|Nome:           " + UtilSBCoreStringFiltros.getLpad(pSistema.getNome(), 29, " ") + "|");
+        System.out.println("|Chave pública   " + UtilSBCoreStringFiltros.getLpad(pSistema.getHashChavePublica(), 29, " ") + "|");
+        System.out.println("|Domímio         " + UtilSBCoreStringFiltros.getLpad(pSistema.getDominio(), 29, " ") + "|");
+        System.out.println("|UrlEndPoint     " + UtilSBCoreStringFiltros.getLpad(pSistema.getUrlPublicaEndPoint(), 29, " ") + "|");
+        System.out.println("|Urlrecepção COD " + UtilSBCoreStringFiltros.getLpad(pSistema.getUrlRecepcaoCodigo(), 29, " ") + "|");
+        System.out.println("______________________________________________");
     }
 
     @Override
@@ -267,7 +259,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public JsonObject gerarConversaoObjetoToJson(ItfSistemaERP pSistema, ItfBeanSimples pBeanSimples) {
+    public JsonObject gerarConversaoObjetoToJson(ItfSistemaERP pSistema, ItfBeanSimples pBeanSimples, boolean pUsarIdComoIdRemotoCorrespondente) {
         // ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(pEntidade, 0);
         // ERPIntegracaoSistemasApi.RESTFUL.getDTO(pBeanSimples, pItefaceObjeto);
         if (pBeanSimples == null) {
@@ -295,41 +287,51 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             temImplementacao = false;
         }
 
-        JsonObject json = UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pBeanSimples);
+        JsonObject json = UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pBeanSimples, pUsarIdComoIdRemotoCorrespondente);
         return json;
 
     }
 
     @Override
-    public JsonObject gerarConversaoObjetoToJson(ItfBeanSimples pJson) {
-        return UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pJson);
+    public JsonObject gerarConversaoObjetoToJson(ItfBeanSimples pItemSimples) {
+        return UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pItemSimples, false);
 
     }
 
     public static JsonObject buildRespostaOptionsServico(SolicitacaoControllerERP pSolicitacao) {
         try {
-            if (pSolicitacao.isAutenticadoComSucesso() && pSolicitacao.getAcaoStrNomeUnico() == null) {
-                List<ItfAcaoGerenciarEntidade> acoesDoUsuario = new ArrayList();
+            JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+            jsonBuilder.add("scope", pSolicitacao.getUsuarioSolicitante().getEmail());
+            jsonBuilder.add("modulo", pSolicitacao.getUsuarioSolicitante().getGrupo().getModuloPrincipal().getNome());
+            JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+            if (pSolicitacao.isAutenticadoComSucesso() && pSolicitacao.getAcaoStrNomeUnico() != null) {
 
-                JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-                jsonBuilder.add("scope", pSolicitacao.getUsuarioSolicitante().getEmail());
-                jsonBuilder.add("modulo", pSolicitacao.getUsuarioSolicitante().getGrupo().getModuloPrincipal().getNome());
-
-                List<ItfAcaoGerenciarEntidade> acoes = MapaAcoesSistema.getListaTodasGestao();
-
-                acoes.stream().filter(ac -> SBCore.getServicoPermissao().isAcaoPermitidaUsuario(pSolicitacao.getUsuarioSolicitante(), ac))
-                        .forEach(acoesDoUsuario::add);
-                JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-                acoesDoUsuario.stream().map(ac -> ac.getNomeUnicoSlug()).forEach(jsonArrayBuilder::add);
+                ItfAcaoGerenciarEntidade acaoGEstao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(pSolicitacao.getAcaoStrNomeUnico()).getAcaoDeGestaoEntidade();
+                List<ItfAcaoSecundaria> acoes = acaoGEstao.getAcoesVinculadas();
+                acoes.stream().map(ac -> ac.getNomeUnico()).forEach(jsonArrayBuilder::add);
                 jsonBuilder.add("acoes", jsonArrayBuilder.build());
 
-                JsonObject retorno = jsonBuilder.build();
+            } else {
 
-                return retorno;
+                if (pSolicitacao.isAutenticadoComSucesso() && pSolicitacao.getAcaoStrNomeUnico() == null) {
+                    //mostra apenas as ações do usuário por questão de segurança
+                    List<ItfAcaoGerenciarEntidade> acoesDoUsuario = new ArrayList();
+
+                    List<ItfAcaoGerenciarEntidade> acoes = MapaAcoesSistema.getListaTodasGestao();
+
+                    acoes.stream().filter(ac -> SBCore.getServicoPermissao().isAcaoPermitidaUsuario(pSolicitacao.getUsuarioSolicitante(), ac))
+                            .forEach(acoesDoUsuario::add);
+
+                    acoesDoUsuario.stream().map(ac -> ac.getNomeUnico()).forEach(jsonArrayBuilder::add);
+                    jsonBuilder.add("acoes", jsonArrayBuilder.build());
+
+                }
             }
-            return null;
-        } catch (Throwable ex) {
+            JsonObject retorno = jsonBuilder.build();
+            return retorno;
 
+        } catch (Throwable ex) {
+            SBCore.RelatarErroAoUsuario(FabErro.SOLICITAR_REPARO, "Falha criando resposta com opções de endPoint", ex);
             return null;
         }
 
@@ -349,7 +351,8 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         }
 
         if (pSolicitacao.getAcaoStrNomeUnico() != null) {
-            acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(pSolicitacao.getAcaoStrNomeUnico());
+            final String acaoNomeUnico = pSolicitacao.getAcaoStrNomeUnico();
+            acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(acaoNomeUnico);
             if (acao == null) {
                 resposta = new RespostaAcaoDoSistema();
                 resposta.addErro("Ação " + pSolicitacao.getAcaoStrNomeUnico() + " não encontrada");
@@ -413,6 +416,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                         resposta = SBCore.getServicoController().getResposta(acao.getEnumAcaoDoSistema(), entidade);
                     } catch (ErroChamadaController ex) {
                         Logger.getLogger(ApiIntegracaoRestfulimpl.class.getName()).log(Level.SEVERE, null, ex);
+                        resposta.addErro("Falha executando ação: " + resposta.getAcaoVinculada().getNomeUnico() + "| Erro:" + ex.getMessage());
                     }
                 }
                 return resposta;
@@ -561,4 +565,67 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     }
 
+    private static Map<String, ItfSistemaERP> sistemasRegistrados = new HashMap<>();
+
+    @Override
+    public ItfSistemaERP getSistemaByChavePublica(String pChavePublica) {
+
+        if (sistemasRegistrados.containsKey(pChavePublica)) {
+            return sistemasRegistrados.get(pChavePublica);
+        }
+
+        EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
+        try {
+            ConsultaDinamicaDeEntidade novaConsulta = new ConsultaDinamicaDeEntidade(SistemaERPConfiavel.class, em);
+            novaConsulta.addcondicaoCampoIgualA("chavePublica", pChavePublica);
+            List<SistemaERPConfiavel> sistemaConfiavel = novaConsulta.resultadoRegistros();
+            if (sistemaConfiavel.isEmpty()) {
+                novaConsulta = new ConsultaDinamicaDeEntidade(SistemaErpChaveLocal.class, em);
+                sistemaConfiavel = novaConsulta.resultadoRegistros();
+                if (sistemaConfiavel.isEmpty()) {
+                    return null;
+                } else {
+                    sistemasRegistrados.put(pChavePublica, sistemaConfiavel.get(0));
+                    return sistemaConfiavel.get(0);
+                }
+
+            } else {
+                sistemasRegistrados.put(pChavePublica, sistemaConfiavel.get(0));
+                return sistemaConfiavel.get(0);
+            }
+        } finally {
+            UtilSBPersistencia.fecharEM(em);
+        }
+
+    }
+
+    @Override
+    public ItfSistemaERPLocal getSistemaLocalByHashChavePublica(String pHashChavePuvlica) {
+        if (getSistemaAtual() != null) {
+            if (getSistemaAtual().getHashChavePublica().equals(pHashChavePuvlica)) {
+                return getSistemaAtual();
+            }
+        }
+
+        if (sistemasRegistrados.containsKey(pHashChavePuvlica)) {
+            if (sistemasRegistrados.get(pHashChavePuvlica) instanceof ItfSistemaERPLocal) {
+                throw new UnsupportedOperationException("O sistema com hash público " + pHashChavePuvlica + " foi encontrado, mas não possui chave privada");
+            }
+            return (ItfSistemaERPLocal) sistemasRegistrados.get(pHashChavePuvlica);
+
+        }
+
+        EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
+        try {
+            ConsultaDinamicaDeEntidade novaConsulta = new ConsultaDinamicaDeEntidade(SistemaErpChaveLocal.class, em);
+            List<SistemaErpChaveLocal> sistemaConfiavel = novaConsulta.resultadoRegistros();
+            if (!sistemaConfiavel.isEmpty()) {
+                sistemasRegistrados.put(pHashChavePuvlica, sistemaConfiavel.get(0));
+                return sistemaConfiavel.get(0);
+            }
+        } finally {
+            UtilSBPersistencia.fecharEM(em);
+        }
+        return null;
+    }
 }

@@ -41,7 +41,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     OAUTH_VALIDAR_CREDENCIAL,
-    @InfoConsumoRestService(getPachServico = "/acoesRestful/acao/executar/{0}/{1}",
+    @InfoConsumoRestService(getPachServico = "/acao/executar/{0}/{1}",
             tipoConexao = FabTipoConexaoRest.PUT,
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             parametrosGet = {"nomeUnicoAcaoGestao", "codigoEntidade"},
@@ -76,8 +76,9 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
     ACOES_EXECUTAR_DELETE,
-    @InfoConsumoRestService(getPachServico = "/acaogestao/",
+    @InfoConsumoRestService(getPachServico = "/{0}",
             tipoConexao = FabTipoConexaoRest.OPTIONS,
+            parametrosGet = "Acção Gestão",
             tipoInformacaoRecebida = FabTipoArquivoImportacao.JSON,
             urlDocumentacao = "https://coletivojava.com.br",
             adicionarAutenticacaoBearer = true)
@@ -126,7 +127,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
 
     @Override
     public ItfTokenGestaoOauth getGestaoToken(ItfUsuario pUsuario) {
-        throw new UnsupportedOperationException("Informe o sistema chamando get GestaoDeToken(Sistema)");
+        throw new UnsupportedOperationException("Informe o sistema chamando get getGestaoToken(ItfSistemaERP)");
     }
 
     public static ItfTokenGestaoOauth getGestaoTokenOpcoes(ItfSistemaERP pSistemaServico) {

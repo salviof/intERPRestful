@@ -5,6 +5,7 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 
+import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
@@ -15,11 +16,14 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.Info
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
 import jakarta.json.JsonObject;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -31,6 +35,8 @@ import javax.persistence.Transient;
 @Table(indexes = {
     @Index(name = "CHAVEPUBLICA", columnList = "chavePublica")})
 @InfoObjetoSB(tags = "Sistema ERP Confiável", plural = "Sistemas Confiáveis")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipoChave")
 public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaERP {
 
     @Id
@@ -46,12 +52,15 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     @Column(nullable = false)
     private String dominio;
 
+    @Column(nullable = false, updatable = false, insertable = false)
+    private String tipoChave;
+
     @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Endereço Recepção Código Autorização")
     @Column(nullable = true, length = 2000)
     @Deprecated
     private String urlRecepcaoCodigo;
 
-    @Column(length = 8000)
+    @Column(length = 8000, unique = true)
     @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_DESCRITIVO, obrigatorio = true)
     private String chavePublica;
 
@@ -160,6 +169,14 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
 
     public void setFoiEstabelicidaConexao(boolean foiEstabelicidaConexao) {
         this.foiEstabelicidaConexao = foiEstabelicidaConexao;
+    }
+
+    public String getTipoChave() {
+        return tipoChave;
+    }
+
+    public void setTipoChave(String tipoChave) {
+        this.tipoChave = tipoChave;
     }
 
 }

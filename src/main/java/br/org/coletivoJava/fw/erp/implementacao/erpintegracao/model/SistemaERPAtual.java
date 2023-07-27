@@ -5,13 +5,13 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 
-import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
+import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 
 /**
  *
  * @author sfurbino
  */
-public class SistemaERPAtual extends SistemaERPConfiavel implements ItfSistemaERPAtual {
+public class SistemaERPAtual extends SistemaERPConfiavel implements ItfSistemaERPLocal {
 
     private String chavePrivada;
 

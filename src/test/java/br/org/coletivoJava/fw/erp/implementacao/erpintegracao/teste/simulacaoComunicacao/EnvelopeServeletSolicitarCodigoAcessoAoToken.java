@@ -29,6 +29,7 @@ public class EnvelopeServeletSolicitarCodigoAcessoAoToken extends EnvelopeRequis
     private final SistemaERPConfiavel sistemaServidor;
     private final SistemaERPConfiavel sistemaCliente;
     private final String emailSolicitante;
+    private String urlRequisicao;
 
     public EnvelopeServeletSolicitarCodigoAcessoAoToken(
             SistemaERPConfiavel pSistemaServidor, SistemaERPConfiavel pSistemaRequisicao, String pEmailSolicitante
@@ -53,6 +54,9 @@ public class EnvelopeServeletSolicitarCodigoAcessoAoToken extends EnvelopeRequis
                     + "/" + emailSolicitante;
 
             URL urlCompleto = new URL("https://" + sistemaServidor.getDominio() + patchRequisicao);
+            urlRequisicao = urlCompleto.toString();
+            System.out.println("A url será requisitada em ");
+            System.out.println(urlRequisicao);
             setRequestURL(urlCompleto);
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(EnvelopeServeletSolicitarCodigoAcessoAoToken.class.getName()).log(Level.SEVERE, null, ex);
@@ -78,6 +82,10 @@ public class EnvelopeServeletSolicitarCodigoAcessoAoToken extends EnvelopeRequis
     @Override
     public String getRespostaPost(HttpServlet pServeletProcessador) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getUrlRequisicao() {
+        return urlRequisicao;
     }
 
 }

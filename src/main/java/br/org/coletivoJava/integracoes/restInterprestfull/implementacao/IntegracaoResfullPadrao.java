@@ -8,6 +8,7 @@ package br.org.coletivoJava.integracoes.restInterprestfull.implementacao;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
+import com.google.common.collect.Lists;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
@@ -21,12 +22,14 @@ import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author sfurbino
  */
-public class IntegracaoResfullPadrao extends
+public abstract class IntegracaoResfullPadrao extends
         AcaoApiIntegracaoComOauthAbstrato {
 
     protected SolicitacaoControllerERP solicitacao;
@@ -35,6 +38,24 @@ public class IntegracaoResfullPadrao extends
     public IntegracaoResfullPadrao(String pTipoApicacao, ItfFabricaIntegracaoRest pIntegracaoEndpoint, FabTipoAgenteClienteApi pTipoAgente, ItfUsuario pUsuario, Object... pParametros) {
         super(pTipoApicacao, pIntegracaoEndpoint,
                 pTipoAgente, pUsuario, pParametros);
+    }
+
+    @Override
+    protected void executarAcao() {
+        SolicitacaoControllerERP solicitacaoParametro = getSoliciatacao();
+
+        String pNomeAcao = solicitacaoParametro.getAcaoStrNomeUnico();
+        parametros = Lists.newArrayList(pNomeAcao);
+        parametros.addAll(gerarParametrosResFullPelaSolicitacao());
+        super.executarAcao();
+
+    }
+
+    protected List<Object> gerarParametrosResFullPelaSolicitacao() {
+        if (SBCore.isEmModoDesenvolvimento()) {
+            System.out.println("implemente este método para dicionar parametos a partir dos parametros iniciais");
+        }
+        return new ArrayList<>();
     }
 
     public ItfSistemaERP getDadoServico() {
@@ -49,11 +70,12 @@ public class IntegracaoResfullPadrao extends
     public SolicitacaoControllerERP getSoliciatacao() {
 
         if (solicitacao == null) {
-            if (!(parametros[0] instanceof SolicitacaoControllerERP)) {
+
+            if (!(parametros.get(0) instanceof SolicitacaoControllerERP)) {
                 throw new UnsupportedOperationException("O único parâmetro aceitável é  " + SolicitacaoControllerERP.class.getSimpleName() + " utlize a classe " + UtilSBRestful.class.getSimpleName() + " para instanciar um parâmetro");
             }
 
-            solicitacao = (SolicitacaoControllerERP) parametros[0];
+            solicitacao = (SolicitacaoControllerERP) parametros.get(0);
         }
         return solicitacao;
     }

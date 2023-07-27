@@ -21,4 +21,9 @@ public class ConfigPercistenciaItegracaoSistemas extends ConfigPersistenciaPadra
         return new Class[]{FabModuloTestesIntegracao.class, FabGrupoTestesIntegracao.class, FabDadosIniciaisTesteIntegracao.class};
     }
 
+    @Override
+    public boolean isExibirLogBancoDeDados() {
+        return false;
+    }
+
 }

@@ -21,12 +21,8 @@ public class IntegracaoRestInterprestfullAcoesExecutarController
     }
 
     @Override
-    protected void executarAcao() {
-        SolicitacaoControllerERP solicitacaoParametro = getSoliciatacao();
-        String pNomeAcao = solicitacaoParametro.getAcaoStrNomeUnico();
-
-        parametros = new Object[]{pNomeAcao};
-        super.executarAcao();
+    public String gerarCorpoRequisicao() {
+        return super.gerarCorpoRequisicao(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
 
 }

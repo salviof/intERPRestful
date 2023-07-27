@@ -10,6 +10,8 @@ import jakarta.json.JsonObject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,19 +29,17 @@ public class IntegracaoRestInterprestfullAcoesGetListaEntidades
     }
 
     @Override
-    protected void executarAcao() {
-
+    protected List<Object> gerarParametrosResFullPelaSolicitacao() {
         SolicitacaoControllerERP sl = getSoliciatacao();
-        String pNomeAcao = sl.getAcaoStrNomeUnico();
+        List<Object> novosPr = new ArrayList<>();
         JsonObject parametrosLista = UtilSBCoreJson.getJsonObjectByTexto(sl.getCorpoParametros());
         int pagina = parametrosLista.getInt("pagina");
-        if (sl.getAtributoEntidade() == null) {
-            parametros = new Object[]{pNomeAcao, pagina};
-        } else {
-            parametros = new Object[]{pNomeAcao, pagina, sl.getAtributoEntidade()};
+        novosPr.add(pagina);
+        if (sl.getAtributoEntidade() != null) {
+            novosPr.add(sl.getAtributoEntidade());
         }
 
-        super.executarAcao();
+        return novosPr;
     }
 
     @Override

@@ -36,7 +36,7 @@ public class SerializerTest {
             System.out.println(campo.getNome());
         }
         for (UsuarioSB usr : usuarios) {
-            System.out.println(UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(usr));
+            System.out.println(UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(usr, false));
         }
 
     }

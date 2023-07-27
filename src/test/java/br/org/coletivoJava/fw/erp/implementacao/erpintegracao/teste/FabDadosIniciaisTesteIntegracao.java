@@ -16,7 +16,8 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basic
  */
 public enum FabDadosIniciaisTesteIntegracao implements ItfFabricaComPersistencia {
     //   GRUPO_TESTE,
-    USUARIO_SALVIO;
+    USUARIO_SALVIO,
+    USUARIO_WEB;
     //   MODULO_TESTE_INTEGRACAO;
 
     @Override
@@ -40,6 +41,14 @@ public enum FabDadosIniciaisTesteIntegracao implements ItfFabricaComPersistencia
                 usuario.setEmail("salviof@gmail.com");
                 usuario.setSenha("123456");
                 return usuario;
+            case USUARIO_WEB:
+                UsuarioSB usuarioCliente = new UsuarioSB();
+                usuarioCliente.setNome("Salvio");
+                usuarioCliente.setId(1);
+                usuarioCliente.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
+                usuarioCliente.setEmail("cliente@sistemaerp2.com.br");
+                usuarioCliente.setSenha("123456");
+                return usuarioCliente;
 
             default:
                 throw new AssertionError(this.name());

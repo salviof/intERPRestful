@@ -15,7 +15,6 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,23 +30,38 @@ import org.coletivojava.fw.api.tratamentoErros.FabErro;
 public class UtilSBRestFulJsonToEntity {
 
     public static void aplicarValor(ItfBeanSimples pEntidade, String pChave, JsonValue pValorJson) {
+
         EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
         try {
             ItfCampoInstanciado campo = pEntidade.getCPinst(pChave);
             switch (campo.getFabricaTipoAtributo().getTipoPrimitivo()) {
+
                 case INTEIRO:
                     pEntidade.getCampoInstanciadoByNomeOuAnotacao(pChave)
-                            .setValor(pValorJson);
+                            .setValor(UtilSBCoreJson.getComoInteiro(pValorJson));
                     break;
                 case NUMERO_LONGO:
 
                     break;
                 case LETRAS:
-                    String valorstr = ((JsonString) pValorJson).getString();
+                    String valorstr = null;
+                    if (pValorJson instanceof jakarta.json.JsonString) {
+                        valorstr = ((jakarta.json.JsonString) pValorJson).getString();
+                    }
+
+                    if (valorstr == null) {
+                        if (pValorJson != null) {
+                            if (!pValorJson.getValueType().equals(JsonValue.ValueType.NULL)) {
+                                valorstr = pValorJson.toString();
+                            }
+                        }
+                    }
+
                     pEntidade.getCampoInstanciadoByNomeOuAnotacao(pChave)
                             .setValor(valorstr);
 
                     break;
+
                 case DATAS:
 
                     break;
@@ -61,24 +75,44 @@ public class UtilSBRestFulJsonToEntity {
                 case ENTIDADE:
 
                     switch (campo.getFabricaTipoAtributo()) {
+                        case LC_LOCALIZACAO:
+                            if (pValorJson.getValueType().equals(JsonValue.ValueType.OBJECT)) {
+                                if (pValorJson.asJsonObject().containsKey("cep")) {
+                                    ItfCampoInstanciado cpLocalizacao = pEntidade.getCampoInstanciadoByNomeOuAnotacao(pChave);
+                                    String cep = pValorJson.asJsonObject().getString("cep");
+                                    cpLocalizacao.getComoCampoLocalizacao().aplicarCEP(cep);
+                                    if (pValorJson.asJsonObject().containsKey("complemento")) {
+                                        cpLocalizacao.getComoCampoLocalizacao().setComplemento(pValorJson.asJsonObject().getString("complemento"));
+                                    }
+
+                                }
+                            }
+
+                            break;
                         case OBJETO_DE_UMA_LISTA:
                             ItfCampoInstanciado cp = pEntidade.getCampoInstanciadoByNomeOuAnotacao(pChave);
-                            if (pValorJson.asJsonObject().containsKey("@id")) {
-                                ItfBeanSimples beanSimples = cp.getObjetoDoAtributo();
-                                EstruturaDeEntidade estrutura = MapaObjetosProjetoAtual.getEstruturaObjeto(beanSimples.getClass().getSimpleName());
-                                String entidade = estrutura.getCampoByNomeDeclarado(pChave).getClasseCampoDeclaradoOuTipoLista();
-                                int id = UtilSBCoreJson.getComoInteiro(pValorJson.asJsonObject().get("@id"));
-                                ItfBeanSimples item = (ItfBeanSimples) UtilSBPersistencia.getRegistroByID(MapaObjetosProjetoAtual.getClasseDoObjetoByNome(entidade), id, em);
-                                cp.setValor(item);
+                            if (pValorJson.getValueType().equals(JsonValue.ValueType.OBJECT)) {
+                                if (pValorJson.asJsonObject().containsKey("@id")) {
+                                    ItfBeanSimples beanSimples = cp.getObjetoDoAtributo();
+                                    EstruturaDeEntidade estrutura = MapaObjetosProjetoAtual.getEstruturaObjeto(beanSimples.getClass().getSimpleName());
+                                    String entidade = estrutura.getCampoByNomeDeclarado(pChave).getClasseCampoDeclaradoOuTipoLista();
+                                    int id = 0;
+                                    if (pValorJson instanceof jakarta.json.JsonObject) {
+                                        id = UtilSBCoreJson.getComoInteiro(pValorJson.asJsonObject().get("@id"));
+                                    }
 
-                            } else {
-                                throw new UnsupportedOperationException("Falha criando Atributo [" + pChave + "] o @id não foi informado o sistema ainda não suporta Cascata de persistencia com @ManyToOne");
+                                    ItfBeanSimples item = (ItfBeanSimples) UtilSBPersistencia.getRegistroByID(MapaObjetosProjetoAtual.getClasseDoObjetoByNome(entidade), id, em);
+                                    cp.setValor(item);
+
+                                } else {
+                                    throw new UnsupportedOperationException("Falha criando Atributo [" + pChave + "] o @id não foi informado o sistema ainda não suporta Cascata de persistencia com @ManyToOne");
+                                }
+                                String tipoCampo = cp.getTipoCampoSTR();
+                                //    ItfBeanSimples objeto = (ItfBeanSimples) UtilSBPersistencia.
+                                //          getRegistroByID(entidadeFilho, pJsonAtributosAtualizadosObjeto.getJsonObject(campo.getNomeDeclarado())
+                                //                .getInt("id"), em);
+                                //cp.setValor(objeto);
                             }
-                            String tipoCampo = cp.getTipoCampoSTR();
-                            //    ItfBeanSimples objeto = (ItfBeanSimples) UtilSBPersistencia.
-                            //          getRegistroByID(entidadeFilho, pJsonAtributosAtualizadosObjeto.getJsonObject(campo.getNomeDeclarado())
-                            //                .getInt("id"), em);
-                            //cp.setValor(objeto);
                             break;
                         case LISTA_OBJETOS_PARTICULARES:
                         case LISTA_OBJETOS_PUBLICOS:

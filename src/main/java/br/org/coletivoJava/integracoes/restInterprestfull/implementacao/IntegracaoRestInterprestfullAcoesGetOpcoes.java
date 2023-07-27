@@ -23,4 +23,9 @@ public class IntegracaoRestInterprestfullAcoesGetOpcoes
         super.executarAcao();
     }
 
+    @Override
+    public String gerarUrlRequisicao() {
+        return super.gerarUrlRequisicao();
+    }
+
 }

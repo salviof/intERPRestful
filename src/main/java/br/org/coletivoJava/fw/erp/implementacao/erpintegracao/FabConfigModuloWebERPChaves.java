@@ -23,7 +23,10 @@ public enum FabConfigModuloWebERPChaves implements ItfFabConfigModulo {
     @InfoPropriedadeConfigRestIntegracao(tipoPropriedade = FabPropriedadeModuloIntegracaoOauth.CHAVE_PUBLICA)
     PAR_DE_CHAVES_IDENTIFICADOR,
     @InfoPropriedadeConfigRestIntegracao(tipoPropriedade = FabPropriedadeModuloIntegracaoOauth.URL_SERVIDOR_API)
-    SITE_URL;
+    SITE_URL,
+    @InfoPropriedadeConfigRestIntegracao(tipoPropriedade = FabPropriedadeModuloIntegracaoOauth.USUARIO)
+    USUARIO_ADMIN;
+
     private static KeyPairGenerator gerador;
 
     @Override

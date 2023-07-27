@@ -1,13 +1,13 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json_bind_restful.SistemaERPAtual;
 
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.dto.ItfDTOSBJSON;
-import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.json.JsonObject;
 import java.lang.String;
+import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 
 @JsonDeserialize(using = JsonBindDTOSistemaERPAtual.class)
-public interface ItfDTOSistemaERPAtual extends ItfDTOSBJSON, ItfSistemaERPAtual {
+public interface ItfDTOSistemaERPAtual extends ItfDTOSBJSON, ItfSistemaERPLocal {
 
     @Override
     public default String getChavePrivada() {

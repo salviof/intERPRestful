@@ -6,7 +6,6 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
-import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPAtual;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros.ParametroListaRestful;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenAcessoOauthServer;
@@ -48,6 +47,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 
 /**
  *
@@ -140,13 +140,18 @@ public class UtilSBRestful {
                 pCliente.getHashChavePublica(),
                 pNomeUnicoAcao, SBCore.getUsuarioLogado(), codigoBeanSimples,
                 atributo,
-                erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples));
+                erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples, true));
 
         return novaSolicitacao;
     }
 
     public static SolicitacaoControllerERP getSolicitacaoAcaoController(ItfSistemaERP pCliente, ItfSistemaERP pServico,
             String pNomeUnicoAcao, ItfBeanSimples pBeanSimples) {
+        return getSolicitacaoAcaoController(pCliente, pServico, pNomeUnicoAcao, pBeanSimples, false);
+    }
+
+    public static SolicitacaoControllerERP getSolicitacaoAcaoController(ItfSistemaERP pCliente, ItfSistemaERP pServico,
+            String pNomeUnicoAcao, ItfBeanSimples pBeanSimples, boolean pUsarCodigoIdComoId) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
         if (pNomeUnicoAcao == null) {
@@ -159,20 +164,25 @@ public class UtilSBRestful {
         if (pBeanSimples != null) {
             codigoBeanSimples = String.valueOf(pBeanSimples.getId());
         }
-
-        UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pBeanSimples);
-
+        JsonObject itemJson = erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples, pUsarCodigoIdComoId);
         SolicitacaoControllerERP novaSolicitacao = new SolicitacaoControllerERP(
                 FabTipoSolicitacaoRestfull.CONTROLLER.getMetodo(),
                 pServico.getHashChavePublica(),
                 pCliente.getHashChavePublica(),
                 pNomeUnicoAcao, SBCore.getUsuarioLogado(), codigoBeanSimples,
                 null,
-                erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples));
+                itemJson);
 
         return novaSolicitacao;
     }
 
+    /**
+     *
+     * @param pCliente
+     * @param pServico
+     * @param pNomeUnicoAcao Nome único da ação
+     * @return
+     */
     public static SolicitacaoControllerERP getSolicitacaoOption(ItfSistemaERP pCliente, ItfSistemaERP pServico,
             String pNomeUnicoAcao) {
         if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pNomeUnicoAcao)) {
@@ -251,7 +261,7 @@ public class UtilSBRestful {
             });
         }
         ItfIntegracaoERP servicoRestful = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
-        ItfSistemaERPAtual servidor = servicoRestful.getSistemaAtual();
+        ItfSistemaERPLocal servidor = servicoRestful.getSistemaAtual();
 
         SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(
                 pRequest.getMethod(),

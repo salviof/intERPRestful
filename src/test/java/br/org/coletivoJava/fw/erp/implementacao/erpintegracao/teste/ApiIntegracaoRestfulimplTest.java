@@ -11,7 +11,6 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ConfigCoreApiIntegracao;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabTipoSolicitacaoRestfull;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.FabGrupoTestesIntegracao;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;

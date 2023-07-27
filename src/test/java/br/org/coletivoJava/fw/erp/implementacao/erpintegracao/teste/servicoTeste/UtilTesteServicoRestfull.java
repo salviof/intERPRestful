@@ -17,6 +17,8 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import spark.Spark;
 
 /**
@@ -83,7 +85,11 @@ public class UtilTesteServicoRestfull {
             return respostaStr;
         }
         );
-
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(UtilTesteServicoRestfull.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 ;
 

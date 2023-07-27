@@ -7,6 +7,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto.GeradorIdJsonIDLocalTransienteRefIDRemoto;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto.JsonIdentificadorIDLocalCorrespondeIDRemoto;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto.MixLocalCorrespondeRemoto;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -42,7 +43,7 @@ public class UtilSBRestFulEntityToJson {
     private static Map<Class, Class> mapaConversorEntidadeToJson = new HashMap<>();
     private static Map<Class, Class> mapaConversorJsonToEntidade = new HashMap<>();
 
-    public static JsonObject getJsonFromObjetoGenerico(ItfBeanSimples beanSimples) {
+    public static JsonObject getJsonFromObjetoGenerico(ItfBeanSimples beanSimples, boolean pUsarIdBeanSimplesComoIdRemoto) {
         if (beanSimples == null) {
             return null;
         }
@@ -51,6 +52,9 @@ public class UtilSBRestFulEntityToJson {
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         mapper.setAnnotationIntrospector(new AutoAnotacaoJacksonDefinindoCampoId());
+        if (pUsarIdBeanSimplesComoIdRemoto) {
+            mapper.addMixIn(beanSimples.getClass(), MixLocalCorrespondeRemoto.class);
+        }
         mapper.enable(MapperFeature.USE_ANNOTATIONS);
         mapper.registerModule(new Hibernate5Module());
 
@@ -66,13 +70,14 @@ public class UtilSBRestFulEntityToJson {
 
     public static JsonObjectBuilder getJsonBuilderFromObjetoGenerico(ItfBeanSimples beanSimples) {
 
-        return Json.createObjectBuilder(getJsonFromObjetoGenerico(beanSimples));
+        return Json.createObjectBuilder(getJsonFromObjetoGenerico(beanSimples, false));
     }
 
     static class AutoAnotacaoJacksonDefinindoCampoId extends JacksonAnnotationIntrospector {
 
         public AutoAnotacaoJacksonDefinindoCampoId() {
             System.out.println("Test");
+
         }
 
         @Override
