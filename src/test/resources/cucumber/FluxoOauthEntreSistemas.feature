@@ -27,12 +27,8 @@ Contexto: CenárioServidorFicticio
 
   Cenario: Sistema cliente lista os usuários em servidor apos se autenticar via oauth
     Dado um usuario logado no sitema com chave de acesso configuradas entre cliente e servidor
-    Quando o sistema solicita um código de concessão 
+    Quando o sistema solicita um código de concessão no escopo do sistema
     Então o servidor valida as chaves de acesso assincronas e reconhece o nome de usuário
-    E o proprio servidor acessa a url inviando o código de concessao
-    Quando o cliente recebe o codigo de concessao no seu endereço
-    Entao o aplicativo do cliente solicita o token usando código de concessão via post
-    E armazena o token de acesso do cliente
-    Quando o cliente possuidor de token tenta acessar um recurso do servidor
-    Entao o servidor reconhece o token
-    E executar uma ação controller com o token
+    E o proprio servidor acessa a url enviando o código de concessao que por sua vez solicita o token
+    Quando o sistema solicita a listagem de usuario com um token valido
+    Entao o servidor entrega uma lista em Json com os dados de usuário

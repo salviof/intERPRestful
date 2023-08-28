@@ -14,10 +14,10 @@ import static org.junit.Assert.assertTrue;
 
 public class Quando__o_sistema_solicita_um_codigo_de_concessao {
 
-    @Quando(EtapasFluxoOauthInteracaoSistema.QUANDO_O_SISTEMA_SOLICITA_UM_CODIGO_DE_CONCESSAO)
+    @Quando(EtapasFluxoOauthInteracaoSistema.QUANDO_O_SISTEMA_SOLICITA_UM_CODIGO_DE_CONCESSAO_NO_ESCOPO_DO_SISTEMA)
     public void implementacaoEtapa() {
         System.out.println("O usuário não possui um token de acesso");
-        ItfTokenGestao gestao = FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL.getGestaoToken(FluxoOauth2SistemaAcessoRestfull.sistemaRemoto);
+        ItfTokenGestao gestao = FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL.getGestaoToken(FluxoOauth2SistemaAcessoRestfull.sistemaServidorRecursos);
         assertFalse(gestao.isTemTokemAtivo());
 
         System.out.println("O usuário acessa a url para obter o código de solicitação,"
@@ -26,7 +26,7 @@ public class Quando__o_sistema_solicita_um_codigo_de_concessao {
         SBCore.getServicoSessao().logarEmailESenha(FluxoOauth2SistemaAcessoRestfull.EMAIL_USUARIO_AUTENTICADO, "123456");
         assertTrue("Usuário não logrou êxito ao efetuar login", SBCore.getServicoSessao().getSessaoAtual().isIdentificado());
         FluxoOauth2SistemaAcessoRestfull.envelopeSolicitacaoCodigoDeAcesso = new EnvelopeServeletSolicitarCodigoAcessoAoToken(
-                FluxoOauth2SistemaAcessoRestfull.sistemaRemoto, FluxoOauth2SistemaAcessoRestfull.sistemaCliente, FluxoOauth2SistemaAcessoRestfull.EMAIL_USUARIO_AUTENTICADO);
+                FluxoOauth2SistemaAcessoRestfull.sistemaServidorRecursos, FluxoOauth2SistemaAcessoRestfull.sistemaCliente, FluxoOauth2SistemaAcessoRestfull.EMAIL_USUARIO_AUTENTICADO);
         System.out.println("O código de acesso será soclicitado pela url:");
         System.out.println(FluxoOauth2SistemaAcessoRestfull.envelopeSolicitacaoCodigoDeAcesso.getUrlRequisicao());
     }

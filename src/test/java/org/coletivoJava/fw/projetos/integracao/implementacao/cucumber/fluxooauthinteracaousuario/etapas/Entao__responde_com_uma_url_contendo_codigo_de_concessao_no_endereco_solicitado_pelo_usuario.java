@@ -37,7 +37,7 @@ public class Entao__responde_com_uma_url_contendo_codigo_de_concessao_no_enderec
         }
         //Verificar código de acesso
         GestaoTokenRestInterprestfull gestaoResful = (GestaoTokenRestInterprestfull) FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL
-                .getGestaoToken(FluxoOauth2UsuarioAcessoRestfull.sistemaCliente);
+                .getGestaoToken(FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos);
         gestaoResful.isCodigoSolicitacaoRegistrado();
 
         try {

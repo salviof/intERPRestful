@@ -168,7 +168,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         //obterCodigoSolicitacaoDeslogado();
 
         String url = reposta;
-        UtilTesteServicoRestfull.iniciarServico();
+        UtilTesteServicoRestfull.iniciarServicoRestFull();
 
         ItfAcaoApiRest acaoOpcoes = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES.getAcao(UtilSBRestful.getSolicitacaoOption(sistemaCliente, sisRemoto, ""));
         ItfResposta respOpcoes = acaoOpcoes.getResposta();

@@ -13,33 +13,23 @@ import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRest
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJsonRest;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexao;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringsMaiuculoMinusculo;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
-import com.super_bits.modulosSB.SBCore.modulos.Mensagens.ItfMensagem;
-import com.super_bits.modulosSB.SBCore.modulos.comunicacao.FabTipoComunicacao;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabrica;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
-import com.super_bits.modulosSB.webPaginas.controller.servlets.FabTipoInformacaoUrl;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
-import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -114,8 +104,27 @@ public class UtilSBRestful {
         return getSolicitacaoAcaoController(pCliente, pServico, acao, pBeanSimples);
     }
 
+    private static boolean isUsuarioAdmin(ItfSistemaERP pSistemaServico) {
+        if (pSistemaServico == null) {
+            return false;
+        }
+        if (pSistemaServico.getEmailusuarioAdmin() != null && pSistemaServico.getEmailusuarioAdmin().isEmpty()) {
+            if (SBCore.getUsuarioLogado().getEmail().equals(pSistemaServico.getEmailusuarioAdmin())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static SolicitacaoControllerERP getSolicitacaoAcaoListagemDeEntidade(ItfSistemaERP pCliente, ItfSistemaERP pServico,
             String pNomeUnicoAcao, ItfBeanSimples pBeanSimples) {
+
+        return getSolicitacaoAcaoListagemDeEntidade(pCliente, pServico, pNomeUnicoAcao, isUsuarioAdmin(pServico), pBeanSimples);
+
+    }
+
+    public static SolicitacaoControllerERP getSolicitacaoAcaoListagemDeEntidade(ItfSistemaERP pCliente, ItfSistemaERP pServico,
+            String pNomeUnicoAcao, boolean pAcessarComoAdmin, ItfBeanSimples pBeanSimples) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
         if (pNomeUnicoAcao == null) {
@@ -138,7 +147,7 @@ public class UtilSBRestful {
                 FabTipoSolicitacaoRestfull.LISTA_DE_ENTIDADE.getMetodo(),
                 pServico.getHashChavePublica(),
                 pCliente.getHashChavePublica(),
-                pNomeUnicoAcao, SBCore.getUsuarioLogado(), codigoBeanSimples,
+                pNomeUnicoAcao, SBCore.getUsuarioLogado(), pAcessarComoAdmin, codigoBeanSimples,
                 atributo,
                 erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples, true));
 
@@ -169,7 +178,7 @@ public class UtilSBRestful {
                 FabTipoSolicitacaoRestfull.CONTROLLER.getMetodo(),
                 pServico.getHashChavePublica(),
                 pCliente.getHashChavePublica(),
-                pNomeUnicoAcao, SBCore.getUsuarioLogado(), codigoBeanSimples,
+                pNomeUnicoAcao, SBCore.getUsuarioLogado(), isUsuarioAdmin(pServico), codigoBeanSimples,
                 null,
                 itemJson);
 
@@ -195,7 +204,7 @@ public class UtilSBRestful {
                 FabTipoSolicitacaoRestfull.OPCOES.getMetodo(),
                 pServico.getHashChavePublica(),
                 pCliente.getHashChavePublica(),
-                pNomeUnicoAcao, SBCore.getUsuarioLogado(), null,
+                pNomeUnicoAcao, SBCore.getUsuarioLogado(), isUsuarioAdmin(pServico), null,
                 null,
                 null);
         return novaSolicitacao;
@@ -266,7 +275,7 @@ public class UtilSBRestful {
         SolicitacaoControllerERP solicitacao = new SolicitacaoControllerERP(
                 pRequest.getMethod(),
                 servidor.getHashChavePublica(),
-                token.getClient_id(), acaoDoSistemaEnum, usuario, codigoEntidade, atributoEntidade, json, parametorsRequisicao);
+                token.getClient_id(), acaoDoSistemaEnum, usuario, isUsuarioAdmin(servidor), codigoEntidade, atributoEntidade, json, parametorsRequisicao);
 
         return solicitacao;
 

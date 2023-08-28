@@ -43,8 +43,8 @@ public enum FabDadosIniciaisTesteIntegracao implements ItfFabricaComPersistencia
                 return usuario;
             case USUARIO_WEB:
                 UsuarioSB usuarioCliente = new UsuarioSB();
-                usuarioCliente.setNome("Salvio");
-                usuarioCliente.setId(1);
+                usuarioCliente.setNome("Cliente teste ");
+                usuarioCliente.setId(2);
                 usuarioCliente.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
                 usuarioCliente.setEmail("cliente@sistemaerp2.com.br");
                 usuarioCliente.setSenha("123456");

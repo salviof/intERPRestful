@@ -27,7 +27,7 @@ public class Entao__executar_uma_acao_controller_com_o_token {
 
         novoUsuario.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
 
-        SolicitacaoControllerERP solicitaca = UtilSBRestful.getSolicitacaoAcaoController(FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos, FluxoOauth2UsuarioAcessoRestfull.sistemaCliente,
+        SolicitacaoControllerERP solicitaca = UtilSBRestful.getSolicitacaoAcaoController(FluxoOauth2UsuarioAcessoRestfull.sistemaCliente, FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos,
                 FabAcaoRestfullTestes.USUARIO_RESTFUL_CTR_SALVAR_MERGE.getRegistro().getNomeUnico(),
                 novoUsuario, true);
 

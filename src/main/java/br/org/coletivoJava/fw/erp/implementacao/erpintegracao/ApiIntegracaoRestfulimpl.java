@@ -59,6 +59,9 @@ import org.coletivojava.fw.api.tratamentoErros.FabErro;
 import org.coletivojava.fw.utilCoreBase.UtilSBCoreReflexaoAPIERPRestFull;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaErpChaveLocal;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.ItfRespostaWebServiceSimples;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestaoOauth;
+import com.super_bits.modulosSB.SBCore.modulos.Mensagens.FabTipoAgenteDoSistema;
 import java.util.HashMap;
 
 @ApiIntegracaoRestful
@@ -134,10 +137,11 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         SistemaERPAtual sistemAtual = new SistemaERPAtual();
         sistemAtual.setNome(SBCore.getGrupoProjeto());
 
-        String idPardeChaves = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class).getPropriedade(FabConfigModuloWebERPChaves.PAR_DE_CHAVES_IDENTIFICADOR);
-        Map<String, String> par = RepositorioChavePublicaPrivada.geParDeChavesPubPrivada(idPardeChaves);
+        String idChave = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class).getPropriedade(FabConfigModuloWebERPChaves.PAR_DE_CHAVES_IDENTIFICADOR);
+        System.out.println("buscando por" + idChave);
+        Map<String, String> par = RepositorioChavePublicaPrivada.getParDeChavesPubPrivada(idChave);
         if (par == null) {
-            throw new UnsupportedOperationException("O par de chaves local do sistema não foi encontrado");
+            throw new UnsupportedOperationException("O par de chaves local do sistema não foi encontrado buscando pelo par com hash " + idChave);
         }
         String cvPublicaDecoded = par.keySet().iterator().next();
         String cvPrivadaDecoded = par.values().iterator().next();
@@ -150,7 +154,8 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             sistemAtual.setDominio(urlSite.getHost());
             sistemAtual.setUrlPublicaEndPoint(urlStr + "/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
             String getaoTpkenIdentificador = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER.getClasseGestaoOauth().getSimpleName();
-            sistemAtual.setUrlRecepcaoCodigo(urlStr + "/solicitacaoAuth2Recept/code/Usuario/" + getaoTpkenIdentificador);
+
+            sistemAtual.setUrlRecepcaoCodigo(urlStr + "/solicitacaoAuth2Recept/code/" + FabTipoAgenteDoSistema.USUARIO.name() + "/" + getaoTpkenIdentificador);
 
         } catch (MalformedURLException ex) {
             throw new UnsupportedOperationException("o sistema atual não possui uma url válida");
@@ -195,10 +200,17 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     }
 
-    @Override
-    public ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro) {
+    private ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro, boolean pRenovarTokenCasoFalha) {
+        boolean acessarComoAdmin = false;
+
+        if (pSistemaServico.getEmailusuarioAdmin() != null && !pSistemaServico.getEmailusuarioAdmin().isEmpty()) {
+            if (pSistemaServico.getEmailusuarioAdmin().equals(SBCore.getUsuarioLogado().getEmail())) {
+                acessarComoAdmin = true;
+            }
+        }
 
         FabTipoAcaoSistemaGenerica tipoAcao = FabTipoAcaoSistemaGenerica.getAcaoGenericaByNome(nomeAcao);
+        ItfRespostaWebServiceSimples respostaREquisicao = null;
         switch (tipoAcao) {
             case FORMULARIO_NOVO_REGISTRO:
                 break;
@@ -210,8 +222,10 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                 break;
             case FORMULARIO_LISTAR:
 
-                ItfAcaoApiRest acaoListagem = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_LISTA_ENTIDADES.getAcao(UtilSBRestful.getSolicitacaoAcaoListagemDeEntidade(getSistemaAtual(), pSistemaServico, nomeAcao, pParametro));
-                return acaoListagem.getResposta();
+                ItfAcaoApiRest acaoListagem = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_LISTA_ENTIDADES
+                        .getAcao(UtilSBRestful.getSolicitacaoAcaoListagemDeEntidade(getSistemaAtual(), pSistemaServico, nomeAcao, acessarComoAdmin, pParametro)
+                        );
+                respostaREquisicao = acaoListagem.getResposta();
 
             case FORMULARIO_MODAL:
                 break;
@@ -226,15 +240,32 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             case CONTROLLER_REMOVER:
             case CONTROLLER_DESATIVAR:
                 ItfAcaoApiRest acao = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_CONTROLLER.getAcao(UtilSBRestful.getSolicitacaoAcaoController(getSistemaAtual(), pSistemaServico, nomeAcao, pParametro));
-                return acao.getResposta();
+                respostaREquisicao = acao.getResposta();
 
             case GERENCIAR_DOMINIO:
                 break;
             default:
                 throw new AssertionError();
         }
+        if (respostaREquisicao != null && respostaREquisicao.isSucesso()) {
+            return respostaREquisicao;
+        } else {
+            if (pRenovarTokenCasoFalha && respostaREquisicao.getCodigoResposta() >= 400 && respostaREquisicao.getCodigoResposta() < 500) {
+                ItfTokenGestaoOauth gestao = FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoes(pSistemaServico);
+                gestao.excluirToken();
+                gestao.gerarNovoToken();
+                return getResposta(pSistemaServico, nomeAcao, pParametro, false);
 
-        throw new UnsupportedOperationException("Tipo de ação não detectado");
+            }
+            return respostaREquisicao;
+
+        }
+
+    }
+
+    @Override
+    public ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro) {
+        return getResposta(pSistemaServico, nomeAcao, pParametro, true);
 
     }
 
@@ -439,7 +470,8 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                             List lista = new ArrayList<>();
                             Class entidadeListagem = acao.getComoAcaoDeEntidade().getClasseRelacionada();
                             if (pSolicitacao.getParametrosDeUrl() == null || pSolicitacao.getParametrosDeUrl().isEmpty()) {
-                                lista = UtilSBPersistencia.getListaTodos(entidadeListagem, emLista);
+                                lista = UtilSBPersistencia.getListaTodos(entidadeListagem, emLista, 10);
+                                resposta.setRetorno(lista);
                             } else {
                                 ConsultaDinamicaDeEntidade consultaDinamica = new ConsultaDinamicaDeEntidade(entidadeListagem, emLista);
                                 EstruturaDeEntidade estutura = MapaObjetosProjetoAtual.getEstruturaObjeto(entidadeListagem);
@@ -609,9 +641,9 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
         if (sistemasRegistrados.containsKey(pHashChavePuvlica)) {
             if (sistemasRegistrados.get(pHashChavePuvlica) instanceof ItfSistemaERPLocal) {
-                throw new UnsupportedOperationException("O sistema com hash público " + pHashChavePuvlica + " foi encontrado, mas não possui chave privada");
+                return (ItfSistemaERPLocal) sistemasRegistrados.get(pHashChavePuvlica);
+                //throw new UnsupportedOperationException("O sistema com hash público " + pHashChavePuvlica + " foi encontrado, mas não possui chave privada");
             }
-            return (ItfSistemaERPLocal) sistemasRegistrados.get(pHashChavePuvlica);
 
         }
 

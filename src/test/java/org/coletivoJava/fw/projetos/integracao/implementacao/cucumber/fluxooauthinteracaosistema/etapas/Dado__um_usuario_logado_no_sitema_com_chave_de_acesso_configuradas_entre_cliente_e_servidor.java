@@ -2,15 +2,12 @@ package org.coletivoJava.fw.projetos.integracao.implementacao.cucumber.fluxooaut
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTokenRestInterprestfull;
-import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
+import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import org.coletivoJava.fw.projetos.integracao.api.cucumber.fluxooauthinteracaosistema.EtapasFluxoOauthInteracaoSistema;
 import cucumber.api.java.pt.Dado;
-import java.lang.UnsupportedOperationException;
-import java.util.List;
 import org.coletivoJava.fw.projetos.integracao.api.cucumber.fluxooauthinteracaosistema.FluxoOauth2SistemaAcessoRestfull;
 
 import static org.junit.Assert.assertNotNull;
@@ -23,29 +20,28 @@ public class Dado__um_usuario_logado_no_sitema_com_chave_de_acesso_configuradas_
 
         FluxoOauth2SistemaAcessoRestfull.renovarConexaoEntityManagerEscopoTeste();
 
-        List<SistemaERPConfiavel> sistemasRegistrados = UtilSBPersistencia
-                .getListaTodos(SistemaERPConfiavel.class, FluxoOauth2SistemaAcessoRestfull.getEM());
-        System.out.println(sistemasRegistrados.size() + " sistemas encontrados");
-        for (SistemaERPConfiavel sis : sistemasRegistrados) {
-            System.out.println("nome ->" + sis.getNome());
-            System.out.println("Dominio ->" + sis.getDominio());
-            System.out.println("Hashpub ->" + sis.getHashChavePublica());
-            System.out.println("___________________________________________");
-        }
-
         ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
-        // sistemaRemoto = (SistemaERPAtual) erp.getSistemaAtual();
+        // sistemaCliente = (SistemaERPAtual) erp.getSistemaAtual();
         // SBCore.getServicoSessao().logarEmailESenha("salviof@gmail.com", "123456");
 
-        System.out.println("O usuário utiliza o sistema crm.casanovadigital.com.br");
-        assertTrue(FluxoOauth2SistemaAcessoRestfull.sistemaCliente.getDominio().contains("crm.casanovadigita"));
+        assertTrue("Sistema remoto crm.casanovadigital não foi encontrado", FluxoOauth2SistemaAcessoRestfull.sistemaServidorRecursos.getDominio().contains("crm.casanovadigital.com.b"));
 
-        System.out.println("O usuário deseja ver uma nota no sistema fatura");
-        ItfSistemaERP sisRemoto = erp.getSistemaByDominio("localhost");
-        assertNotNull("O sistema fatura não foi registrado no sistemas", sisRemoto);
+        ItfSistemaERP sisRemoto = FluxoOauth2SistemaAcessoRestfull.sistemaServidorRecursos;
+        assertNotNull("O sistema local não foi registrado no sistema", sisRemoto);
 
         GestaoTokenRestInterprestfull gestaoResful = (GestaoTokenRestInterprestfull) FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL
                 .getGestaoToken(sisRemoto);
 
+        SBCore.getServicoSessao().logarEmailESenha(FluxoOauth2SistemaAcessoRestfull.EMAIL_USUARIO_AUTENTICADO, "123456");
+        assertTrue("Usuário não logrou êxito ao efetuar login", SBCore.getServicoSessao().getSessaoAtual().isIdentificado());
+    }
+
+    public static String extrairCodigoDeAcessoPelaUrl(String pUrl) {
+
+        int indiceConexao = pUrl.indexOf("?code=");
+
+        String respostaCodigo = pUrl.substring(indiceConexao);
+        String codigoSolicitacao = respostaCodigo.substring("?code=".length(), respostaCodigo.indexOf("&"));
+        return codigoSolicitacao;
     }
 }

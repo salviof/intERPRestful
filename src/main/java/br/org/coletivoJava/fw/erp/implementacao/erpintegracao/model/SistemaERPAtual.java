@@ -29,4 +29,9 @@ public class SistemaERPAtual extends SistemaERPConfiavel implements ItfSistemaER
         return super.getUrlRecepcaoCodigo(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
 
+    @Override
+    public void setUrlRecepcaoCodigo(String urlRecepcaoCodigo) {
+        super.setUrlRecepcaoCodigo(urlRecepcaoCodigo); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
+
 }

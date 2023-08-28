@@ -35,7 +35,7 @@ public enum FabConfigModuloWebERPChaves implements ItfFabConfigModulo {
         switch (this) {
             case PAR_DE_CHAVES_IDENTIFICADOR: {
                 Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
-                String identificador = RepositorioChavePublicaPrivada.getIndentificadorParDeChaves(parDeChaves);
+                String identificador = RepositorioChavePublicaPrivada.getIdentificacaoChavePublica(parDeChaves);
                 RepositorioChavePublicaPrivada.persistirChavePublica(parDeChaves);
                 return identificador;
             }
@@ -46,6 +46,8 @@ public enum FabConfigModuloWebERPChaves implements ItfFabConfigModulo {
                 }
 
                 return SBCore.getConfigModulo(FabConfigModuloWebAppGenerico.class).getPropriedade(FabConfigModuloWebAppGenerico.URL_DOMINIO_APLICACAO);
+            case USUARIO_ADMIN:
+                return "";
 
             default:
                 throw new AssertionError(this.name());

@@ -79,4 +79,9 @@ public interface ItfDTOSistemaERPAtual extends ItfDTOSBJSON, ItfSistemaERPLocal 
         return getJsonModoPojo();
     }
 
+    @Override
+    public default String getEmailusuarioAdmin() {
+        return (String) getValorPorReflexao();
+    }
+
 }

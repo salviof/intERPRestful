@@ -12,7 +12,12 @@ public class Quando__o_cliente_recebe_o_codigo_de_concessao_no_seu_endereco {
 
         String respostaServidorOauthPosLogin = FluxoOauth2UsuarioAcessoRestfull.envelopeSolicitacaoCodigoDeAcesso.getRespostaGet(FluxoOauth2UsuarioAcessoRestfull.servletCodConcessaoTokenService);
         System.out.println(respostaServidorOauthPosLogin);
-        assertTrue("O código de concessao não foi criado, falha na autenticação das chaves ou usuário invalido", respostaServidorOauthPosLogin.contains("?code="));
+        assertTrue("O token de acesso não foi criado falha recebendo código de concessão no cliente", respostaServidorOauthPosLogin.contains("?code="));
+
+        System.out.println("_________________________________________________________");
+        System.out.println("+ \"   4 |        |<-(D)-----Token de acesso é recebido e registrado para usufruto do cliente -----|               |\\n\"");
+        System.out.println("_________________________________________________________");
+
         FluxoOauth2UsuarioAcessoRestfull.respostaServidorOauthObtencaoCodigoDeAcesso = respostaServidorOauthPosLogin;
 
     }

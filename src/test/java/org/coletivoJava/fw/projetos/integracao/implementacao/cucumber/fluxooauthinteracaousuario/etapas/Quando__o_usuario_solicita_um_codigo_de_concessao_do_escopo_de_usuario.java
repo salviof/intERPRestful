@@ -16,7 +16,7 @@ public class Quando__o_usuario_solicita_um_codigo_de_concessao_do_escopo_de_usua
     @Quando(EtapasFluxoOauthInteracaoUsuario.QUANDO_O_USUARIO_SOLICITA_UM_CODIGO_DE_CONCESSAO_DO_ESCOPO_DE_USUARIO)
     public void implementacaoEtapa() {
 
-        ItfTokenGestao gestao = FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL.getGestaoToken(FluxoOauth2UsuarioAcessoRestfull.sistemaCliente);
+        ItfTokenGestao gestao = FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL.getGestaoToken(FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos);
         assertFalse(gestao.isTemTokemAtivo());
 
         System.out.println("O usuário acessa a url para obter o código de solicitação,"

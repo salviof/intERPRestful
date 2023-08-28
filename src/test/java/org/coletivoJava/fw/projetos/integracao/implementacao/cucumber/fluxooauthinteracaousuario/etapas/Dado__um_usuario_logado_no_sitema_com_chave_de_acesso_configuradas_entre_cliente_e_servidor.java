@@ -27,7 +27,7 @@ public class Dado__um_usuario_logado_no_sitema_com_chave_de_acesso_configuradas_
 
         assertTrue("Sistema remoto crm.casanovadigital não foi encontrado", FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos.getDominio().contains("crm.casanovadigita"));
 
-        ItfSistemaERP sisRemoto = erp.getSistemaByDominio("localhost");
+        ItfSistemaERP sisRemoto = FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos;
         assertNotNull("O sistema local não foi registrado no sistema", sisRemoto);
 
         GestaoTokenRestInterprestfull gestaoResful = (GestaoTokenRestInterprestfull) FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL

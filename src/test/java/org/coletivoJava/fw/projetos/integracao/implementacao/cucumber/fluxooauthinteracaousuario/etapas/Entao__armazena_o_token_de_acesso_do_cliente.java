@@ -13,7 +13,7 @@ public class Entao__armazena_o_token_de_acesso_do_cliente {
     @Entao(EtapasFluxoOauthInteracaoUsuario.E_ARMAZENA_O_TOKEN_DE_ACESSO_DO_CLIENTE)
     public void implementacaoEtapa() {
         GestaoTokenRestInterprestfull gestaoResful = (GestaoTokenRestInterprestfull) FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL
-                .getGestaoToken(FluxoOauth2UsuarioAcessoRestfull.sistemaCliente);
+                .getGestaoToken(FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos);
         Assert.assertTrue("Token de acesso não encontrado adicione um breakpoint no Servlet " + ServletRecepcaoOauth.class.getSimpleName(), gestaoResful.isPossuiTokenValido());
     }
 }

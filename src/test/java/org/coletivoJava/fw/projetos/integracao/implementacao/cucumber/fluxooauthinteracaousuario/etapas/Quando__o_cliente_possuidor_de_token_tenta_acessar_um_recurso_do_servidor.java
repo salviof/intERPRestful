@@ -16,13 +16,14 @@ public class Quando__o_cliente_possuidor_de_token_tenta_acessar_um_recurso_do_se
     @Quando(EtapasFluxoOauthInteracaoUsuario.QUANDO_O_CLIENTE_POSSUIDOR_DE_TOKEN_TENTA_ACESSAR_UM_RECURSO_DO_SERVIDOR)
     public void implementacaoEtapa() {
 
-        UtilTesteServicoRestfull.iniciarServico();
+        UtilTesteServicoRestfull.iniciarServicoRestFull();
         String nomeUnicoAcao = FabAcaoRestfullTestes.USUARIO_RESTFUL_MB_GESTAO.getNomeUnico();
         ItfAcaoApiRest acaoOpcoes = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_OPCOES
-                .getAcao(UtilSBRestful.getSolicitacaoOption(FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos, FluxoOauth2UsuarioAcessoRestfull.sistemaCliente,
+                .getAcao(UtilSBRestful.getSolicitacaoOption(FluxoOauth2UsuarioAcessoRestfull.sistemaCliente, FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos,
                         nomeUnicoAcao));
         ItfRespostaWebServiceSimples respOpcoes = acaoOpcoes.getResposta();
         Assert.assertTrue("Falha obtendo opções" + respOpcoes.getRespostaTexto(), respOpcoes.isSucesso());
+        System.out.println(respOpcoes.getRespostaTexto());
 
     }
 }

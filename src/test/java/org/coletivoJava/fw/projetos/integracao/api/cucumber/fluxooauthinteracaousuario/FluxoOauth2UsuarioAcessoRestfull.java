@@ -9,6 +9,7 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ConfigCoreApiIntegracao;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPAtual;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaErpChaveLocal;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.ConfigPercistenciaItegracaoSistemas;
@@ -41,7 +42,7 @@ import testesFW.devOps.DevOpsCucumberPersistenciaMysql;
 public class FluxoOauth2UsuarioAcessoRestfull extends TesteIntegracaoFuncionalidadeCucumber {
 
     public static final String EMAIL_USUARIO_AUTENTICADO = "cliente@sistemaerp2.com.br";
-    public static SistemaERPConfiavel sistemaServidorRecursos;
+    public static SistemaErpChaveLocal sistemaServidorRecursos;
     public static String URL_ENTREGA_CODIGO_CONCESSAO_TOKEN;
     public static SistemaERPConfiavel sistemaCliente;
     public static String respostaServidorOauthObtencaoCodigoDeAcesso;
@@ -77,14 +78,15 @@ public class FluxoOauth2UsuarioAcessoRestfull extends TesteIntegracaoFuncionalid
         }
         criouAplicativo = true;
 
-        sistemaServidorRecursos = new SistemaERPConfiavel();
+        sistemaServidorRecursos = new SistemaErpChaveLocal();
         sistemaServidorRecursos.setNome("Sistema Remoto Demonstração");
         sistemaServidorRecursos.setDominio("crm.casanovadigital.com.br");
-        sistemaServidorRecursos.setUrlPublicaEndPoint("https://crm.casanovadigital.com.br/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
+        sistemaServidorRecursos.setUrlPublicaEndPoint("http://localhost:8066/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
 
         sistemaServidorRecursos.setUrlRecepcaoCodigo("não Se Aplica apenas servidor");
         Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
         sistemaServidorRecursos.setChavePublica(parDeChaves.keySet().stream().findFirst().get());
+        sistemaServidorRecursos.setChavePrivada(parDeChaves.values().stream().findFirst().get());
         chavePrivadaDoAplicativoConfiavel = parDeChaves.values().stream().findFirst().get();
 
         sistemaServidorRecursos = UtilSBPersistencia.mergeRegistro(sistemaServidorRecursos);

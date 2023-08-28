@@ -14,6 +14,7 @@ import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ItfFabricaIntegracaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.FabTipoConexaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.InfoConsumoRestService;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.servicoRegistrado.FabTipoAutenticacaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.servicoRegistrado.InfoConfigRestClientIntegracao;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestao;
@@ -117,7 +118,11 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
         if (sistemaSErvidor == null) {
             throw new UnsupportedOperationException("Hash chave pública do serviço não foi definida");
         }
-        return ItfFabricaIntegracaoRest.super.getAcao(SBCore.getUsuarioLogado(), pSolicicatacao);
+        FabTipoAgenteClienteApi tipoAgente = FabTipoAgenteClienteApi.USUARIO;
+        if (pSolicicatacao.isSolicitarComoAdmin()) {
+            tipoAgente = FabTipoAgenteClienteApi.SISTEMA;
+        }
+        return ItfFabricaIntegracaoRest.super.getAcao(tipoAgente, SBCore.getUsuarioLogado(), pSolicicatacao);
     }
 
     public ItfTokenGestaoOauth getGestaoToken(ItfSistemaERP pSistemaServico) {

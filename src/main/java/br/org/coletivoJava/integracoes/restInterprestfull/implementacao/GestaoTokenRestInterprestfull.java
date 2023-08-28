@@ -53,7 +53,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
     private final String chavePublicaCliente;
     private final String chavePublicaServidor;
     private final String urlRetornoSucessoObterToken;
-    private final String urlRetornoReceberCodigoSolicitao;
+    private String urlRetornoReceberCodigoSolicitao;
 
     public GestaoTokenRestInterprestfull(
             final FabTipoAgenteClienteApi pTipoAgente, final ItfUsuario pUsuario, String pIdentificadorServico) {
@@ -90,12 +90,6 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
 
         urlServidorApiRest = protocolo + "://" + sistemaServidor.getDominio() + porta;
         chavePublicaCliente = sistemaLocal.getChavePublica();
-        urlObterCodigoSolicitacao = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
-                + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO.toString()
-                + "/" + sistemaServidor.getChavePublica().hashCode()
-                + "/" + chavePublicaCliente.hashCode()
-                + "/" + URLEncoder.encode(sistemaLocal.getUrlRecepcaoCodigo())
-                + "/" + pUsuario.getEmail();
 
         urlObterToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
                 + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
@@ -105,6 +99,22 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
                 + "/" + pUsuario.getEmail();
         urlRetornoReceberCodigoSolicitao = sistemaLocal.getUrlRecepcaoCodigo();
 
+        switch (pTipoAgente) {
+            case USUARIO:
+                urlRetornoReceberCodigoSolicitao = urlRetornoReceberCodigoSolicitao.replace(FabTipoAgenteClienteApi.SISTEMA.name(), pTipoAgente.name());
+                break;
+            case SISTEMA:
+                urlRetornoReceberCodigoSolicitao = urlRetornoReceberCodigoSolicitao.replace(FabTipoAgenteClienteApi.USUARIO.name(), pTipoAgente.name());
+                break;
+            default:
+                throw new AssertionError();
+        }
+        urlObterCodigoSolicitacao = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO.toString()
+                + "/" + sistemaServidor.getChavePublica().hashCode()
+                + "/" + chavePublicaCliente.hashCode()
+                + "/" + URLEncoder.encode(urlRetornoReceberCodigoSolicitao)
+                + "/" + pUsuario.getEmail();
         urlRetornoSucessoObterToken = "https://" + sistemaLocal.getDominio();
     }
 

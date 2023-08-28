@@ -1,14 +1,14 @@
 package org.coletivoJava.fw.projetos.integracao.implementacao.cucumber.fluxooauthinteracaosistema.etapas;
 
 import org.coletivoJava.fw.projetos.integracao.api.cucumber.fluxooauthinteracaosistema.EtapasFluxoOauthInteracaoSistema;
-import cucumber.api.java.pt.Quando;
+import cucumber.api.java.pt.Entao;
 import java.lang.UnsupportedOperationException;
 
-public class Quando__o_cliente_recebe_o_codigo_de_concessao_no_seu_endereco {
+public class Entao__o_servidor_entrega_uma_lista_em_Json_com_os_dados_de_usuario {
 
-	@Quando(EtapasFluxoOauthInteracaoSistema.QUANDO_O_CLIENTE_RECEBE_O_CODIGO_DE_CONCESSAO_NO_SEU_ENDERECO)
+	@Entao(EtapasFluxoOauthInteracaoSistema.ENTAO_O_SERVIDOR_ENTREGA_UMA_LISTA_EM_JSON_COM_OS_DADOS_DE_USUARIO)
 	public void implementacaoEtapa() {
 		throw new UnsupportedOperationException(
-				"Etapa 'o cliente recebe o codigo de concessao no seu endereço' não implementadas");
+				"Etapa 'o servidor entrega uma lista em Json com os dados de usuário' não implementadas");
 	}
 }

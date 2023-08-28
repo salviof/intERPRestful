@@ -55,6 +55,9 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     @Column(nullable = false, updatable = false, insertable = false)
     private String tipoChave;
 
+    @InfoCampo(tipo = FabTipoAtributoObjeto.EMAIL, descricao = "Deixe em branco para desabilitar o acesso direto sem intermediação do usuário")
+    private String emailusuarioAdmin;
+
     @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Endereço Recepção Código Autorização")
     @Column(nullable = true, length = 2000)
     @Deprecated
@@ -129,6 +132,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
      */
     @Deprecated
     public void setUrlRecepcaoCodigo(String urlRecepcaoCodigo) {
+
         this.urlRecepcaoCodigo = urlRecepcaoCodigo;
     }
 
@@ -177,6 +181,15 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
 
     public void setTipoChave(String tipoChave) {
         this.tipoChave = tipoChave;
+    }
+
+    @Override
+    public String getEmailusuarioAdmin() {
+        return emailusuarioAdmin;
+    }
+
+    public void setEmailusuarioAdmin(String emailusuarioAdmin) {
+        this.emailusuarioAdmin = emailusuarioAdmin;
     }
 
 }

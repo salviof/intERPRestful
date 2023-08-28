@@ -17,6 +17,7 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
+import com.super_bits.modulosSB.webPaginas.controller.servlets.servletRecepcaoOauth.ServletRecepcaoOauth;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import spark.Spark;
@@ -29,10 +30,61 @@ public class UtilTesteServicoRestfull {
 
     private static ItfIntegracaoERP erpIntegraca = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
-    public static void iniciarServico() {
+    public static void iniciarServicoRecepcaoCodigo() {
         Spark.port(8066);
         Spark.get("/hello", (req, res) -> "Hello World");
+        System.out.println("Publicando Restfull  em:");
+        System.out.println("http://localhost:8066" + "/" + ServletRecepcaoOauth.NOME_URL_SERVLET);
+        Spark.get(ServletRecepcaoOauth.NOME_URL_SERVLET + "/*", (req, res) -> {
+            ServletRecepcaoOauth novo = new ServletRecepcaoOauth();
+            novo.doGet(req.raw(), res.raw());
 
+            String resposta = novo.getRespostaTestReader();
+
+            return resposta;
+        });
+        Spark.get(ServletRestfullERP.SLUGPUBLICACAOSERVLET + "/*", (req, res) -> {
+
+            SolicitacaoControllerERP solicitacao;
+            try {
+                solicitacao = UtilSBRestful.getSolicitacaoByRequest(req.raw());
+            } catch (ErroTentandoObterTokenAcesso ex) {
+                RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
+                resposta.addErro("Autenticação negada");
+                res.status(401);
+                String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+                return respostaStr;
+            }
+
+            ItfRespostaAcaoDoSistema resposta = erpIntegraca.gerarRespostaAcaoDoSistemaServico(solicitacao);
+            String respostaStr = UtilSBRestful.buildTextoJsonResposta(resposta);
+
+            if (resposta.isSucesso()) {
+                res.status(200);
+            } else {
+                if (!UtilSBCoreStringValidador.isNuloOuEmbranco(solicitacao.getAcaoStrNomeUnico())) {
+                    ItfAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
+                    if (!SBCore.getServicoPermissao().isAcaoPermitidaUsuario(solicitacao.getUsuarioSolicitante(), acao)) {
+                        res.status(403);
+
+                    }
+                } else {
+                    res.status(500);
+                }
+            }
+
+            return respostaStr;
+
+        });
+
+    }
+
+    public static void iniciarServicoRestFull() {
+
+        Spark.port(8066);
+        Spark.get("/hello", (req, res) -> "Hello World");
+        System.out.println("Publicando Restfull  em:");
+        System.out.println("http://localhost:8066" + "/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
         Spark.options("/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET + "/*", (req, res) -> {
 
             SolicitacaoControllerERP solicitacao;
