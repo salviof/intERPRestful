@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
+import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.IntegracaoRestInterprestfullAcoesGetListaEntidades;
 
 /**
  *
@@ -117,14 +118,14 @@ public class UtilSBRestful {
     }
 
     public static SolicitacaoControllerERP getSolicitacaoAcaoListagemDeEntidade(ItfSistemaERP pCliente, ItfSistemaERP pServico,
-            String pNomeUnicoAcao, ItfBeanSimples pBeanSimples) {
+            String pNomeUnicoAcao, ParametroListaRestful pParametosLista) {
 
-        return getSolicitacaoAcaoListagemDeEntidade(pCliente, pServico, pNomeUnicoAcao, isUsuarioAdmin(pServico), pBeanSimples);
+        return getSolicitacaoAcaoListagemDeEntidade(pCliente, pServico, pNomeUnicoAcao, isUsuarioAdmin(pServico), pParametosLista);
 
     }
 
     public static SolicitacaoControllerERP getSolicitacaoAcaoListagemDeEntidade(ItfSistemaERP pCliente, ItfSistemaERP pServico,
-            String pNomeUnicoAcao, boolean pAcessarComoAdmin, ItfBeanSimples pBeanSimples) {
+            String pNomeUnicoAcao, boolean pAcessarComoAdmin, ParametroListaRestful pParametroListagem) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
         if (pNomeUnicoAcao == null) {
@@ -135,21 +136,47 @@ public class UtilSBRestful {
             throw new UnsupportedOperationException("A ação " + pNomeUnicoAcao + " não parece ser do tipo lista");
         }
 
-        String codigoBeanSimples = null;
-        if (pBeanSimples != null) {
-            codigoBeanSimples = String.valueOf(pBeanSimples.getId());
+        String codigoBeanSimples = String.valueOf(pParametroListagem.getId());
+        String atributo = pParametroListagem.getAtributo();
+        int limite = pParametroListagem.getLimite();
+        int pagina = pParametroListagem.getPagina();
+
+        JsonObjectBuilder jsonBuilderParametrosBase = Json.createObjectBuilder();
+        JsonObjectBuilder jsonBuilderFiltros = Json.createObjectBuilder();
+
+        jsonBuilderParametrosBase.add(IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_CODIGO, codigoBeanSimples);
+
+        if (atributo != null) {
+            jsonBuilderParametrosBase.add(IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_ATRIBUTO_SUBLISTA, atributo);
+        } else {
+            jsonBuilderParametrosBase.add(IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_ATRIBUTO_SUBLISTA, JsonValue.NULL);
         }
-        String atributo = null;
-        if (pBeanSimples instanceof ParametroListaRestful) {
-            atributo = ((ParametroListaRestful) pBeanSimples).getAtributo();
+        jsonBuilderParametrosBase.add(IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_PAGINA, pagina);
+        jsonBuilderParametrosBase.add(IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_LIMITE, limite);
+
+        if (pParametroListagem.getId() > 0) {
+            jsonBuilderFiltros.add("id", pParametroListagem.getId());
         }
+        jsonBuilderFiltros.add(IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_LIMITE, limite);
+
+        for (String filtro : pParametroListagem.getFiltros().keySet()) {
+            jsonBuilderFiltros.add(filtro, pParametroListagem.getFiltros().get(filtro).toString());
+
+        }
+        jsonBuilderParametrosBase.add("filtros", jsonBuilderFiltros.build());
+        JsonObject parametrosListagem = jsonBuilderParametrosBase.build();
+        ItfUsuario usuario = SBCore.getUsuarioLogado();
+        if (pAcessarComoAdmin) {
+            usuario = SBCore.getServicoPermissao().getUsuarioByEmail(pServico.getEmailusuarioAdmin());
+        }
+
         SolicitacaoControllerERP novaSolicitacao = new SolicitacaoControllerERP(
                 FabTipoSolicitacaoRestfull.LISTA_DE_ENTIDADE.getMetodo(),
                 pServico.getHashChavePublica(),
                 pCliente.getHashChavePublica(),
-                pNomeUnicoAcao, SBCore.getUsuarioLogado(), pAcessarComoAdmin, codigoBeanSimples,
+                pNomeUnicoAcao, usuario, pAcessarComoAdmin, codigoBeanSimples,
                 atributo,
-                erpIntegracao.gerarConversaoObjetoToJson(pServico, pBeanSimples, true));
+                parametrosListagem);
 
         return novaSolicitacao;
     }

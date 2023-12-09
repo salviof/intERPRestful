@@ -61,7 +61,9 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaErpChaveLocal;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.ItfRespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestaoOauth;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.UtilSBApiRestClientOauth2;
 import com.super_bits.modulosSB.SBCore.modulos.Mensagens.FabTipoAgenteDoSistema;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
 import java.util.HashMap;
 
 @ApiIntegracaoRestful
@@ -123,8 +125,33 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     @Override
     public String gerarTokenUsuarioLogado(ItfSistemaERP pSistema) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ItfTokenGestaoOauth gestao = FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoes(pSistema);
+        if (!gestao.isTemTokemAtivo()) {
+            gestao.gerarNovoToken();
+
+        }
+        if (!gestao.isTemTokemAtivo()) {
+            return null;
+        }
+        return gestao.getToken();
     }
+
+    @Override
+    public String gerarTokenSistemaComoAdmin(ItfSistemaERP pSistema) {
+        ItfTokenGestaoOauth gestao = FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistema);
+
+        if (!gestao.isTemTokemAtivo()) {
+            UtilSBApiRestClientOauth2.solicitarAutenticacaoExterna(gestao);
+            gestao.gerarNovoToken();
+
+        }
+        if (!gestao.isTemTokemAtivo()) {
+            return null;
+        }
+        return gestao.getToken();
+
+    }
+
     private static ItfSistemaERPLocal chaveLocalPadrao;
 
     @Override
@@ -139,7 +166,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
         String idChave = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class).getPropriedade(FabConfigModuloWebERPChaves.PAR_DE_CHAVES_IDENTIFICADOR);
         System.out.println("buscando por" + idChave);
-        Map<String, String> par = RepositorioChavePublicaPrivada.getParDeChavesPubPrivada(idChave);
+        Map<String, String> par = RepositorioChavePublicaPrivada.getParDeChavesPubPrivadaByHash(idChave);
         if (par == null) {
             throw new UnsupportedOperationException("O par de chaves local do sistema não foi encontrado buscando pelo par com hash " + idChave);
         }
@@ -158,7 +185,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             sistemAtual.setUrlRecepcaoCodigo(urlStr + "/solicitacaoAuth2Recept/code/" + FabTipoAgenteDoSistema.USUARIO.name() + "/" + getaoTpkenIdentificador);
 
         } catch (MalformedURLException ex) {
-            throw new UnsupportedOperationException("o sistema atual não possui uma url válida");
+            throw new UnsupportedOperationException("o sistema atual não possui uma url válida para " + urlStr + "- " + ex.getMessage());
         }
         chaveLocalPadrao = sistemAtual;
         if (SBCore.isEmModoDesenvolvimento()) {
@@ -200,11 +227,15 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     }
 
-    private ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro, boolean pRenovarTokenCasoFalha) {
+    private synchronized ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro, String pEmailUsuarioChamada, boolean pRenovarTokenCasoFalha) {
         boolean acessarComoAdmin = false;
+        String emailusuarioChamada = SBCore.getUsuarioLogado().getEmail();
+        if (pEmailUsuarioChamada != null) {
+            emailusuarioChamada = pEmailUsuarioChamada;
+        }
 
-        if (pSistemaServico.getEmailusuarioAdmin() != null && !pSistemaServico.getEmailusuarioAdmin().isEmpty()) {
-            if (pSistemaServico.getEmailusuarioAdmin().equals(SBCore.getUsuarioLogado().getEmail())) {
+        if (emailusuarioChamada != null && pSistemaServico.getEmailusuarioAdmin() != null) {
+            if (pSistemaServico.getEmailusuarioAdmin().equals(emailusuarioChamada)) {
                 acessarComoAdmin = true;
             }
         }
@@ -221,12 +252,16 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             case FORMULARIO_VISUALIZAR:
                 break;
             case FORMULARIO_LISTAR:
+                if (!(pParametro instanceof ParametroListaRestful)) {
+                    throw new UnsupportedOperationException("A chamada Restfull em lista deve acompanhar um parametro do tipo " + ParametroListaRestful.class.getSimpleName());
+                }
 
                 ItfAcaoApiRest acaoListagem = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_LISTA_ENTIDADES
-                        .getAcao(UtilSBRestful.getSolicitacaoAcaoListagemDeEntidade(getSistemaAtual(), pSistemaServico, nomeAcao, acessarComoAdmin, pParametro)
+                        .getAcao(UtilSBRestful.getSolicitacaoAcaoListagemDeEntidade(getSistemaAtual(),
+                                pSistemaServico, nomeAcao, acessarComoAdmin, (ParametroListaRestful) pParametro)
                         );
                 respostaREquisicao = acaoListagem.getResposta();
-
+                break;
             case FORMULARIO_MODAL:
                 break;
             case SELECAO_DE_ACAO:
@@ -251,10 +286,21 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             return respostaREquisicao;
         } else {
             if (pRenovarTokenCasoFalha && respostaREquisicao.getCodigoResposta() >= 400 && respostaREquisicao.getCodigoResposta() < 500) {
-                ItfTokenGestaoOauth gestao = FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoes(pSistemaServico);
-                gestao.excluirToken();
-                gestao.gerarNovoToken();
-                return getResposta(pSistemaServico, nomeAcao, pParametro, false);
+
+                if (acessarComoAdmin) {
+                    //      gestao.getUrlObterCodigoSolicitacao()
+                    FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistemaServico).excluirToken();
+
+                    if (!FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistemaServico).isCodigoSolicitacaoRegistrado()) {
+                        UtilSBApiRestClientOauth2.solicitarAutenticacaoExterna(FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistemaServico).getComoGestaoOauth());
+                    }
+                    FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistemaServico).gerarNovoToken();
+                } else {
+                    ItfTokenGestaoOauth gestao = FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistemaServico);
+                    gestao.excluirToken();
+                    gestao.gerarNovoToken();
+                }
+                return getResposta(pSistemaServico, nomeAcao, pParametro, pEmailUsuarioChamada, false);
 
             }
             return respostaREquisicao;
@@ -264,8 +310,13 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
+    public ItfResposta getRespostaComoAdmin(ItfSistemaERP pSistema, String nomeAcao, ItfBeanSimples pParametro) {
+        return getResposta(pSistema, nomeAcao, pParametro, pSistema.getEmailusuarioAdmin(), true);
+    }
+
+    @Override
     public ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro) {
-        return getResposta(pSistemaServico, nomeAcao, pParametro, true);
+        return getResposta(pSistemaServico, nomeAcao, pParametro, SBCore.getUsuarioLogado().getEmail(), true);
 
     }
 
@@ -475,10 +526,17 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                             } else {
                                 ConsultaDinamicaDeEntidade consultaDinamica = new ConsultaDinamicaDeEntidade(entidadeListagem, emLista);
                                 EstruturaDeEntidade estutura = MapaObjetosProjetoAtual.getEstruturaObjeto(entidadeListagem);
+                                ParametroListaRestful parametros = new ParametroListaRestful(pSolicitacao);
+
+                                if (parametros.getId() > 0) {
+                                    ItfEstruturaCampoEntidade campoID = estutura.getCampos().stream().filter(cp -> cp.getFabricaTipoAtributo().equals(FabTipoAtributoObjeto.ID)).findFirst().get();
+                                    String nomeCampoID = campoID.getNomeDeclarado();
+                                    consultaDinamica.addcondicaoCampoIgualA(nomeCampoID, parametros.getId());
+                                }
 
                                 try {
-                                    for (Map.Entry<String, String> chaves : pSolicitacao.getParametrosDeUrl().entrySet()) {
-                                        String valor = chaves.getValue();
+                                    for (Map.Entry<String, Object> chaves : parametros.getFiltros().entrySet()) {
+                                        String valor = chaves.getValue().toString();
                                         EstruturaCampo estruturaCampo = estutura.getCampoByNomeDeclarado(chaves.getKey());
                                         System.out.println("pesauisando via RESTfull");
                                         System.out.println(chaves.getKey());
@@ -509,10 +567,23 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                                 }
                                                 break;
                                             case DECIMAL:
-                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), Double.valueOf(chaves.getValue()));
+                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey(), String.valueOf(chaves.getValue()));
                                                 break;
                                             case ENTIDADE:
-                                                consultaDinamica.addcondicaoCampoIgualA(chaves.getKey() + "_id", chaves.getKey());
+                                                if (chaves.getValue() != null) {
+                                                    String codigoEntidadeFiltroSTR = UtilSBCoreStringFiltros.getNumericosDaString(chaves.getValue().toString());
+                                                    if (codigoEntidadeFiltroSTR != null) {
+
+                                                        String entidadeSTR = estruturaCampo.getClasseCampoDeclaradoOuTipoLista();
+                                                        if (entidadeSTR != null) {
+                                                            ItfBeanSimples entidadeFiltro = (ItfBeanSimples) UtilSBPersistencia.getRegistroByID(MapaObjetosProjetoAtual.getClasseDoObjetoByNome(entidadeSTR),
+                                                                    Integer.valueOf(codigoEntidadeFiltroSTR),
+                                                                    emLista);
+                                                            consultaDinamica.addCondicaoManyToOneIgualA(chaves.getKey(), entidadeFiltro);
+                                                        }
+                                                    }
+                                                }
+
                                                 break;
                                             case OUTROS_OBJETOS:
                                                 break;
@@ -525,7 +596,9 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                 } catch (Throwable t) {
                                     resposta.addErro("Falha configurando parametros de pesquisa: " + t.getMessage());
                                 }
-                                lista = consultaDinamica.resultadoRegistros();
+                                lista = consultaDinamica.gerarResultados(parametros.getLimite());
+                                System.out.println("Encontrados " + lista.size());
+
                                 if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getAtributoEntidade())) {
                                     if (lista.isEmpty()) {
                                         resposta.addErro("Impossível acessar os atributos pois nenhuma entidade foi encontrada");

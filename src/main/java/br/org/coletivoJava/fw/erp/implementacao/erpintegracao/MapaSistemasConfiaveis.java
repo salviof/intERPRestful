@@ -33,7 +33,8 @@ public class MapaSistemasConfiaveis {
     private static Map<String, SistemaERPConfiavel> mapaSistemas = new HashMap<>();
 
     private static String getArquivoPersistencia() {
-        return SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class).getRepositorioDeArquivosExternos().getCaminhoArquivosRepositorio() + "/" + pnomeArquivo;
+        String arquivo = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class).getRepositorioDeArquivosExternos().getCaminhoArquivosRepositorio() + "/" + pnomeArquivo;
+        return arquivo;
     }
 
     public static void persistirNovoSistema(SistemaERPConfiavel pSistema) {
@@ -55,6 +56,7 @@ public class MapaSistemasConfiaveis {
                 sistemaJson.add("chavePublica", sistema.getChavePublica());
                 sistemaJson.add("urlPublicaEndPoint", sistema.getUrlPublicaEndPoint());
                 sistemaJson.add("hashChavePublica", sistema.getHashChavePublica());
+                sistemaJson.add("emailusuarioAdmin", sistema.getEmailusuarioAdmin());
                 lista.add(sistemaJson);
                 String jsonTexto = UtilSBCoreJson.getTextoByJsonArray(lista.build());
                 UtilSBCoreArquivoTexto.escreverEmArquivoSubstituindoArqAnterior(getArquivoPersistencia(), jsonTexto);
@@ -89,6 +91,11 @@ public class MapaSistemasConfiaveis {
                     SistemaERPConfiavel sistema = new SistemaERPConfiavel();
                     sistema.setDominio(sistemaJson.getString("dominio"));
                     sistema.setChavePublica(sistemaJson.getString("chavePublica"));
+                    if (sistemaJson.containsKey("emailusuarioAdmin")) {
+                        if (!sistemaJson.isNull("emailusuarioAdmin")) {
+                            sistema.setEmailusuarioAdmin(sistemaJson.getString("emailusuarioAdmin"));
+                        }
+                    }
                     // sistema.setUrlRecepcaoCodigo(sistemaJson.getString("recepcaoCodigo"));
                     sistema.setUrlPublicaEndPoint(sistemaJson.getString("urlPublicaEndPoint"));
                     mapaSistemas.put(sistema.getHashChavePublica(), sistema);

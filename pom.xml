@@ -39,7 +39,7 @@
             <type>jar</type>
         </dependency>
 
-     
+
         <dependency>
             <groupId>br.org.coletivoJava.fw</groupId>
             <artifactId>SBPersistencia</artifactId>
@@ -121,9 +121,7 @@
             <scope>test</scope>
 
         </dependency>
-
-
-
+        
     </dependencies>
 
 

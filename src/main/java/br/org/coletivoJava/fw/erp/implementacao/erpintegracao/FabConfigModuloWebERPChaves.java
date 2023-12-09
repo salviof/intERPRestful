@@ -36,7 +36,7 @@ public enum FabConfigModuloWebERPChaves implements ItfFabConfigModulo {
             case PAR_DE_CHAVES_IDENTIFICADOR: {
                 Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
                 String identificador = RepositorioChavePublicaPrivada.getIdentificacaoChavePublica(parDeChaves);
-                RepositorioChavePublicaPrivada.persistirChavePublica(parDeChaves);
+                RepositorioChavePublicaPrivada.persistirChavePublicaPrivada(parDeChaves);
                 return identificador;
             }
             case SITE_URL:

@@ -62,7 +62,8 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
         ItfSistemaERP sistemaLocal = integracaoERP.getSistemaAtual();
         if (SBCore.isEmModoDesenvolvimento()) {
             if (sistemaLocal.getHashChavePublica().equals(pIdentificadorServico)) {
-                //detectado ambiente de teste
+                //detectado ambiente de teste cliente servidor no mesmo app
+
                 List<SistemaERPConfiavel> sistemasRegistrados = UtilSBPersistencia.getListaTodos(SistemaERPConfiavel.class);
                 if (sistemasRegistrados.size() != 2) {
                     throw new UnsupportedOperationException("para homologar a couminicação ERP usando um sistema unicico como cliente e servidor, devem existir ");
@@ -91,30 +92,43 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
         urlServidorApiRest = protocolo + "://" + sistemaServidor.getDominio() + porta;
         chavePublicaCliente = sistemaLocal.getChavePublica();
 
-        urlObterToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
-                + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
-                + "/" + sistemaServidor.getHashChavePublica()
-                + "/" + sistemaLocal.getHashChavePublica()
-                + "/" + URLEncoder.encode(sistemaLocal.getUrlRecepcaoCodigo())
-                + "/" + pUsuario.getEmail();
         urlRetornoReceberCodigoSolicitao = sistemaLocal.getUrlRecepcaoCodigo();
 
         switch (pTipoAgente) {
             case USUARIO:
+                urlObterToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                        + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
+                        + "/" + sistemaServidor.getHashChavePublica()
+                        + "/" + sistemaLocal.getHashChavePublica()
+                        + "/" + URLEncoder.encode(sistemaLocal.getUrlRecepcaoCodigo())
+                        + "/" + pUsuario.getEmail();
                 urlRetornoReceberCodigoSolicitao = urlRetornoReceberCodigoSolicitao.replace(FabTipoAgenteClienteApi.SISTEMA.name(), pTipoAgente.name());
+                urlObterCodigoSolicitacao = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                        + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO.toString()
+                        + "/" + sistemaServidor.getChavePublica().hashCode()
+                        + "/" + chavePublicaCliente.hashCode()
+                        + "/" + URLEncoder.encode(urlRetornoReceberCodigoSolicitao)
+                        + "/" + pUsuario.getEmail();
                 break;
             case SISTEMA:
+                urlObterToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                        + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
+                        + "/" + sistemaServidor.getHashChavePublica()
+                        + "/" + sistemaLocal.getHashChavePublica()
+                        + "/" + URLEncoder.encode(sistemaLocal.getUrlRecepcaoCodigo())
+                        + "/" + sistemaServidor.getEmailusuarioAdmin();
                 urlRetornoReceberCodigoSolicitao = urlRetornoReceberCodigoSolicitao.replace(FabTipoAgenteClienteApi.USUARIO.name(), pTipoAgente.name());
+                urlObterCodigoSolicitacao = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                        + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO.toString()
+                        + "/" + sistemaServidor.getChavePublica().hashCode()
+                        + "/" + chavePublicaCliente.hashCode()
+                        + "/" + URLEncoder.encode(urlRetornoReceberCodigoSolicitao)
+                        + "/" + sistemaServidor.getEmailusuarioAdmin();
                 break;
             default:
                 throw new AssertionError();
         }
-        urlObterCodigoSolicitacao = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
-                + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO.toString()
-                + "/" + sistemaServidor.getChavePublica().hashCode()
-                + "/" + chavePublicaCliente.hashCode()
-                + "/" + URLEncoder.encode(urlRetornoReceberCodigoSolicitao)
-                + "/" + pUsuario.getEmail();
+
         urlRetornoSucessoObterToken = "https://" + sistemaLocal.getDominio();
     }
 

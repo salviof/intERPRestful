@@ -67,6 +67,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
     @Override
     public void doGet(HttpServletRequest requisicao, HttpServletResponse resp) throws ServletException, IOException {
         try {
+            System.out.println("OAUTH SERVICE INICIADO");
             UrlInterpretada parametrosDeUrl;
             try {
 
@@ -76,6 +77,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                 resp.getWriter().append("PARAMETROS DE ACESSO INCORRETOS, VERIFIQUE A DOCUMENTAÇÃO DA CLASSE " + FabUrlOauth2Server.class.getSimpleName());
                 return;
             }
+            System.out.println("PARAMETROS PROCESSADOS");
             if (!SBCore.isEmModoProducao()) {
                 parametrosDeUrl.printParametrosComValoresInterpretados();
             }
@@ -83,7 +85,8 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             String hashChaveCliente = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_CLIENTE);
             String hashChaveServicoRecurso = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_RECURSOS);
             ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
-
+            System.out.println("HASH CLIENTE:" + hashChaveCliente);
+            System.out.println("HASH LOCAL SERVER ENVIADO:" + hashChaveServicoRecurso);
             ItfSistemaERPLocal sistemaRecursos = erp.getSistemaAtual();
             if (!sistemaRecursos.getHashChavePublica().equals(hashChaveServicoRecurso)) {
                 erp.getSistemaLocalByHashChavePublica(hashChaveServicoRecurso);
@@ -92,6 +95,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             if (sistemaRecursos == null) {
                 resp.setStatus(401);
                 resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO SERVIÇO DE RECURSOS  " + hashChaveServicoRecurso + " NÃO FOI ENCONTRADA");
+                System.out.println("Acesso negado, hash serviço inválido:" + hashChaveServicoRecurso);
                 return;
             }
 
@@ -100,6 +104,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             if (sistemaCliente == null) {
                 resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO CLIENTE NÃO FOI REGISTRADA");
                 resp.setStatus(401);
+                System.out.println("Acesso negado, hash cliente inválido:" + hashChaveServicoRecurso);
                 return;
             }
             // PODE VALIDAR TAMBÉM A CHAVE PÚBLICA DO SERVIDOR, POR MOTIVOS DE COMPATIBILIDADE DE TESTES FOI REMOVIDA A VALIDAÇÃO
@@ -107,21 +112,33 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             String dominioDoSistemaClienteResgistrado = sistemaCliente.getDominio();
             String dominioDaRequisicao = requisicao.getHeader("referer");
 
-            if (SBCore.isEmModoProducao() && (dominioDaRequisicao == null || !dominioDaRequisicao.contains(dominioDoSistemaClienteResgistrado))) {
-                if (!dominioDoSistemaClienteResgistrado.contains("localhost")) {
-                    resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA [" + dominioDaRequisicao + "|" + dominioDoSistemaClienteResgistrado + "]");
-                    return;
-                }
-            }
-
             ConfigModulo configuracaoRESTFull = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class);
             String emailDoEscopo = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.ESCOPO);
             String emailAdmin = configuracaoRESTFull.getPropriedade(FabConfigModuloWebERPChaves.USUARIO_ADMIN);
+            System.out.println("O usuário admin é " + emailAdmin);
             boolean solicitacaoUsuarioAdmin = false;
             if (!UtilSBCoreStringValidador.isNuloOuEmbranco(emailDoEscopo) && !UtilSBCoreStringValidador.isNuloOuEmbranco(emailAdmin)) {
                 if (emailDoEscopo.toLowerCase().equals(emailAdmin.toLowerCase())) {
                     solicitacaoUsuarioAdmin = true;
+                    System.out.println("Token Solicitado como admin");
+                } else {
+                    System.out.println("token Solicitado por intermedio de usuário");
                 }
+            }
+            if (!solicitacaoUsuarioAdmin) {
+                if (SBCore.isEmModoProducao()
+                        && (dominioDaRequisicao == null
+                        || !dominioDaRequisicao.contains(dominioDoSistemaClienteResgistrado))) {
+                    if (!dominioDoSistemaClienteResgistrado.contains("localhost")) {
+                        resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA [" + dominioDaRequisicao + "|" + dominioDoSistemaClienteResgistrado + "]");
+                        System.out.println("Acesso negado, origem inválida:" + dominioDaRequisicao + "Origem aceita:" + dominioDoSistemaClienteResgistrado);
+                        return;
+                    }
+                }
+            } else {
+                System.out.println("ACESSO VIA ADMIN");
+                System.out.println("TODO: CHECK IP DO SERVIDOR DE ACESSO");
+                //todo set ip ou host autorizado
             }
 
             ItfUsuario pUsuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDoEscopo);
@@ -204,7 +221,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                             }
 
                         } else {
-
+                            System.out.println("REspondendo ao usuário com o link de registro do token");
                             url = url + "?code=" + tokenConcessaodeAcesso.getToken() + "&tipoAplicacao=" + sistemaRecursos.getHashChavePublica() + "&escopo=" + sessaoAtual.getUsuario().getEmail();
                             resp.getWriter().append("<script> windows.location='" + url + "'</script>");
                             resp.sendRedirect(url);

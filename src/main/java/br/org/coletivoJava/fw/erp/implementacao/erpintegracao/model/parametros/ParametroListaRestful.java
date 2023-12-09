@@ -4,7 +4,10 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros;
 
+import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.IntegracaoRestInterprestfullAcoesGetListaEntidades;
+import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,11 +18,40 @@ import java.util.Map;
 public class ParametroListaRestful extends ParametroRestful {
 
     private int pagina = 0;
-    private Map<String, Object> parametros;
+    private int limite = 10;
     private String atributo;
+    private Map<String, Object> filtros;
 
     public ParametroListaRestful() {
         super(ParametroListaRestful.class.getSimpleName());
+    }
+
+    public ParametroListaRestful(SolicitacaoControllerERP pSolicitacaoRequest) {
+        super(ParametroListaRestful.class.getSimpleName());
+        filtros = new HashMap<>();
+
+        for (Map.Entry<String, String> chaves : pSolicitacaoRequest.getParametrosDeUrl().entrySet()) {
+            final String valorStr = chaves.getValue();
+            final String atr = chaves.getKey();
+            switch (atr) {
+                case IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_ATRIBUTO_SUBLISTA:
+                    atributo = valorStr;
+                    break;
+                case IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_CODIGO:
+                    setId(Integer.valueOf(valorStr));
+                    break;
+                case IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_LIMITE:
+                    setLimite(Integer.valueOf(valorStr));
+
+                    break;
+                case IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_PAGINA:
+                    setPagina(Integer.valueOf(valorStr));
+                    break;
+                default:
+                    filtros.put(atr, valorStr);
+
+            }
+        }
     }
 
     public int getPagina() {
@@ -30,12 +62,12 @@ public class ParametroListaRestful extends ParametroRestful {
         this.pagina = pagina;
     }
 
-    public Map<String, Object> getParametros() {
-        return parametros;
+    public Map<String, Object> getFiltros() {
+        return filtros;
     }
 
-    public void setParametros(Map<String, Object> parametros) {
-        this.parametros = parametros;
+    public void setFiltros(Map<String, Object> filtros) {
+        this.filtros = filtros;
     }
 
     public String getAtributo() {
@@ -44,6 +76,14 @@ public class ParametroListaRestful extends ParametroRestful {
 
     public void setAtributo(String atributo) {
         this.atributo = atributo;
+    }
+
+    public int getLimite() {
+        return limite;
+    }
+
+    public void setLimite(int limite) {
+        this.limite = limite;
     }
 
 }

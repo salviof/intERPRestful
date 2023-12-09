@@ -8,6 +8,9 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto.GeradorIdJsonIDLocalTransienteRefIDRemoto;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto.JsonIdentificadorIDLocalCorrespondeIDRemoto;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto.MixLocalCorrespondeRemoto;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.json.MixIgnoreCaseItemSimples;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.json.MixinJsonSerializadorPadrao;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.json.SerializadorPadrao;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,10 +20,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyName;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.introspect.ObjectIdInfo;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
@@ -28,7 +35,9 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,24 +57,18 @@ public class UtilSBRestFulEntityToJson {
             return null;
         }
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
-        mapper.setAnnotationIntrospector(new AutoAnotacaoJacksonDefinindoCampoId());
-        if (pUsarIdBeanSimplesComoIdRemoto) {
-            mapper.addMixIn(beanSimples.getClass(), MixLocalCorrespondeRemoto.class);
-        }
-        mapper.enable(MapperFeature.USE_ANNOTATIONS);
-        mapper.registerModule(new Hibernate5Module());
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(beanSimples.getClass(), new SerializadorPadrao());
+        mapper.registerModule(module);
 
-        String json = null;
+        String serialized = null;
         try {
-            json = mapper.writer().withDefaultPrettyPrinter().writeValueAsString(beanSimples);
+            serialized = mapper.writeValueAsString(beanSimples);
         } catch (JsonProcessingException ex) {
             Logger.getLogger(UtilSBRestFulEntityToJson.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        return UtilSBCoreJson.getJsonObjectByTexto(json);
+        return UtilSBCoreJson.getJsonObjectByTexto(serialized);
     }
 
     public static JsonObjectBuilder getJsonBuilderFromObjetoGenerico(ItfBeanSimples beanSimples) {
@@ -91,6 +94,7 @@ public class UtilSBRestFulEntityToJson {
                             "controleCalculo",
                             "instancia",
                             "camposEsperados",
+                            "camposInstanciados",
                             "mapaJustificativasExecucaoAcao",
                             "mapaAssistenteLocalizacao",
                             "mapeouTodosOsCampos"
@@ -133,5 +137,46 @@ public class UtilSBRestFulEntityToJson {
             }
         }
 
+    }
+
+    static class AutoAnotacaoCampoIdPadrao extends JacksonAnnotationIntrospector {
+
+        public AutoAnotacaoCampoIdPadrao() {
+            System.out.println("Test");
+
+        }
+
+        @Override
+        public JsonIgnoreProperties.Value findPropertyIgnorals(Annotated a) {
+            Class classe = a.getRawType();
+
+            JsonIgnoreProperties.Value ignorados = JsonIgnoreProperties.Value
+                    .forIgnoredProperties("mapaCamposInstanciados",
+                            "novoBeanPreparado",
+                            "mapaCampoPorAnotacao",
+                            "controleCalculo",
+                            "instancia",
+                            "camposEsperados",
+                            "mapaJustificativasExecucaoAcao",
+                            "mapaAssistenteLocalizacao",
+                            "mapeouTodosOsCampos"
+                    );
+
+            return ignorados;
+
+        }
+
+        @Override
+        public String findImplicitPropertyName(AnnotatedMember m) {
+            String nomePropriedade = super.findImplicitPropertyName(m);
+            return nomePropriedade;
+        }
+
+        @Override
+        public ObjectIdInfo findObjectIdInfo(com.fasterxml.jackson.databind.introspect.Annotated anotacao) {
+
+            return super.findObjectIdInfo(anotacao);
+
+        }
     }
 }
