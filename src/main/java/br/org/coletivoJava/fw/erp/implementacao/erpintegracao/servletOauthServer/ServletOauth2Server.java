@@ -67,6 +67,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
     @Override
     public void doGet(HttpServletRequest requisicao, HttpServletResponse resp) throws ServletException, IOException {
         try {
+
             System.out.println("OAUTH SERVICE INICIADO");
             UrlInterpretada parametrosDeUrl;
             try {
