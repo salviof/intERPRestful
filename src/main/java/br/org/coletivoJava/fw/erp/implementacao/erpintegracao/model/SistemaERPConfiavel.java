@@ -44,7 +44,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_NOME, somenteLeitura = false)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.NOME, somenteLeitura = false)
     @InfoCampoValorLogico(nomeCalculo = "nome Aplicação", somenteLeitura = false)
     private String nome;
 
@@ -64,7 +64,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     private String urlRecepcaoCodigo;
 
     @Column(length = 8000, unique = true)
-    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_DESCRITIVO, obrigatorio = true)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.DESCRITIVO, obrigatorio = true)
     private String chavePublica;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Url endpoint Restful")

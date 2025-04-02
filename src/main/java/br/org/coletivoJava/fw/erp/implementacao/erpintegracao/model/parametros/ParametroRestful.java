@@ -17,7 +17,7 @@ public class ParametroRestful extends ItemSimples {
     @Id
     private int id;
 
-    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_NOME)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.NOME)
     private String nometipoParametro;
 
     public ParametroRestful(String nometipoParametro) {

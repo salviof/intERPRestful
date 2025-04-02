@@ -21,7 +21,7 @@ public class TipoRequisicaoOauth extends ItemSimples implements ItfBeanVinculado
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.ID)
     private int id;
-    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_NOME)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.NOME)
     private String nome;
     private FabTipoRequisicaoOauthServer enumVinculado;
 

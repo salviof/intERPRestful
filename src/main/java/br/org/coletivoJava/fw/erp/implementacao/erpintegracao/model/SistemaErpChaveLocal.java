@@ -38,7 +38,7 @@ public class SistemaErpChaveLocal extends SistemaERPConfiavel implements ItfSist
     }
 
     @Column(length = 8000)
-    @InfoCampo(tipo = FabTipoAtributoObjeto.AAA_DESCRITIVO, obrigatorio = true)
+    @InfoCampo(tipo = FabTipoAtributoObjeto.DESCRITIVO, obrigatorio = true)
     private String chavePrivada;
 
     @Override
