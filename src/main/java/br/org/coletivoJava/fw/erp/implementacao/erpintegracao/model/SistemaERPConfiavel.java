@@ -42,7 +42,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     @Id
     @InfoCampo(tipo = FabTipoAtributoObjeto.ID)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.NOME, somenteLeitura = false)
     @InfoCampoValorLogico(nomeCalculo = "nome Aplicação", somenteLeitura = false)
@@ -102,12 +102,12 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     }
 
     @Override
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
     @Override
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

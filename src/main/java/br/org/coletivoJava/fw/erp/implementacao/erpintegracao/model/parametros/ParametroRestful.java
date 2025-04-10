@@ -15,7 +15,7 @@ import javax.persistence.Id;
 public class ParametroRestful extends ItemSimples {
 
     @Id
-    private int id;
+    private Long id;
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.NOME)
     private String nometipoParametro;
@@ -26,12 +26,12 @@ public class ParametroRestful extends ItemSimples {
     }
 
     @Override
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
     @Override
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

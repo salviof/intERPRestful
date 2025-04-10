@@ -47,7 +47,7 @@ public class LinkEntidadesSistemasERP extends EntidadeSimples {
     @Id
     @InfoCampo(tipo = FabTipoAtributoObjeto.ID)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(unique = true)
     private String codigoIdentificador;
@@ -69,12 +69,12 @@ public class LinkEntidadesSistemasERP extends EntidadeSimples {
     private String codigoInterno;
 
     @Override
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
     @Override
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
