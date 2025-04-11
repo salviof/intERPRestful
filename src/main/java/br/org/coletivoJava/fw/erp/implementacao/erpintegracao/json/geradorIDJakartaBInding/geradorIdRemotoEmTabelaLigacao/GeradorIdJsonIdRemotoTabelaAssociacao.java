@@ -28,13 +28,13 @@ public abstract class GeradorIdJsonIdRemotoTabelaAssociacao extends GeradorIdJso
     }
 
     @Override
-    public Integer generateId(Object forPojo) {
+    public Long generateId(Object forPojo) {
         ItfBeanSimples itemSimples = (ItfBeanSimples) forPojo;
         String itemRemoto = ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(sistemaRemoto, itemSimples);
         if (itemRemoto == null) {
             itemRemoto = "0";
         }
-        return Integer.valueOf(itemRemoto);
+        return Long.valueOf(itemRemoto);
     }
 
     @Override

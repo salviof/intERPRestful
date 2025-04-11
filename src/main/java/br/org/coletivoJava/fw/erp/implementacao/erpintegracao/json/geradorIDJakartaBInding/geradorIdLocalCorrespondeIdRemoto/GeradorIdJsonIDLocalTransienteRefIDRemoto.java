@@ -25,7 +25,7 @@ public class GeradorIdJsonIDLocalTransienteRefIDRemoto extends GeradorIdJsonGene
     }
 
     @Override
-    public Integer generateId(Object forPojo) {
+    public Long generateId(Object forPojo) {
         return ((ItfBeanSimples) forPojo).getId();
     }
 

@@ -96,9 +96,9 @@ public class UtilSBRestFulJsonToEntity {
                                     ItfBeanSimples beanSimples = cp.getObjetoDoAtributo();
                                     EstruturaDeEntidade estrutura = MapaObjetosProjetoAtual.getEstruturaObjeto(beanSimples.getClass().getSimpleName());
                                     String entidade = estrutura.getCampoByNomeDeclarado(pChave).getClasseCampoDeclaradoOuTipoLista();
-                                    int id = 0;
+                                    Long id = 0l;
                                     if (pValorJson instanceof jakarta.json.JsonObject) {
-                                        id = UtilSBCoreJson.getComoInteiro(pValorJson.asJsonObject().get("@id"));
+                                        id = Long.valueOf(UtilSBCoreJson.getComoInteiro(pValorJson.asJsonObject().get("@id")));
                                     }
 
                                     ItfBeanSimples item = (ItfBeanSimples) UtilSBPersistencia.getRegistroByID(MapaObjetosProjetoAtual.getClasseDoObjetoByNome(entidade), id, em);
@@ -128,7 +128,7 @@ public class UtilSBRestFulJsonToEntity {
                                 ItfBeanSimples item = null;
                                 JsonObject itemJson = jsonValue.asJsonObject();
                                 if (itemJson.containsKey("@id")) {
-                                    item = (ItfBeanSimples) UtilSBPersistencia.getRegistroByID(entidade, itemJson.getInt("@id"), em);
+                                    item = (ItfBeanSimples) UtilSBPersistencia.getRegistroByID(entidade, Long.valueOf(itemJson.getInt("@id")), em);
                                 } else {
                                     try {
                                         item = (ItfBeanSimples) entidade.newInstance();

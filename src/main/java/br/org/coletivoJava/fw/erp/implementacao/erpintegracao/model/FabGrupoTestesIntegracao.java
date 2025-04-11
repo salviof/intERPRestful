@@ -20,7 +20,7 @@ public enum FabGrupoTestesIntegracao implements ItfFabricaComPersistencia {
     @Override
     public Object getRegistro() {
         GrupoUsuarioSB grupo = new GrupoUsuarioSB();
-        grupo.setId(1);
+        grupo.setId(1l);
         grupo.setNome("Testes integracao");
         grupo.setPaginaInicial(FabAcaoProjetoSB.PROJETO_FRM_VISAO_GERAL);
         grupo.setModuloPrincipal((ModuloAcaoSistema) FabModuloTestesIntegracao.MODULO_TESTES.getRegistro());

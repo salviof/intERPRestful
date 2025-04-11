@@ -10,10 +10,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
-import jakarta.json.JsonObject;
 import java.io.IOException;
-import java.time.DayOfWeek;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -75,16 +72,17 @@ public class SerializadorPadrao extends JsonSerializer<ItfBeanSimples> {
                             if (cpInst.isUmValorEmLista()) {
 
                                 List<ItfBeanSimples> itens = (List) cpInst.getValor();
-                                List<Integer> itensCodigo = new ArrayList<>();
+                                List<Long> itensCodigo = new ArrayList<>();
                                 for (ItfBeanSimples item : itens) {
                                     itensCodigo.add(item.getId());
 
                                 }
-                                int[] codigosArray = new int[itens.size()];
+                                long[] codigosArray = new long[itens.size()];
 
                                 int i = 0;
-                                for (Integer element : itensCodigo) {
+                                for (Long element : itensCodigo) {
                                     codigosArray[i++] = element;
+
                                 }
                                 gen.writeArray(codigosArray, 0, itensCodigo.size());
                                 System.out.println("Lista");

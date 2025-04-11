@@ -38,7 +38,7 @@ public class ParametroListaRestful extends ParametroRestful {
                     atributo = valorStr;
                     break;
                 case IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_CODIGO:
-                    setId(Integer.valueOf(valorStr));
+                    setId(Long.valueOf(valorStr));
                     break;
                 case IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_LIMITE:
                     setLimite(Integer.valueOf(valorStr));

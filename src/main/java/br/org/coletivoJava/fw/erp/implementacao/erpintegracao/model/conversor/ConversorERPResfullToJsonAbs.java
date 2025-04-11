@@ -113,7 +113,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
                     if (codigo == null) {
                         codigo = "0";
                     }
-                    item.setId(Integer.valueOf(codigo));
+                    item.setId(Long.valueOf(codigo));
                     for (String atributoObjeto : atributos) {
                         ItfCampoInstanciado campoInstanciado = item.getCPinst(atributoObjeto);
                         Map<String, String> mapeamentoSubatributos = mapeamentoSubCampoLista.get(campoLista);

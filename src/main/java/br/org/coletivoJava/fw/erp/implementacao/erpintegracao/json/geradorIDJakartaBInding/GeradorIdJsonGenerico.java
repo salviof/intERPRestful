@@ -12,7 +12,7 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basic
  *
  * @author salvio
  */
-public abstract class GeradorIdJsonGenerico extends ObjectIdGenerator<Integer> {
+public abstract class GeradorIdJsonGenerico extends ObjectIdGenerator<Long> {
 
     protected final Class<?> _scope;
 
@@ -31,13 +31,13 @@ public abstract class GeradorIdJsonGenerico extends ObjectIdGenerator<Integer> {
     }
 
     @Override
-    public ObjectIdGenerator<Integer> forScope(Class<?> scope) {
+    public ObjectIdGenerator<Long> forScope(Class<?> scope) {
         //return (_scope == scope) ? this : new ObjectIdGenerators.IntSequenceGenerator(scope, _nextValue);
         return this;
     }
 
     @Override
-    public ObjectIdGenerator<Integer> newForSerialization(Object context) {
+    public ObjectIdGenerator<Long> newForSerialization(Object context) {
         return this;
     }
 
@@ -51,5 +51,5 @@ public abstract class GeradorIdJsonGenerico extends ObjectIdGenerator<Integer> {
     }
 
     @Override
-    public abstract Integer generateId(Object forPojo);
+    public abstract Long generateId(Object forPojo);
 }

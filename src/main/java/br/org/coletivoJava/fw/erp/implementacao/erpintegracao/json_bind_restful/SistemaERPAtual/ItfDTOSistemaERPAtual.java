@@ -55,8 +55,8 @@ public interface ItfDTOSistemaERPAtual extends ItfDTOSBJSON, ItfSistemaERPLocal 
     }
 
     @Override
-    public default int getId() {
-        return (int) getValorPorReflexao();
+    public default Long getId() {
+        return (long) getValorPorReflexao();
     }
 
     @Override

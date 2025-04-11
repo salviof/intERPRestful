@@ -82,7 +82,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public boolean registrarCodigoLigacaoApi(java.lang.Class c, int i,
+    public boolean registrarCodigoLigacaoApi(java.lang.Class c, Long i,
             java.lang.String s) {
         return false;
     }
@@ -94,7 +94,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public String getCodigoApiExterna(java.lang.Class c, int i) {
+    public String getCodigoApiExterna(java.lang.Class c, Long i) {
         return null;
     }
 
@@ -477,7 +477,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
                     } else {
 
-                        int codigo = Integer.valueOf(pSolicitacao.getCodigoEntidade());
+                        Long codigo = Long.valueOf(pSolicitacao.getCodigoEntidade());
                         entidade = UtilSBPersistencia.getRegistroByID(classeEntidade, codigo, em);
                         EstruturaDeEntidade estrutura = MapaObjetosProjetoAtual.getEstruturaObjeto(classeEntidade);
                         for (ItfEstruturaCampoEntidade campo : estrutura.getCampos()) {
@@ -577,7 +577,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                                         String entidadeSTR = estruturaCampo.getClasseCampoDeclaradoOuTipoLista();
                                                         if (entidadeSTR != null) {
                                                             ItfBeanSimples entidadeFiltro = (ItfBeanSimples) UtilSBPersistencia.getRegistroByID(MapaObjetosProjetoAtual.getClasseDoObjetoByNome(entidadeSTR),
-                                                                    Integer.valueOf(codigoEntidadeFiltroSTR),
+                                                                    Long.valueOf(codigoEntidadeFiltroSTR),
                                                                     emLista);
                                                             consultaDinamica.addCondicaoManyToOneIgualA(chaves.getKey(), entidadeFiltro);
                                                         }

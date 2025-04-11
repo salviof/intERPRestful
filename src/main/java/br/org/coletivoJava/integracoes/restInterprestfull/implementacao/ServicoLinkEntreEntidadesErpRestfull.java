@@ -101,7 +101,7 @@ public class ServicoLinkEntreEntidadesErpRestfull implements ItfServicoLinkEntre
     }
 
     @Override
-    public String getCodigoApiExterna(Class pEntidade, int pCodigoInterno
+    public String getCodigoApiExterna(Class pEntidade, Long pCodigoInterno
     ) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
@@ -113,7 +113,7 @@ public class ServicoLinkEntreEntidadesErpRestfull implements ItfServicoLinkEntre
     }
 
     @Override
-    public boolean registrarCodigoLigacaoApi(Class pEntidade, int codigoInterno, String codigoAPIExterna
+    public boolean registrarCodigoLigacaoApi(Class pEntidade, Long codigoInterno, String codigoAPIExterna
     ) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }

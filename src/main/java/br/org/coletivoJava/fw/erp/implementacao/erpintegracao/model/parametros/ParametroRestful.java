@@ -21,7 +21,7 @@ public class ParametroRestful extends ItemSimples {
     private String nometipoParametro;
 
     public ParametroRestful(String nometipoParametro) {
-        this.id = 0;//new Date().toString().hashCode();
+        this.id = 0l;//new Date().toString().hashCode();
         this.nometipoParametro = nometipoParametro;
     }
 
