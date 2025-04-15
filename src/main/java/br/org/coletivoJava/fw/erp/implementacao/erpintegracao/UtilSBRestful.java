@@ -154,7 +154,7 @@ public class UtilSBRestful {
         jsonBuilderParametrosBase.add(IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_PAGINA, pagina);
         jsonBuilderParametrosBase.add(IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_LIMITE, limite);
 
-        if (pParametroListagem.getId() > 0) {
+        if (pParametroListagem.getId() != null && pParametroListagem.getId() > 0) {
             jsonBuilderFiltros.add("id", pParametroListagem.getId());
         }
         jsonBuilderFiltros.add(IntegracaoRestInterprestfullAcoesGetListaEntidades.ATRIBUTO_JSON_FILTRO_LIMITE, limite);

@@ -22,7 +22,7 @@ public class ValorLogicoSistemaERPConfiavelFoiEstabelicidaConexao
 
     @Override
     public Object getValor(Object... pEntidade) {
-        if (getSistema().getId() > 0) {
+        if (getSistema().getId() != null && getSistema().getId() > 0) {
             try {
                 if (!isCacheAtivado()) {
                     ItfTokenGestao gestao = FabIntApiRestIntegracaoERPRestfull.OAUTH_VALIDAR_CREDENCIAL.getGestaoToken(getSistema());

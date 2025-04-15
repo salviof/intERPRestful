@@ -77,7 +77,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
 
     public JsonObjectBuilder buildObjeto(Map<String, String> pMapaValores, ItfBeanSimples pBeanSimples) {
         String idOrcamento = "0";
-        if (pBeanSimples.getId() > 0) {
+        if (pBeanSimples.getId() != null && pBeanSimples.getId() > 0) {
             idOrcamento = ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(getSistemaRemoto(), pBeanSimples);
         }
         JsonObjectBuilder construtor = Json.createObjectBuilder();

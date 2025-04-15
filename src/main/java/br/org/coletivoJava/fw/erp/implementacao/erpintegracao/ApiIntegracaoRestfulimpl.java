@@ -528,7 +528,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                 EstruturaDeEntidade estutura = MapaObjetosProjetoAtual.getEstruturaObjeto(entidadeListagem);
                                 ParametroListaRestful parametros = new ParametroListaRestful(pSolicitacao);
 
-                                if (parametros.getId() > 0) {
+                                if (parametros.getId() != null && parametros.getId() > 0) {
                                     ItfEstruturaCampoEntidade campoID = estutura.getCampos().stream().filter(cp -> cp.getFabricaTipoAtributo().equals(FabTipoAtributoObjeto.ID)).findFirst().get();
                                     String nomeCampoID = campoID.getNomeDeclarado();
                                     consultaDinamica.addcondicaoCampoIgualA(nomeCampoID, parametros.getId());
