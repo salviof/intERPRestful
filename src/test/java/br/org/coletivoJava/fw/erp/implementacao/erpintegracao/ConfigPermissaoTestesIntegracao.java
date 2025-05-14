@@ -16,7 +16,7 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basic
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfGrupoUsuario;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import com.super_bits.modulosSB.SBCore.modulos.view.menu.ItfMenusDeSessao;
-import com.super_bits.modulosSB.SBCore.modulos.view.menu.MenusDaSessao;
+import org.coletivojava.fw.api.objetoNativo.view.menu.MenusDaSessao;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.coletivojava.fw.api.objetoNativo.view.menu.MenuSBFW;
