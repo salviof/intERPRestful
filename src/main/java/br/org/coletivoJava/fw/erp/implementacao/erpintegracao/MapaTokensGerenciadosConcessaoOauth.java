@@ -85,21 +85,42 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         return tokenConcessao;
     }
 
-    public static TokenAcessoOauthServer loadTokenExistente(String pTokenAcesso) {
+    public static TokenAcessoOauthServer loadTokenExistente(String pTokenAcesso, ItfSistemaERP pSistema) {
+        if (!TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
+            loadTokensPersistidos(pSistema);
+        }
         return TOKEN_DE_ACESSO_BY_CODIGO.get(pTokenAcesso);
     }
 
-    public static TokenAcessoOauthServer loadTokenExistente(ItfSistemaERP pSistema, ItfUsuario pUsuario) {
-        if (TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
+    public static TokenAcessoOauthServer getTokenExistente(String pTokenAcesso) {
+
+        return TOKEN_DE_ACESSO_BY_CODIGO.get(pTokenAcesso);
+    }
+
+    @Deprecated
+    public static List<TokenAcessoOauthServer> loadTokensDoUsuario(ItfSistemaERP pSistema, ItfUsuario pUsuario) {
+        List<TokenAcessoOauthServer> tokens = new ArrayList<>();
+        if (!TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
             loadTokensPersistidos(pSistema);
         }
 
         if (!TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
             return null;
         }
+
+        Map<String, TokenAcessoOauthServer> TOKENS_DO_SISTEMA = TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.get(pSistema.getChavePublica());
+        for (Map.Entry<String, TokenAcessoOauthServer> tk : TOKENS_DO_SISTEMA.entrySet()) {
+            TokenAcessoOauthServer token = tk.getValue();
+            if (tk.getValue().getScope() != null) {
+                if (token.getScope().equals(pUsuario.getEmail())) {
+                    tokens.add(token);
+
+                }
+            }
+        }
         TokenAcessoOauthServer token
                 = TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.get(pSistema.getChavePublica()).get(pUsuario.getEmail());
-        return token;
+        return tokens;
 
     }
 
@@ -126,6 +147,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
         TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoRefresh, dataExpiracao, pClient_id, pIdentificadorUsuario);
         if (!persistirToken(pClient_id, novoToken)) {
+
             throw new UnsupportedOperationException("falha persistindo token");
         }
         return novoToken;

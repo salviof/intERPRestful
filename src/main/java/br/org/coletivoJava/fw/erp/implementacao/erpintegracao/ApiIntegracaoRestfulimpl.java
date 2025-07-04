@@ -59,11 +59,16 @@ import org.coletivojava.fw.api.tratamentoErros.FabErro;
 import org.coletivojava.fw.utilCoreBase.UtilSBCoreReflexaoAPIERPRestFull;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaErpChaveLocal;
+import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTokenRestInterprestfull;
+import com.super_bits.modulos.SBAcessosModel.model.GrupoUsuarioSB;
+import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringBuscaTrecho;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.ItfRespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestaoOauth;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.UtilSBApiRestClientOauth2;
 import com.super_bits.modulosSB.SBCore.modulos.Mensagens.FabTipoAgenteDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import java.util.HashMap;
 
 @ApiIntegracaoRestful
@@ -138,17 +143,21 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     @Override
     public String gerarTokenSistemaComoAdmin(ItfSistemaERP pSistema) {
-        ItfTokenGestaoOauth gestao = FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistema);
+        GestaoTokenRestInterprestfull gestao = (GestaoTokenRestInterprestfull) FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistema);
+        ItfUsuario usuario = SBCore.getServicoPermissao().getUsuarioByEmail(pSistema.getEmailusuarioAdmin());
 
-        if (!gestao.isTemTokemAtivo()) {
+        if (usuario == null) {
+            throw new UnsupportedOperationException("Falha criando usuário local corespondente ao usuário remoto");
+        }
+
+        if (gestao.isTemTokemAtivo() && gestao.validarToken()) {
+            return gestao.getToken();
+        } else {
             UtilSBApiRestClientOauth2.solicitarAutenticacaoExterna(gestao);
             gestao.gerarNovoToken();
+        }
 
-        }
-        if (!gestao.isTemTokemAtivo()) {
-            return null;
-        }
-        return gestao.getToken();
+        return null;
 
     }
 
@@ -165,6 +174,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         sistemAtual.setNome(SBCore.getGrupoProjeto());
 
         String idChave = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class).getPropriedade(FabConfigModuloWebERPChaves.PAR_DE_CHAVES_IDENTIFICADOR);
+        String caminho = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class).getPatchArquivoConfig();
         System.out.println("buscando por" + idChave);
         Map<String, String> par = RepositorioChavePublicaPrivada.getParDeChavesPubPrivadaByHash(idChave);
         if (par == null) {

@@ -312,7 +312,8 @@ public class UtilSBRestful {
 
         String autorizacaoWrap = pSolicitacao.getHeader("Authorization");
         String autorizacao = autorizacaoWrap.replace("Bearer ", "");
-        TokenAcessoOauthServer dadosToken = MapaTokensGerenciadosConcessaoOauth.loadTokenExistente(autorizacao);
+
+        TokenAcessoOauthServer dadosToken = MapaTokensGerenciadosConcessaoOauth.getTokenExistente(autorizacao);
         return dadosToken;
     }
 

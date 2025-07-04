@@ -58,7 +58,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     @InfoCampo(tipo = FabTipoAtributoObjeto.EMAIL, descricao = "Deixe em branco para desabilitar o acesso direto sem intermediação do usuário")
     private String emailusuarioAdmin;
 
-    @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Endereço Recepção Código Autorização")
+    @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Endereço Recepção Código Autorização", descricao = "Exemplo: http://localhost:7666/solicitacaoAuth2Recept/")
     @Column(nullable = true, length = 2000)
     @Deprecated
     private String urlRecepcaoCodigo;
@@ -67,7 +67,7 @@ public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaER
     @InfoCampo(tipo = FabTipoAtributoObjeto.DESCRITIVO, obrigatorio = true)
     private String chavePublica;
 
-    @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Url endpoint Restful")
+    @InfoCampo(tipo = FabTipoAtributoObjeto.URL, label = "Url endpoint Restful", descricao = "Exemplo: http://localhost:8776/acoesRestful")
     @Column(nullable = false, length = 2000)
     @InfoCampoValidadorLogico()
     private String urlPublicaEndPoint;

@@ -197,7 +197,9 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                         if (solicitacaoUsuarioAdmin) {
                             tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(sistemaCliente, pUsuario);
                             url = URLDecoder.decode(url, "UTF-8");
-                            url = url + "?code=" + tokenConcessaodeAcesso.getToken() + "&tipoAplicacao=" + sistemaRecursos.getHashChavePublica() + "&escopo=sistema";
+                            url = url + "?code="
+                                    + tokenConcessaodeAcesso.getToken()
+                                    + "&tipoAplicacao=" + sistemaRecursos.getHashChavePublica() + "&escopo=sistema";
                             System.out.println("enviando codigo de concessão via:");
                             System.out.println(url);
                             JsonObject relatorioRecebimento = UtilSBCoreClienteRest.getObjetoJsonPorUrl(url);
@@ -234,11 +236,19 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                     throw new ServletException("Utilize o método post ");
 
                 case VERIFICACAO_STATUS_ACESSO:
-                    TokenAcessoOauthServer token = MapaTokensGerenciadosConcessaoOauth.loadTokenExistente(sistemaCliente, pUsuario);
-                    if (token.isTokenValido()) {
-                        resp.getWriter().append("OK");
+                    String tokenPayLoad = requisicao.getHeader("payload");
+                    if (tokenPayLoad == null) {
+                        throw new UnsupportedOperationException("Payload com token a ser validado não foi anexado ao header");
+                    }
+                    //TokenAcessoOauthServer token = MapaTokensGerenciadosConcessaoOauth.loadTokenExistente(sistemaCliente, pUsuario);
+                    JsonObject jsonPayload = UtilSBCoreJson.getJsonObjectByTexto(tokenPayLoad);
+                    String tokenPayload = jsonPayload.getString("access_token");
+                    TokenAcessoOauthServer token = MapaTokensGerenciadosConcessaoOauth.loadTokenExistente(tokenPayload, sistemaCliente);
+                    if (token != null && token.isTokenValido()) {
+                        resp.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(UtilSBCoreJsonRest.getRespostaJsonBuilderBaseSucesso("OK", JsonObject.EMPTY_JSON_OBJECT.asJsonObject()).build()));
                     } else {
-                        resp.getWriter().append("SEM TOKEN");
+                        resp.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(UtilSBCoreJsonRest.getRespostaJsonBuilderBaseFalha("FALHOU").build()));
+                        resp.setStatus(400);
                     }
                     break;
                 default:
@@ -247,6 +257,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             }
         } catch (Throwable t) {
             resp.getWriter().append("Falha não prevista em serviço de obtenção de código de concessão " + t.getMessage() + FabUrlOauth2Server.class.getSimpleName());
+
             resp.setStatus(500);
         }
     }

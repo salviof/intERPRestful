@@ -25,7 +25,8 @@ public class IntegracaoRestInterprestfullAcoesGetOpcoes
 
     @Override
     public String gerarUrlRequisicao() {
-        return super.gerarUrlRequisicao();
+        String urlReq = super.gerarUrlRequisicao();
+        return urlReq;
     }
 
 }

@@ -3,6 +3,7 @@ package br.org.coletivoJava.integracoes.restInterprestfull.implementacao;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.ServletOauth2Server;
@@ -13,11 +14,13 @@ import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.FabTipoConexaoRest;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.RespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.oauth.InfoTokenOauth2;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenDeAcessoExterno;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestaoOauth;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.ChamadaHttpSimples;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.UtilSBApiRestClient;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.gestaoToken.GestaoTokenOath2Base;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
@@ -53,7 +56,13 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
     private final String chavePublicaCliente;
     private final String chavePublicaServidor;
     private final String urlRetornoSucessoObterToken;
+    private final String urlValidacaoToken;
     private String urlRetornoReceberCodigoSolicitao;
+
+    @Override
+    protected String gerarUrlServicoReceberCodigoSolicitacao() {
+        return super.gerarUrlServicoReceberCodigoSolicitacao(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
 
     public GestaoTokenRestInterprestfull(
             final FabTipoAgenteClienteApi pTipoAgente, final ItfUsuario pUsuario, String pIdentificadorServico) {
@@ -96,6 +105,13 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
 
         switch (pTipoAgente) {
             case USUARIO:
+                urlValidacaoToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                        + "/" + FabTipoRequisicaoOauthServer.VERIFICACAO_STATUS_ACESSO.toString()
+                        + "/" + sistemaServidor.getHashChavePublica()
+                        + "/" + sistemaLocal.getHashChavePublica()
+                        + "/" + URLEncoder.encode(sistemaLocal.getUrlRecepcaoCodigo())
+                        + "/" + pUsuario.getEmail();
+
                 urlObterToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
                         + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
                         + "/" + sistemaServidor.getHashChavePublica()
@@ -111,6 +127,14 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
                         + "/" + pUsuario.getEmail();
                 break;
             case SISTEMA:
+
+                urlValidacaoToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
+                        + "/" + FabTipoRequisicaoOauthServer.VERIFICACAO_STATUS_ACESSO.toString()
+                        + "/" + sistemaServidor.getHashChavePublica()
+                        + "/" + sistemaLocal.getHashChavePublica()
+                        + "/" + URLEncoder.encode(sistemaLocal.getUrlRecepcaoCodigo())
+                        + "/" + sistemaServidor.getEmailusuarioAdmin();
+
                 urlObterToken = urlServidorApiRest + "/" + ServletOauth2Server.SLUGPUBLICACAOSERVLET
                         + "/" + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString()
                         + "/" + sistemaServidor.getHashChavePublica()
@@ -144,7 +168,6 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
                 chamada.setEnderecoHost(urlServidorApiRest);
                 chamada.setPath(urlObterToken.replace(urlServidorApiRest, ""));
                 chamada.setCabecalhos(new HashMap<>());
-                Object teste = Json.createObjectBuilder();
                 JsonObjectBuilder jsonEnvioCodigoAcesso = Json.createObjectBuilder();
                 jsonEnvioCodigoAcesso.add("grant_type", FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString());
                 jsonEnvioCodigoAcesso.add("client_id", chavePublicaCliente.hashCode());
@@ -168,6 +191,23 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
         if (getTokenCompleto() == null) {
             return false;
         }
+        if (!getTokenCompleto().isTokenValido()) {
+            return false;
+        }
+
+        ChamadaHttpSimples chamada = new ChamadaHttpSimples();
+        chamada.setTipoConexao(FabTipoConexaoRest.GET);
+        chamada.setEnderecoHost(urlServidorApiRest);
+        chamada.setPath(urlValidacaoToken.replace(urlServidorApiRest, ""));
+        chamada.setCabecalhos(new HashMap<>());
+        chamada.getCabecalhos().put("payload", getTextoTokenArmazenado());
+
+        RespostaWebServiceSimples resposta = UtilSBApiRestClient.getRespostaRest(chamada);
+        if (!resposta.isSucesso()) {
+            return false;
+        }
+        JsonObject resp = resposta.getRespostaComoObjetoJson();
+
         return getTokenCompleto().isTokenValido();
     }
 
