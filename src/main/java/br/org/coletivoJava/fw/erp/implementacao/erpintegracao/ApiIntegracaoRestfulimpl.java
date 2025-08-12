@@ -625,7 +625,8 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                         ((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).getValor();
 
                                         if (((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).isVazio()) {
-                                            resposta.addErro("Entidade encontrada, mas o atributo da entidade está vazia");
+                                            resposta.addAviso("Entidade encontrada, mas o atributo da entidade está vazia");
+                                            return resposta;
                                         }
                                         resposta.setRetorno(((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).getValor());
                                     }
