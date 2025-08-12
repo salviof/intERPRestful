@@ -43,6 +43,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.coletivojava.fw.api.tratamentoErros.FabErro;
 import org.json.JSONException;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
+import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO;
+import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO;
+import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer.VERIFICACAO_STATUS_ACESSO;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJsonRest;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import jakarta.json.JsonObjectBuilder;
@@ -59,7 +62,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
 
     public static final String SLUGPUBLICACAOSERVLET = "OAUTH2_SERVICE";
     private static final ItfIntegracaoERP integracaoEntreSistemas = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
-
+    private static final ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
     @Inject
     @QlSessaoFacesContext
     private ItfSessao sessaoAtual;
@@ -85,19 +88,15 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             //FacesContext contexto = FacesContext.getCurrentInstance();
             String hashChaveCliente = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_CLIENTE);
             String hashChaveServicoRecurso = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_RECURSOS);
-            ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
+
             System.out.println("HASH CLIENTE:" + hashChaveCliente);
             System.out.println("HASH LOCAL SERVER ENVIADO:" + hashChaveServicoRecurso);
-            ItfSistemaERPLocal sistemaRecursos = erp.getSistemaAtual();
-            if (!sistemaRecursos.getHashChavePublica().equals(hashChaveServicoRecurso)) {
-                erp.getSistemaLocalByHashChavePublica(hashChaveServicoRecurso);
-            }
+            ItfSistemaERPLocal sistemaLocalRecursos = erp.getSistemaAtual();
 
-            if (sistemaRecursos == null) {
+            if (!sistemaLocalRecursos.getHashChavePublica().equals(hashChaveServicoRecurso)) {
                 resp.setStatus(401);
-                resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO SERVIÇO DE RECURSOS  " + hashChaveServicoRecurso + " NÃO FOI ENCONTRADA");
-                System.out.println("Acesso negado, hash serviço inválido:" + hashChaveServicoRecurso);
-                return;
+                resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO SERVIÇO LOCAL " + hashChaveServicoRecurso + " NÃO FOI ENCONTRADA");
+
             }
 
             //TODO verifica se o rash servico recurso é o hash do servidor atual
@@ -110,7 +109,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             }
             // PODE VALIDAR TAMBÉM A CHAVE PÚBLICA DO SERVIDOR, POR MOTIVOS DE COMPATIBILIDADE DE TESTES FOI REMOVIDA A VALIDAÇÃO
             //Verifica se a origem é vinda do dominio do sistema solicitante
-            String dominioDoSistemaClienteResgistrado = sistemaCliente.getDominio();
+
             String dominioDaRequisicao = requisicao.getHeader("referer");
 
             ConfigModulo configuracaoRESTFull = SBCore.getConfigModulo(FabConfigModuloWebERPChaves.class);
@@ -123,114 +122,31 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                     solicitacaoUsuarioAdmin = true;
                     System.out.println("Token Solicitado como admin");
                 } else {
+                    solicitacaoUsuarioAdmin = false;
                     System.out.println("token Solicitado por intermedio de usuário");
                 }
             }
-            if (!solicitacaoUsuarioAdmin) {
-                if (SBCore.isEmModoProducao()
-                        && (dominioDaRequisicao == null
-                        || !dominioDaRequisicao.contains(dominioDoSistemaClienteResgistrado))) {
-                    if (!dominioDoSistemaClienteResgistrado.contains("localhost")) {
-                        resp.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA [" + dominioDaRequisicao + "|" + dominioDoSistemaClienteResgistrado + "]");
-                        System.out.println("Acesso negado, origem inválida:" + dominioDaRequisicao + "Origem aceita:" + dominioDoSistemaClienteResgistrado);
-                        return;
-                    }
-                }
-            } else {
-                System.out.println("ACESSO VIA ADMIN");
-                System.out.println("TODO: CHECK IP DO SERVIDOR DE ACESSO");
-                //todo set ip ou host autorizado
-            }
-
-            ItfUsuario pUsuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDoEscopo);
-
             if (emailDoEscopo == null) {
                 resp.getWriter().append("ACESSO NEGADO IMPOSSÍVEL RECONHECER O USUÁRIO VERIFIQUE SUA CHAVE PRIVADA");
                 return;
             }
 
-            if (pUsuario == null) {
+            ItfUsuario usuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDoEscopo);
+            TipoRequisicaoOauth tipoRequisicao = (TipoRequisicaoOauth) parametrosDeUrl.getValorComoBeanSimples(FabUrlOauth2Server.TIPO_REQUISICAO);
+            if (usuario == null) {
                 resp.getWriter().append("ACESSO NEGADO O USUÁRIO " + emailDoEscopo + " NÃO FOI ENCONTRADO NO SISTEMA");
                 return;
             }
-            TipoRequisicaoOauth tipoRequisicao = (TipoRequisicaoOauth) parametrosDeUrl.getValorComoBeanSimples(FabUrlOauth2Server.TIPO_REQUISICAO);
 
-            try {
-                sessaoAtual.getUsuario();
-                System.out.println(sessaoAtual.getUsuario().getEmail());
-            } catch (Throwable t) {
-
-            }
-            if (SBCore.isEmModoDesenvolvimento()) {
-                sessaoAtual = SBCore.getServicoSessao().getSessaoAtual();
-            }
-            if (!solicitacaoUsuarioAdmin) {
-                if (!pUsuario.equals(sessaoAtual.getUsuario())) {
-
-                    if (sessaoAtual.isIdentificado()) {
-
-                        sessaoAtual.encerrarSessao();
-                    }
-                    if (SBCore.isEmModoDesenvolvimento()) {
-                        resp.getWriter().append("EFETUE LOGIN DE FORMA PROGRAMÁTICA,POR PADRÃO O SERVIÇO CDI QUE GERE OS BEANS DE SESSÃO NÃO É ATIVADO NO MODO TESTES");
-                    } else {
-                        RequestDispatcher despachadorDeRespostaParaRequisicao = requisicao
-                                .getRequestDispatcher("/resources/oauth/login.xhtml?hashChavePublicaAplicacaoSolicitante=" + sistemaCliente.getHashChavePublica() + "&scopo=" + pUsuario.getEmail());
-
-                        despachadorDeRespostaParaRequisicao.forward(requisicao, resp);
-
-                        return;
-                    }
-                }
-            }
             switch (tipoRequisicao.getEnumVinculado()) {
+
                 case OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO:
-
-                    TokenConcessaoOauthServer tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(sistemaCliente, pUsuario);
-
-                    if (tokenConcessaodeAcesso == null) {
-                        throw new ServletException("Falha gerando código de concessao do token de acesso");
+                    String urlRedirecionamentoTokenCodigoSolicitacao = URLDecoder.decode(parametrosDeUrl.getValorComoString(FabUrlOauth2Server.REDIRECT_URI), "UTF-8");
+                    if (solicitacaoUsuarioAdmin) {
+                        despacharLoginAdmin(resp, tipoRequisicao, sistemaCliente, usuario, urlRedirecionamentoTokenCodigoSolicitacao);
                     } else {
-
-                        String url = URLDecoder.decode(parametrosDeUrl.getValorComoString(FabUrlOauth2Server.REDIRECT_URI));
-
-                        if (solicitacaoUsuarioAdmin) {
-                            tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(sistemaCliente, pUsuario);
-                            url = URLDecoder.decode(url, "UTF-8");
-                            url = url + "?code="
-                                    + tokenConcessaodeAcesso.getToken()
-                                    + "&tipoAplicacao=" + sistemaRecursos.getHashChavePublica() + "&escopo=sistema";
-                            System.out.println("enviando codigo de concessão via:");
-                            System.out.println(url);
-                            JsonObject relatorioRecebimento = UtilSBCoreClienteRest.getObjetoJsonPorUrl(url);
-                            if (relatorioRecebimento == null) {
-                                JsonObjectBuilder respEnvioCodigo = UtilSBCoreJsonRest.getRespostaJsonBuilderBaseFalha("Falha acessando" + url);
-                                resp.setStatus(500);
-                                resp.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
-                                resp.flushBuffer();
-                                return;
-                            }
-                            ItfResposta respObtencaoToken = UtilSBCoreJsonRest.getResposta(relatorioRecebimento);
-                            if (respObtencaoToken.isSucesso()) {
-                                JsonObjectBuilder respEnvioCodigo = UtilSBCoreJsonRest.getRespostaJsonBuilderBaseSucesso("o token de acesso foi registrado com sucesso no cliente", relatorioRecebimento);
-                                resp.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
-                                resp.flushBuffer();
-                                return;
-                            } else {
-                                JsonObjectBuilder respEnvioCodigo = UtilSBCoreJsonRest.getRespostaJsonBuilderBaseSucesso("o codigo de solicitação foi enviado, mas houve falha obtendo o token com o código enviado", relatorioRecebimento);
-                                resp.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
-                                resp.flushBuffer();
-                                return;
-                            }
-
-                        } else {
-                            System.out.println("REspondendo ao usuário com o link de registro do token");
-                            url = url + "?code=" + tokenConcessaodeAcesso.getToken() + "&tipoAplicacao=" + sistemaRecursos.getHashChavePublica() + "&escopo=" + sessaoAtual.getUsuario().getEmail();
-                            resp.getWriter().append("<script> windows.location='" + url + "'</script>");
-                            resp.sendRedirect(url);
-                        }
+                        despacharLoginUsuarioRemoto(resp, requisicao, tipoRequisicao, dominioDaRequisicao, sistemaCliente, usuario, urlRedirecionamentoTokenCodigoSolicitacao);
                     }
-
                     break;
                 case OBTER_CODIGO_DE_AUTORIZACAO:
                     throw new ServletException("Utilize o método post ");
@@ -252,9 +168,9 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                     }
                     break;
                 default:
-                    throw new AssertionError(tipoRequisicao.getEnumVinculado().name());
-
+                    throw new AssertionError();
             }
+
         } catch (Throwable t) {
             resp.getWriter().append("Falha não prevista em serviço de obtenção de código de concessão " + t.getMessage() + FabUrlOauth2Server.class.getSimpleName());
 
@@ -262,15 +178,120 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
         }
     }
 
+    public void despacharLoginAdmin(HttpServletResponse pResposta, TipoRequisicaoOauth pTipoRequisicao, ItfSistemaERP pSistemaCliente, ItfUsuario pUsuario, String pUrlRedirecionamentoTokenCodigoSolicitacao) throws Throwable {
+        ItfSistemaERPLocal sistemaRecursos = erp.getSistemaAtual();
+        TokenConcessaoOauthServer tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(pSistemaCliente, pUsuario);
+        switch (pTipoRequisicao.getEnumVinculado()) {
+            case OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO:
+                tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(pSistemaCliente, pUsuario);
+                String url = URLDecoder.decode(pUrlRedirecionamentoTokenCodigoSolicitacao, "UTF-8");
+                url = url + "?code="
+                        + tokenConcessaodeAcesso.getToken()
+                        + "&tipoAplicacao=" + sistemaRecursos.getHashChavePublica() + "&escopo=sistema";
+                System.out.println("enviando codigo de concessão via:");
+                System.out.println(url);
+                JsonObject relatorioRecebimento = UtilSBCoreClienteRest.getObjetoJsonPorUrl(url);
+                if (relatorioRecebimento == null) {
+                    JsonObjectBuilder respEnvioCodigo = UtilSBCoreJsonRest.getRespostaJsonBuilderBaseFalha("Falha acessando" + url);
+                    pResposta.setStatus(500);
+                    pResposta.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
+                    pResposta.flushBuffer();
+                    return;
+                }
+                ItfResposta respObtencaoToken = UtilSBCoreJsonRest.getResposta(relatorioRecebimento);
+                if (respObtencaoToken.isSucesso()) {
+                    JsonObjectBuilder respEnvioCodigo = UtilSBCoreJsonRest.getRespostaJsonBuilderBaseSucesso("o token de acesso foi registrado com sucesso no cliente", relatorioRecebimento);
+                    pResposta.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
+                    pResposta.flushBuffer();
+
+                } else {
+                    JsonObjectBuilder respEnvioCodigo = UtilSBCoreJsonRest.getRespostaJsonBuilderBaseSucesso("o codigo de solicitação foi enviado, mas houve falha obtendo o token com o código enviado", relatorioRecebimento);
+                    pResposta.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
+                    pResposta.flushBuffer();
+
+                }
+
+                break;
+            default:
+                throw new ServletException("o método despachar login admin só processa requisições do tipo  " + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString());
+
+        }
+
+    }
+
+    public void despacharLoginUsuarioRemoto(HttpServletResponse pResposta, HttpServletRequest requisicao, TipoRequisicaoOauth pTipoRequisicao, String pDominioConexao, ItfSistemaERP pSistemaCliente, ItfUsuario pUsuario, String pUrlRedirecionamentoTokenCodigoSolicitacao) throws Throwable {
+        ItfSistemaERPLocal sistemaRecursos = erp.getSistemaAtual();
+        String dominioDoSistemaClienteResgistrado = pSistemaCliente.getDominio();
+        if (SBCore.isEmModoProducao()
+                && (pDominioConexao == null
+                || !pDominioConexao.contains(dominioDoSistemaClienteResgistrado))) {
+            if (!dominioDoSistemaClienteResgistrado.contains("localhost")) {
+                pResposta.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA [" + pDominioConexao + "|" + dominioDoSistemaClienteResgistrado + "]");
+                System.out.println("Acesso negado, origem inválida:" + pDominioConexao + "Origem aceita:" + dominioDoSistemaClienteResgistrado);
+                return;
+            }
+        }
+
+        sessaoAtual.getUsuario();
+        System.out.println(sessaoAtual.getUsuario().getEmail());
+
+        if (SBCore.isEmModoDesenvolvimento()) {
+            sessaoAtual = SBCore.getServicoSessao().getSessaoAtual();
+        }
+
+        if (!pUsuario.equals(sessaoAtual.getUsuario())) {
+
+            if (sessaoAtual.isIdentificado()) {
+
+                sessaoAtual.encerrarSessao();
+            }
+            if (SBCore.isEmModoDesenvolvimento()) {
+                pResposta.getWriter().append("EFETUE LOGIN DE FORMA PROGRAMÁTICA,POR PADRÃO O SERVIÇO CDI QUE GERE OS BEANS DE SESSÃO NÃO É ATIVADO NO MODO TESTES");
+            } else {
+                RequestDispatcher despachadorDeRespostaParaRequisicao = requisicao
+                        .getRequestDispatcher("/resources/oauth/login.xhtml?hashChavePublicaAplicacaoSolicitante=" + pSistemaCliente.getHashChavePublica() + "&scopo=" + pUsuario.getEmail());
+
+                despachadorDeRespostaParaRequisicao.forward(requisicao, pResposta);
+
+                return;
+            }
+        }
+
+        switch (pTipoRequisicao.getEnumVinculado()) {
+            case OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO:
+
+                TokenConcessaoOauthServer tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(pSistemaCliente, pUsuario);
+
+                if (tokenConcessaodeAcesso == null) {
+                    throw new ServletException("Falha gerando código de concessao do token de acesso");
+                }
+
+                System.out.println("REspondendo ao usuário com o link de registro do token");
+                String url = pUrlRedirecionamentoTokenCodigoSolicitacao + "?code=" + tokenConcessaodeAcesso.getToken() + "&tipoAplicacao=" + sistemaRecursos.getHashChavePublica() + "&escopo=" + sessaoAtual.getUsuario().getEmail();
+                pResposta.getWriter().append("<script> windows.location='" + url + "'</script>");
+                pResposta.sendRedirect(url);
+
+                break;
+
+            default:
+                throw new ServletException("o método despachar login admin só processa requisições do tipo  " + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString());
+
+        }
+
+    }
+
     @Override
     public void doPost(HttpServletRequest requisicao, HttpServletResponse resp) throws ServletException, IOException {
         UrlInterpretada parametrosDeUrl;
+
         try {
 
-            parametrosDeUrl = UtilFabUrlServlet.getUrlInterpretada(FabUrlOauth2Server.class, requisicao);
+            parametrosDeUrl = UtilFabUrlServlet.getUrlInterpretada(FabUrlOauth2Server.class,
+                    requisicao);
 
         } catch (Throwable t) {
-            resp.getWriter().append("PARAMETROS DE ACESSO INCORRETOS, VERIFIQUE A DOCUMENTAÇÃO DA CLASSE " + FabUrlOauth2Server.class.getSimpleName());
+            resp.getWriter().append("PARAMETROS DE ACESSO INCORRETOS, VERIFIQUE A DOCUMENTAÇÃO DA CLASSE " + FabUrlOauth2Server.class
+                    .getSimpleName());
             return;
         }
         String hashChaveCliente = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.CHAVE_PUBLICA_ID_CLIENTE);

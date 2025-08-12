@@ -247,6 +247,9 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         if (emailusuarioChamada != null && pSistemaServico.getEmailusuarioAdmin() != null) {
             if (pSistemaServico.getEmailusuarioAdmin().equals(emailusuarioChamada)) {
                 acessarComoAdmin = true;
+                if (acessarComoAdmin) {
+                    ItfTokenGestaoOauth gestao = FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistemaServico);
+                }
             }
         }
 
@@ -271,6 +274,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                 pSistemaServico, nomeAcao, acessarComoAdmin, (ParametroListaRestful) pParametro)
                         );
                 respostaREquisicao = acaoListagem.getResposta();
+                //System.out.println(respostaREquisicao.getRespostaTexto());
                 break;
             case FORMULARIO_MODAL:
                 break;
@@ -321,6 +325,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     @Override
     public ItfResposta getRespostaComoAdmin(ItfSistemaERP pSistema, String nomeAcao, ItfBeanSimples pParametro) {
+
         return getResposta(pSistema, nomeAcao, pParametro, pSistema.getEmailusuarioAdmin(), true);
     }
 
@@ -617,6 +622,11 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                         resposta.addErro("Impossível acessar o atributo, pois a pesquisa retornou mais de um registro");
                                     }
                                     if (lista.size() == 1) {
+                                        ((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).getValor();
+
+                                        if (((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).isVazio()) {
+                                            resposta.addErro("Entidade encontrada, mas o atributo da entidade está vazia");
+                                        }
                                         resposta.setRetorno(((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).getValor());
                                     }
                                 } else {

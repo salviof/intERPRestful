@@ -9,6 +9,7 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSiste
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ErroTentandoObterTokenAcesso;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
+import com.super_bits.modulos.SBAcessosModel.view.FabAcaoPaginasDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
@@ -16,6 +17,9 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAc
 import com.super_bits.modulosSB.SBCore.modulos.Controller.qualificadoresCDI.sessao.QlSessaoFacesContext;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfSessao;
 import com.super_bits.modulosSB.SBCore.modulos.servicosCore.ItfServicoControllerExecucao;
+import com.super_bits.modulosSB.webPaginas.controller.servlets.WebPaginasServlet;
+import com.super_bits.modulosSB.webPaginas.util.UtilSBWPServletTools;
+import com.super_bits.modulosSB.webPaginas.util.UtilSBWP_JSFTools;
 import java.io.IOException;
 import java.io.Serializable;
 import javax.inject.Inject;
@@ -80,8 +84,10 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
             resp.getWriter().append(respostaStr);
             return;
         }
-
-        RequestDispatcher despachadorDeRespostaParaRequisicao = req.getRequestDispatcher("/resources/restful/respostaController.xhtml");
+        req.setAttribute("solicitacao", solicitacao);
+        ;
+        //UtilSBWPServletTools.getRequestAtribute(WebPaginasServlet.NOME_BEAN_PACOTE_CONTROLLER_REQ) //UtilSBWP_JSFTools.dispacharRespostaController(pPacote, req, resp);
+        RequestDispatcher despachadorDeRespostaParaRequisicao = req.getRequestDispatcher(FabAcaoPaginasDoSistema.FORMULARIO_API_RESTFUL);
         req.setAttribute("solicitacao", solicitacao);
         despachadorDeRespostaParaRequisicao.forward(req, resp);
 

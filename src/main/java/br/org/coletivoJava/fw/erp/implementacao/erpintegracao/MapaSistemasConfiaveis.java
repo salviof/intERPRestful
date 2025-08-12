@@ -69,6 +69,9 @@ public class MapaSistemasConfiaveis {
         if (mapaSistemas.isEmpty()) {
             loadSistemasPersistidos();
         }
+        if (!mapaSistemas.containsKey(pHash)) {
+            loadSistemasPersistidos();
+        }
         return mapaSistemas.get(pHash);
     }
 
