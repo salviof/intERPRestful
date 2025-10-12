@@ -21,4 +21,9 @@ public enum FabTipoRequisicaoOauthServer implements ItfFabrica {
     @InfoObjetoDaFabrica(nomeObjeto = "VERIFICACAO_STATUS_ACESSO", id = 3, classeObjeto = TipoRequisicaoOauth.class)
     VERIFICACAO_STATUS_ACESSO;
 
+    @Override
+    public TipoRequisicaoOauth getRegistro() {
+        return (TipoRequisicaoOauth) ItfFabrica.super.getRegistro(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    }
+
 }

@@ -58,11 +58,9 @@ import java.net.URLEncoder;
  *
  * @author sfurbino
  */
-public class ServletOauth2Server extends HttpServlet implements Serializable {
+public class ServletOauth2Server extends ServletOauth2ServerAbs implements Serializable {
 
     public static final String SLUGPUBLICACAOSERVLET = "OAUTH2_SERVICE";
-    private static final ItfIntegracaoERP integracaoEntreSistemas = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
-    private static final ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
     @Inject
     @QlSessaoFacesContext
     private ItfSessao sessaoAtual;
@@ -145,7 +143,7 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                     if (solicitacaoUsuarioAdmin) {
                         despacharLoginAdmin(resp, tipoRequisicao, sistemaCliente, usuario, urlRedirecionamentoTokenCodigoSolicitacao);
                     } else {
-                        despacharLoginUsuarioRemoto(resp, requisicao, tipoRequisicao, dominioDaRequisicao, sistemaCliente, usuario, urlRedirecionamentoTokenCodigoSolicitacao);
+                        despacharLoginUsuarioRemotoEscopoDeUsuario(resp, requisicao, tipoRequisicao, dominioDaRequisicao, sistemaCliente, usuario, urlRedirecionamentoTokenCodigoSolicitacao);
                     }
                     break;
                 case OBTER_CODIGO_DE_AUTORIZACAO:
@@ -212,67 +210,6 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
                 }
 
                 break;
-            default:
-                throw new ServletException("o método despachar login admin só processa requisições do tipo  " + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString());
-
-        }
-
-    }
-
-    public void despacharLoginUsuarioRemoto(HttpServletResponse pResposta, HttpServletRequest requisicao, TipoRequisicaoOauth pTipoRequisicao, String pDominioConexao, ItfSistemaERP pSistemaCliente, ItfUsuario pUsuario, String pUrlRedirecionamentoTokenCodigoSolicitacao) throws Throwable {
-        ItfSistemaERPLocal sistemaRecursos = erp.getSistemaAtual();
-        String dominioDoSistemaClienteResgistrado = pSistemaCliente.getDominio();
-        if (SBCore.isEmModoProducao()
-                && (pDominioConexao == null
-                || !pDominioConexao.contains(dominioDoSistemaClienteResgistrado))) {
-            if (!dominioDoSistemaClienteResgistrado.contains("localhost")) {
-                pResposta.getWriter().append("ACESSO NEGADO, A ORIGEM DA REQUISIÇÃO DIVERGE DA ORIEM AUTORIZADA [" + pDominioConexao + "|" + dominioDoSistemaClienteResgistrado + "]");
-                System.out.println("Acesso negado, origem inválida:" + pDominioConexao + "Origem aceita:" + dominioDoSistemaClienteResgistrado);
-                return;
-            }
-        }
-
-        sessaoAtual.getUsuario();
-        System.out.println(sessaoAtual.getUsuario().getEmail());
-
-        if (SBCore.isEmModoDesenvolvimento()) {
-            sessaoAtual = SBCore.getServicoSessao().getSessaoAtual();
-        }
-
-        if (!pUsuario.equals(sessaoAtual.getUsuario())) {
-
-            if (sessaoAtual.isIdentificado()) {
-
-                sessaoAtual.encerrarSessao();
-            }
-            if (SBCore.isEmModoDesenvolvimento()) {
-                pResposta.getWriter().append("EFETUE LOGIN DE FORMA PROGRAMÁTICA,POR PADRÃO O SERVIÇO CDI QUE GERE OS BEANS DE SESSÃO NÃO É ATIVADO NO MODO TESTES");
-            } else {
-                RequestDispatcher despachadorDeRespostaParaRequisicao = requisicao
-                        .getRequestDispatcher("/resources/oauth/login.xhtml?hashChavePublicaAplicacaoSolicitante=" + pSistemaCliente.getHashChavePublica() + "&scopo=" + pUsuario.getEmail());
-
-                despachadorDeRespostaParaRequisicao.forward(requisicao, pResposta);
-
-                return;
-            }
-        }
-
-        switch (pTipoRequisicao.getEnumVinculado()) {
-            case OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO:
-
-                TokenConcessaoOauthServer tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(pSistemaCliente, pUsuario);
-
-                if (tokenConcessaodeAcesso == null) {
-                    throw new ServletException("Falha gerando código de concessao do token de acesso");
-                }
-
-                System.out.println("REspondendo ao usuário com o link de registro do token");
-                String url = pUrlRedirecionamentoTokenCodigoSolicitacao + "?code=" + tokenConcessaodeAcesso.getToken() + "&tipoAplicacao=" + sistemaRecursos.getHashChavePublica() + "&escopo=" + sessaoAtual.getUsuario().getEmail();
-                pResposta.getWriter().append("<script> windows.location='" + url + "'</script>");
-                pResposta.sendRedirect(url);
-
-                break;
-
             default:
                 throw new ServletException("o método despachar login admin só processa requisições do tipo  " + FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO.toString());
 
@@ -383,6 +320,15 @@ public class ServletOauth2Server extends HttpServlet implements Serializable {
             SBCore.RelatarErro(FabErro.SOLICITAR_REPARO, "Erro criando json de resposta com token de acesso", ex);
         }
 
+    }
+
+    @Override
+    protected ItfSessao getSessao() {
+        if (SBCore.isEmModoDesenvolvimento()) {
+            return SBCore.getServicoSessao().getSessaoAtual();
+        } else {
+            return sessaoAtual;
+        }
     }
 
 }
