@@ -386,8 +386,8 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public JsonObject gerarConversaoObjetoToJson(ComoEntidadeSimples pItemSimples) {
-        return UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pItemSimples, false);
+    public JsonObject gerarConversaoObjetoToJson(ComoEntidadeSimples pEntidadeSimples) {
+        return UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pEntidadeSimples, false);
 
     }
 

@@ -8,7 +8,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServe
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.ItemSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.EntidadeSimples;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeVinculadoAEnum;
 import com.super_bits.modulosSB.SBCore.modulos.fabrica.ComoFabrica;
 
@@ -17,7 +17,7 @@ import com.super_bits.modulosSB.SBCore.modulos.fabrica.ComoFabrica;
  * @author sfurbino
  */
 @InfoObjetoSB(tags = "Tipo requisição", plural = "Tipos de Requisição", fabricaVinculada = FabTipoRequisicaoOauthServer.class)
-public class TipoRequisicaoOauth extends ItemSimples implements ComoEntidadeVinculadoAEnum {
+public class TipoRequisicaoOauth extends EntidadeSimples implements ComoEntidadeVinculadoAEnum {
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.ID)
     private Long id;

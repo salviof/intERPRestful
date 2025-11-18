@@ -8,7 +8,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto.GeradorIdJsonIDLocalTransienteRefIDRemoto;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto.JsonIdentificadorIDLocalCorrespondeIDRemoto;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto.MixLocalCorrespondeRemoto;
-import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.json.MixIgnoreCaseItemSimples;
+import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.json.MixIgnoreCaseEntidadeSimples;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.json.MixinJsonSerializadorPadrao;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.json.SerializadorPadrao;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

@@ -7,12 +7,12 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.ItemSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.EntidadeSimples;
 import java.util.Date;
 import javax.persistence.Id;
 
 @InfoObjetoSB(tags = "Parametro restful", plural = "Parametros Restful")
-public class ParametroRestful extends ItemSimples {
+public class ParametroRestful extends EntidadeSimples {
 
     @Id
     private Long id;

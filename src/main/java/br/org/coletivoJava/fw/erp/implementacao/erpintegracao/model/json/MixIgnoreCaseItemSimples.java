@@ -27,7 +27,7 @@ import java.util.Map;
     "mapaJustificativasExecucaoAcao",
     "mapaAssistenteLocalizacao",
     "mapeouTodosOsCampos"})
-public class MixIgnoreCaseItemSimples {
+public class MixIgnoreCaseEntidadeSimples {
 
     @JsonIgnore
     protected CampoMapValores camposEsperados;

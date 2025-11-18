@@ -140,7 +140,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
                                 break;
                             case ENTIDADE:
                                 if (campoInstanciado.getValor() != null) {
-                                    String itemRemoto = ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(getSistemaRemoto(), campoInstanciado.getValorComoItemSimples());
+                                    String itemRemoto = ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(getSistemaRemoto(), campoInstanciado.getValorComoEntidadeSimples());
                                     if (itemRemoto == null) {
                                         itemRemoto = "0";
                                     }
@@ -194,7 +194,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
                     break;
                 case ENTIDADE:
                     if (campoInstanciado.getValor() != null) {
-                        String itemRemoto = ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(getSistemaRemoto(), campoInstanciado.getValorComoItemSimples());
+                        String itemRemoto = ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(getSistemaRemoto(), campoInstanciado.getValorComoEntidadeSimples());
                         if (itemRemoto == null) {
                             itemRemoto = "0";
                         }
