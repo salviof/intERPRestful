@@ -13,7 +13,7 @@ import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
-import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ItfFabricaIntegracaoRest;
+import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ComoFabricaIntegracaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.FabTipoConexaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.InfoConsumoRestService;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
@@ -25,7 +25,7 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.UtilSBIntegracaoClientReflexao;
 import com.super_bits.modulosSB.SBCore.modulos.ManipulaArquivo.importacao.FabTipoArquivoImportacao;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
 
 /**
  *
@@ -36,7 +36,7 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basic
         nomeIntegracao = "intERPRestfull",
         configuracao = FabConfigModuloWebERPChaves.class
 )
-public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRest {
+public enum FabIntApiRestIntegracaoERPRestfull implements ComoFabricaIntegracaoRest {
 
     @InfoConsumoRestService(getPachServico = "/oauth2Service/status/{0}",
             tipoConexao = FabTipoConexaoRest.GET,
@@ -115,7 +115,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
     @Override
     @Deprecated
     public ItfAcaoApiRest getAcao(Object... parametros) {
-        return ItfFabricaIntegracaoRest.super.getAcao(parametros); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+        return ComoFabricaIntegracaoRest.super.getAcao(parametros); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
 
     public ItfAcaoApiRest getAcao(SolicitacaoControllerERP pSolicicatacao) {
@@ -132,9 +132,9 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
         switch (tipoAgente) {
 
             case USUARIO:
-                return ItfFabricaIntegracaoRest.super.getAcao(tipoAgente, SBCore.getUsuarioLogado(), pSolicicatacao);
+                return ComoFabricaIntegracaoRest.super.getAcao(tipoAgente, SBCore.getUsuarioLogado(), pSolicicatacao);
             case SISTEMA:
-                return ItfFabricaIntegracaoRest.super.getAcao(tipoAgente, pSolicicatacao.getUsuarioSolicitante(), pSolicicatacao);
+                return ComoFabricaIntegracaoRest.super.getAcao(tipoAgente, pSolicicatacao.getUsuarioSolicitante(), pSolicicatacao);
 
             default:
                 throw new AssertionError();
@@ -144,17 +144,17 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ItfFabricaIntegracaoRe
 
     public ItfTokenGestaoOauth getGestaoToken(ItfSistemaERP pSistemaServico) {
 
-        return (ItfTokenGestaoOauth) ItfFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pSistemaServico.getHashChavePublica());
+        return (ItfTokenGestaoOauth) ComoFabricaIntegracaoRest.super.getGestaoToken(SBCore.getUsuarioLogado(), pSistemaServico.getHashChavePublica());
     }
 
-    private ItfTokenGestaoOauth getGestaoToken(ItfSistemaERP pSistemaServico, ItfUsuario pUsuario) {
+    private ItfTokenGestaoOauth getGestaoToken(ItfSistemaERP pSistemaServico, ComoUsuario pUsuario) {
 
-        return (ItfTokenGestaoOauth) ItfFabricaIntegracaoRest.super.getGestaoToken(pUsuario,
+        return (ItfTokenGestaoOauth) ComoFabricaIntegracaoRest.super.getGestaoToken(pUsuario,
                 pSistemaServico.getHashChavePublica());
     }
 
     @Override
-    public ItfTokenGestaoOauth getGestaoToken(ItfUsuario pUsuario) {
+    public ItfTokenGestaoOauth getGestaoToken(ComoUsuario pUsuario) {
         throw new UnsupportedOperationException("Informe o sistema chamando get getGestaoToken(ItfSistemaERP)");
     }
 

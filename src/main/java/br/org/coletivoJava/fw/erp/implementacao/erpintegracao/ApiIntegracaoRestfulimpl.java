@@ -1,7 +1,6 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimplesSomenteLeitura;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.erp.repositorioLinkEntidades.RepositorioLinkEntidadesGenerico;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.ApiIntegracaoRestful;
 
@@ -13,10 +12,9 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros.P
 import com.super_bits.modulosSB.SBCore.modulos.erp.conversao.ItfConversorERRestfullToJson;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
-import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.consultaDinamica.ConsultaDinamicaDeEntidade;
-import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
+
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
@@ -27,8 +25,7 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_
 import com.super_bits.modulosSB.SBCore.modulos.Controller.ErroChamadaController;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoSecundaria;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ComoAcaoSecundaria;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ItfAcaoGerenciarEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
@@ -38,7 +35,7 @@ import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaCamp
 import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaDeEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.MapaObjetosProjetoAtual;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.estrutura.ItfEstruturaCampoEntidade;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
@@ -51,7 +48,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -60,16 +56,16 @@ import org.coletivojava.fw.utilCoreBase.UtilSBCoreReflexaoAPIERPRestFull;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaErpChaveLocal;
 import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTokenRestInterprestfull;
-import com.super_bits.modulos.SBAcessosModel.model.GrupoUsuarioSB;
-import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringBuscaTrecho;
+import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimplesORM;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.ItfRespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTokenGestaoOauth;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.UtilSBApiRestClientOauth2;
 import com.super_bits.modulosSB.SBCore.modulos.Mensagens.FabTipoAgenteDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import java.util.HashMap;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimplesSomenteLeitura;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ComoAcaoDoSistema;
 
 @ApiIntegracaoRestful
 public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
@@ -93,7 +89,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public ItfBeanSimplesSomenteLeitura getObjetoDTOFromJson(java.lang.Class c,
+    public ComoEntidadeSimplesSomenteLeitura getObjetoDTOFromJson(java.lang.Class c,
             java.lang.String s) {
         return null;
     }
@@ -104,7 +100,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public List<String> getAcoesDisponiveis(ItfSistemaERP pSistema, String nomeAcao, ItfBeanSimples pParametro) {
+    public List<String> getAcoesDisponiveis(ItfSistemaERP pSistema, String nomeAcao, ComoEntidadeSimples pParametro) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -144,7 +140,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     @Override
     public String gerarTokenSistemaComoAdmin(ItfSistemaERP pSistema) {
         GestaoTokenRestInterprestfull gestao = (GestaoTokenRestInterprestfull) FabIntApiRestIntegracaoERPRestfull.getGestaoTokenOpcoesAdmin(pSistema);
-        ItfUsuario usuario = SBCore.getServicoPermissao().getUsuarioByEmail(pSistema.getEmailusuarioAdmin());
+        ComoUsuario usuario = SBCore.getServicoPermissao().getUsuarioByEmail(pSistema.getEmailusuarioAdmin());
 
         if (usuario == null) {
             throw new UnsupportedOperationException("Falha criando usuário local corespondente ao usuário remoto");
@@ -237,7 +233,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     }
 
-    private synchronized ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro, String pEmailUsuarioChamada, boolean pRenovarTokenCasoFalha) {
+    private synchronized ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ComoEntidadeSimples pParametro, String pEmailUsuarioChamada, boolean pRenovarTokenCasoFalha) {
         boolean acessarComoAdmin = false;
         String emailusuarioChamada = SBCore.getUsuarioLogado().getEmail();
         if (pEmailUsuarioChamada != null) {
@@ -324,39 +320,39 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public ItfResposta getRespostaComoAdmin(ItfSistemaERP pSistema, String nomeAcao, ItfBeanSimples pParametro) {
+    public ItfResposta getRespostaComoAdmin(ItfSistemaERP pSistema, String nomeAcao, ComoEntidadeSimples pParametro) {
 
         return getResposta(pSistema, nomeAcao, pParametro, pSistema.getEmailusuarioAdmin(), true);
     }
 
     @Override
-    public ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ItfBeanSimples pParametro) {
+    public ItfResposta getResposta(ItfSistemaERP pSistemaServico, String nomeAcao, ComoEntidadeSimples pParametro) {
         return getResposta(pSistemaServico, nomeAcao, pParametro, SBCore.getUsuarioLogado().getEmail(), true);
 
     }
 
     @Override
-    public ItfBeanSimples gerarConversaoJsonStringToObjeto(ItfSistemaERP pSistema, String pJson) {
+    public ComoEntidadeSimples gerarConversaoJsonStringToObjeto(ItfSistemaERP pSistema, String pJson) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ItfBeanSimples gerarConversaoJsonStringToObjeto(String pJson) {
+    public ComoEntidadeSimples gerarConversaoJsonStringToObjeto(String pJson) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ItfBeanSimples gerarConversaoJsonToObjeto(ItfSistemaERP pSistema, JsonObject pJson) {
+    public ComoEntidadeSimples gerarConversaoJsonToObjeto(ItfSistemaERP pSistema, JsonObject pJson) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ItfBeanSimples gerarConversaoJsonToObjeto(JsonObject pJson) {
+    public ComoEntidadeSimples gerarConversaoJsonToObjeto(JsonObject pJson) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public JsonObject gerarConversaoObjetoToJson(ItfSistemaERP pSistema, ItfBeanSimples pBeanSimples, boolean pUsarIdComoIdRemotoCorrespondente) {
+    public JsonObject gerarConversaoObjetoToJson(ItfSistemaERP pSistema, ComoEntidadeSimples pBeanSimples, boolean pUsarIdComoIdRemotoCorrespondente) {
         // ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(pEntidade, 0);
         // ERPIntegracaoSistemasApi.RESTFUL.getDTO(pBeanSimples, pItefaceObjeto);
         if (pBeanSimples == null) {
@@ -390,7 +386,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     }
 
     @Override
-    public JsonObject gerarConversaoObjetoToJson(ItfBeanSimples pItemSimples) {
+    public JsonObject gerarConversaoObjetoToJson(ComoEntidadeSimples pItemSimples) {
         return UtilSBRestFulEntityToJson.getJsonFromObjetoGenerico(pItemSimples, false);
 
     }
@@ -404,7 +400,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
             if (pSolicitacao.isAutenticadoComSucesso() && pSolicitacao.getAcaoStrNomeUnico() != null) {
 
                 ItfAcaoGerenciarEntidade acaoGEstao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(pSolicitacao.getAcaoStrNomeUnico()).getAcaoDeGestaoEntidade();
-                List<ItfAcaoSecundaria> acoes = acaoGEstao.getAcoesVinculadas();
+                List<ComoAcaoSecundaria> acoes = acaoGEstao.getAcoesVinculadas();
                 acoes.stream().map(ac -> ac.getNomeUnico()).forEach(jsonArrayBuilder::add);
                 jsonBuilder.add("acoes", jsonArrayBuilder.build());
 
@@ -437,7 +433,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
     @Override
     public ItfRespostaAcaoDoSistema gerarRespostaAcaoDoSistemaServico(SolicitacaoControllerERP pSolicitacao) {
 
-        ItfAcaoDoSistema acao = null;
+        ComoAcaoDoSistema acao = null;
 
         ItfRespostaAcaoDoSistema resposta = null;
 
@@ -476,8 +472,8 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         }
         switch (metodo) {
             case "POST":
-                ItfBeanSimples entidade = null;
-                Class<? extends EntidadeSimples> classeEntidade = null;
+                ComoEntidadeSimples entidade = null;
+                Class<? extends EntidadeSimplesORM> classeEntidade = null;
                 if (acao != null) {
                     classeEntidade = acao.getComoAcaoDeEntidade().getClasseRelacionada();
                 }
@@ -485,7 +481,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                 try {
                     if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getCodigoEntidade()) || pSolicitacao.getCodigoEntidade().equals("0")) {
                         try {
-                            entidade = (ItfBeanSimples) classeEntidade.newInstance();
+                            entidade = (ComoEntidadeSimples) classeEntidade.newInstance();
                         } catch (InstantiationException | IllegalAccessException ex) {
                             SBCore.RelatarErro(FabErro.SOLICITAR_REPARO, "Falha instanciando nova entidade" + entidade, ex);
                         }
@@ -591,7 +587,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
                                                         String entidadeSTR = estruturaCampo.getClasseCampoDeclaradoOuTipoLista();
                                                         if (entidadeSTR != null) {
-                                                            ItfBeanSimples entidadeFiltro = (ItfBeanSimples) UtilSBPersistencia.getRegistroByID(MapaObjetosProjetoAtual.getClasseDoObjetoByNome(entidadeSTR),
+                                                            ComoEntidadeSimples entidadeFiltro = (ComoEntidadeSimples) UtilSBPersistencia.getRegistroByID(MapaObjetosProjetoAtual.getClasseDoObjetoByNome(entidadeSTR),
                                                                     Long.valueOf(codigoEntidadeFiltroSTR),
                                                                     emLista);
                                                             consultaDinamica.addCondicaoManyToOneIgualA(chaves.getKey(), entidadeFiltro);
@@ -622,13 +618,13 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                         resposta.addErro("Impossível acessar o atributo, pois a pesquisa retornou mais de um registro");
                                     }
                                     if (lista.size() == 1) {
-                                        ((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).getValor();
+                                        ((ComoEntidadeSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).getValor();
 
-                                        if (((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).isVazio()) {
+                                        if (((ComoEntidadeSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).isVazio()) {
                                             resposta.addAviso("Entidade encontrada, mas o atributo da entidade está vazia");
                                             return resposta;
                                         }
-                                        resposta.setRetorno(((ItfBeanSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).getValor());
+                                        resposta.setRetorno(((ComoEntidadeSimples) lista.get(0)).getCPinst(pSolicitacao.getAtributoEntidade()).getValor());
                                     }
                                 } else {
                                     resposta.setRetorno(lista);

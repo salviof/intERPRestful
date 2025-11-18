@@ -23,8 +23,6 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.UtilGeral.json.ErroProcessandoJson;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.qualificadoresCDI.sessao.QlSessaoFacesContext;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfSessao;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.urls.UrlInterpretada;
 import com.super_bits.modulosSB.webPaginas.controller.servletes.util.UtilFabUrlServlet;
 import jakarta.json.JsonObject;
@@ -50,6 +48,8 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJsonRest;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import jakarta.json.JsonObjectBuilder;
 import java.net.URLEncoder;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoSessao;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
 
 /**
  *
@@ -63,7 +63,7 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
     public static final String SLUGPUBLICACAOSERVLET = "OAUTH2_SERVICE";
     @Inject
     @QlSessaoFacesContext
-    private ItfSessao sessaoAtual;
+    private ComoSessao sessaoAtual;
 
     @Override
     public void doGet(HttpServletRequest requisicao, HttpServletResponse resp) throws ServletException, IOException {
@@ -129,7 +129,7 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
                 return;
             }
 
-            ItfUsuario usuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDoEscopo);
+            ComoUsuario usuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDoEscopo);
             TipoRequisicaoOauth tipoRequisicao = (TipoRequisicaoOauth) parametrosDeUrl.getValorComoBeanSimples(FabUrlOauth2Server.TIPO_REQUISICAO);
             if (usuario == null) {
                 resp.getWriter().append("ACESSO NEGADO O USUÁRIO " + emailDoEscopo + " NÃO FOI ENCONTRADO NO SISTEMA");
@@ -176,7 +176,7 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
         }
     }
 
-    public void despacharLoginAdmin(HttpServletResponse pResposta, TipoRequisicaoOauth pTipoRequisicao, ItfSistemaERP pSistemaCliente, ItfUsuario pUsuario, String pUrlRedirecionamentoTokenCodigoSolicitacao) throws Throwable {
+    public void despacharLoginAdmin(HttpServletResponse pResposta, TipoRequisicaoOauth pTipoRequisicao, ItfSistemaERP pSistemaCliente, ComoUsuario pUsuario, String pUrlRedirecionamentoTokenCodigoSolicitacao) throws Throwable {
         ItfSistemaERPLocal sistemaRecursos = erp.getSistemaAtual();
         TokenConcessaoOauthServer tokenConcessaodeAcesso = MapaTokensGerenciadosConcessaoOauth.gerarNovoTokenCocessaoDeAcesso(pSistemaCliente, pUsuario);
         switch (pTipoRequisicao.getEnumVinculado()) {
@@ -255,7 +255,7 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
         }
         String emailDoEscopo = parametrosDeUrl.getValorComoString(FabUrlOauth2Server.ESCOPO);
 
-        ItfUsuario pUsuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDoEscopo);
+        ComoUsuario pUsuario = SBCore.getServicoPermissao().getUsuarioByEmail(emailDoEscopo);
 
         if (emailDoEscopo == null) {
             resp.getWriter().append("ACESSO NEGADO IMPOSSÍVEL RECONHECER O USUÁRIO VERIFIQUE SUA CHAVE PRIVADA");
@@ -323,7 +323,7 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
     }
 
     @Override
-    protected ItfSessao getSessao() {
+    protected ComoSessao getSessao() {
         if (SBCore.isEmModoDesenvolvimento()) {
             return SBCore.getServicoSessao().getSessaoAtual();
         } else {

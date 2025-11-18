@@ -15,7 +15,6 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringGerador;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.gestaoToken.MapaTokensGerenciados;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +28,7 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
 
 /**
  *
@@ -98,7 +98,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
     }
 
     @Deprecated
-    public static List<TokenAcessoOauthServer> loadTokensDoUsuario(ItfSistemaERP pSistema, ItfUsuario pUsuario) {
+    public static List<TokenAcessoOauthServer> loadTokensDoUsuario(ItfSistemaERP pSistema, ComoUsuario pUsuario) {
         List<TokenAcessoOauthServer> tokens = new ArrayList<>();
         if (!TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
             loadTokensPersistidos(pSistema);
@@ -124,7 +124,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
 
     }
 
-    public static TokenConcessaoOauthServer gerarNovoTokenCocessaoDeAcesso(ItfSistemaERP pSistema, ItfUsuario pUsuario) {
+    public static TokenConcessaoOauthServer gerarNovoTokenCocessaoDeAcesso(ItfSistemaERP pSistema, ComoUsuario pUsuario) {
         String tokenConcessao = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio();
         Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 300);
 

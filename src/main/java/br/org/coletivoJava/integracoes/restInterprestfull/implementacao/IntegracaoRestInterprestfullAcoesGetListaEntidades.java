@@ -6,7 +6,6 @@ import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestInteg
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import java.io.UnsupportedEncodingException;
@@ -17,6 +16,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.analysis.function.Add;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
 
 @InfoIntegracaoRestInterprestfullRestfull(tipo = FabIntApiRestIntegracaoERPRestfull.ACOES_GET_LISTA_ENTIDADES)
 public class IntegracaoRestInterprestfullAcoesGetListaEntidades
@@ -31,7 +31,7 @@ public class IntegracaoRestInterprestfullAcoesGetListaEntidades
     public IntegracaoRestInterprestfullAcoesGetListaEntidades(
             final String pTipoAplicacaoERP,
             final FabTipoAgenteClienteApi pTipoAgente,
-            final ItfUsuario pUsuario, final java.lang.Object... pParametro) {
+            final ComoUsuario pUsuario, final java.lang.Object... pParametro) {
         super(pTipoAplicacaoERP, FabIntApiRestIntegracaoERPRestfull.ACOES_GET_LISTA_ENTIDADES,
                 pTipoAgente, pUsuario, pParametro);
 

@@ -7,18 +7,18 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
 
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.FabGrupoTestesIntegracao;
 import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
-import com.super_bits.modulosSB.Persistencia.fabrica.ItfFabricaComPersistencia;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfGrupoUsuario;
+import com.super_bits.modulosSB.Persistencia.fabrica.ComoFabricaComPersistencia;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoGrupoUsuario;
 
 /**
  *
  * @author sfurbino
  */
-public enum FabDadosIniciaisTesteIntegracao implements ItfFabricaComPersistencia {
+public enum FabDadosIniciaisTesteIntegracao implements ComoFabricaComPersistencia {
     //   GRUPO_TESTE,
     USUARIO_SALVIO,
     USUARIO_WEB;
-    //   MODULO_TESTE_INTEGRACAO;
+    //   MODULO_TESTE_INTEGRACAO;//   MODULO_TESTE_INTEGRACAO;//   MODULO_TESTE_INTEGRACAO;//   MODULO_TESTE_INTEGRACAO;
 
     @Override
     public Object getRegistro() {
@@ -37,7 +37,7 @@ public enum FabDadosIniciaisTesteIntegracao implements ItfFabricaComPersistencia
                 UsuarioSB usuario = new UsuarioSB();
                 usuario.setNome("Salvio");
                 usuario.setId(1l);
-                usuario.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
+                usuario.setGrupo((ComoGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
                 usuario.setEmail("salviof@gmail.com");
                 usuario.setSenha("123456");
                 return usuario;
@@ -45,7 +45,7 @@ public enum FabDadosIniciaisTesteIntegracao implements ItfFabricaComPersistencia
                 UsuarioSB usuarioCliente = new UsuarioSB();
                 usuarioCliente.setNome("Cliente teste ");
                 usuarioCliente.setId(2l);
-                usuarioCliente.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
+                usuarioCliente.setGrupo((ComoGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
                 usuarioCliente.setEmail("cliente@sistemaerp2.com.br");
                 usuarioCliente.setSenha("123456");
                 return usuarioCliente;

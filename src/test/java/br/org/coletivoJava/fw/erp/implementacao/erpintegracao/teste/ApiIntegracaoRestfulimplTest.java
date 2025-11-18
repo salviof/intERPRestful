@@ -31,7 +31,6 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.ItfTok
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfGrupoUsuario;
 import com.super_bits.modulosSB.webPaginas.controller.servlets.servletRecepcaoOauth.ServletRecepcaoOauth;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -44,6 +43,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import testesFW.TesteJunitSBPersistencia;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoGrupoUsuario;
 
 /**
  *
@@ -179,7 +179,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         novoUsuario.setApelido("Usuario teste");
         novoUsuario.setSenha("123");
 
-        novoUsuario.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
+        novoUsuario.setGrupo((ComoGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
         //UtilSBRestful.getSolicitacaoByRequest(pRequest)
         SolicitacaoControllerERP solicitaca = UtilSBRestful.getSolicitacaoAcaoController(sistemaCliente, sisRemoto,
                 FabAcaoRestfullTestes.USUARIO_RESTFUL_CTR_SALVAR_MERGE.getRegistro().getNomeUnico(),

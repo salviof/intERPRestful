@@ -4,7 +4,7 @@ import br.org.coletivoJava.integracoes.restInterprestfull.api.InfoIntegracaoRest
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.AcaoApiIntegracaoComOauthAbstrato;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
 
 @InfoIntegracaoRestInterprestfullRestfull(tipo = FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_ATUALIZAR_ENTIDADE)
 public class IntegracaoRestInterprestfullAcoesExecutarAtualizarEntidade
@@ -14,7 +14,7 @@ public class IntegracaoRestInterprestfullAcoesExecutarAtualizarEntidade
     public IntegracaoRestInterprestfullAcoesExecutarAtualizarEntidade(
             final String pTipoAplicacaoERP,
             final FabTipoAgenteClienteApi pTipoAgente,
-            final ItfUsuario pUsuario, final java.lang.Object... pParametro) {
+            final ComoUsuario pUsuario, final java.lang.Object... pParametro) {
         super(pTipoAplicacaoERP, FabIntApiRestIntegracaoERPRestfull.ACOES_EXECUTAR_ATUALIZAR_ENTIDADE,
                 pTipoAgente, pUsuario, pParametro);
     }

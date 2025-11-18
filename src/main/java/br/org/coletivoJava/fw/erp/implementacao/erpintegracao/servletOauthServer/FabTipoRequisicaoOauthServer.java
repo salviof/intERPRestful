@@ -5,14 +5,14 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer;
 
-import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabrica;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoDaFabrica;
+import com.super_bits.modulosSB.SBCore.modulos.fabrica.ComoFabrica;
 
 /**
  *
  * @author sfurbino
  */
-public enum FabTipoRequisicaoOauthServer implements ItfFabrica {
+public enum FabTipoRequisicaoOauthServer implements ComoFabrica {
 
     @InfoObjetoDaFabrica(nomeObjeto = "OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO", id = 1, classeObjeto = TipoRequisicaoOauth.class)
     OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO,
@@ -23,7 +23,7 @@ public enum FabTipoRequisicaoOauthServer implements ItfFabrica {
 
     @Override
     public TipoRequisicaoOauth getRegistro() {
-        return (TipoRequisicaoOauth) ItfFabrica.super.getRegistro(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+        return (TipoRequisicaoOauth) ComoFabrica.super.getRegistro(); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
 
 }

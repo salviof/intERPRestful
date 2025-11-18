@@ -4,13 +4,13 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 
-import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
+import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimplesORM;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,12 +24,12 @@ import javax.persistence.ManyToOne;
  */
 @Entity
 @InfoObjetoSB(plural = "Links de entidades", tags = "Link de entidade")
-public class LinkEntidadesSistemasERP extends EntidadeSimples {
+public class LinkEntidadesSistemasERP extends EntidadeSimplesORM {
 
     public LinkEntidadesSistemasERP() {
     }
 
-    public LinkEntidadesSistemasERP(ItfSistemaERP sistemaRemoto, ItfBeanSimples pBeanSimples, String pCodigoSistemaRemoto) {
+    public LinkEntidadesSistemasERP(ItfSistemaERP sistemaRemoto, ComoEntidadeSimples pBeanSimples, String pCodigoSistemaRemoto) {
         this.sistemaRemoto = (SistemaERPConfiavel) sistemaRemoto;
         this.entidade = UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pBeanSimples.getClass().getSimpleName()).getSimpleName();
         this.codigoSistemaRemoto = pCodigoSistemaRemoto;
@@ -37,7 +37,7 @@ public class LinkEntidadesSistemasERP extends EntidadeSimples {
         this.codigoIdentificador = entidade + this.codigoInterno;
     }
 
-    public LinkEntidadesSistemasERP(ItfSistemaERP sistemaRemoto, ItfBeanSimples pBeanSimples) {
+    public LinkEntidadesSistemasERP(ItfSistemaERP sistemaRemoto, ComoEntidadeSimples pBeanSimples) {
         this.sistemaRemoto = (SistemaERPConfiavel) sistemaRemoto;
         this.entidade = UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pBeanSimples.getClass().getSimpleName()).getSimpleName();
         this.codigoInterno = String.valueOf(pBeanSimples.getId());

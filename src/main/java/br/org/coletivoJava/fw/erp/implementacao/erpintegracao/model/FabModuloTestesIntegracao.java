@@ -6,27 +6,27 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfModuloAcaoSistema;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.modulo.ItfFabricaModulo;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.modulo.ComoFabricaModulo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoDaFabrica;
-import com.super_bits.modulosSB.SBCore.modulos.view.menu.ItfFabricaMenu;
+import com.super_bits.modulosSB.SBCore.modulos.view.menu.ComoFabricaMenu;
 
 /**
  *
  * @author sfurbino
  */
-public enum FabModuloTestesIntegracao implements ItfFabricaModulo {
+public enum FabModuloTestesIntegracao implements ComoFabricaModulo {
     @InfoObjetoDaFabrica(classeObjeto = ModuloTestesIntegracao.class, id = 1, nomeObjeto = "Modulo Testes integração")
     MODULO_TESTES;
 
     @Override
     public ItfModuloAcaoSistema getRegistro() {
-        ModuloTestesIntegracao modulo = (ModuloTestesIntegracao) ItfFabricaModulo.super.getRegistro();
+        ModuloTestesIntegracao modulo = (ModuloTestesIntegracao) ComoFabricaModulo.super.getRegistro();
         modulo.setUmModuloNativo(true);
         return modulo;
     }
 
     @Override
-    public ItfFabricaMenu getMenuPadrao() {
+    public ComoFabricaMenu getMenuPadrao() {
         return null;
     }
 

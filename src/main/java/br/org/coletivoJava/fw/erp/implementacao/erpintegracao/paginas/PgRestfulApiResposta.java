@@ -11,7 +11,6 @@ import com.super_bits.modulos.SBAcessosModel.view.InfoAcaoPaginaDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.qualificadoresCDI.sessao.QlSessaoFacesContext;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
-import com.super_bits.modulosSB.SBCore.modulos.servicosCore.ItfServicoControllerExecucao;
 
 import com.super_bits.modulosSB.webPaginas.controller.sessao.SessaoAtualSBWP;
 import com.super_bits.modulosSB.webPaginas.util.UtilSBWPServletTools;
@@ -20,11 +19,12 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import com.super_bits.modulosSB.SBCore.modulos.servicosCore.ComoServicoControllerExecucao;
 
 @RequestScoped
 @Named
 @InfoAcaoPaginaDoSistema(acao = FabAcaoPaginasDoSistema.PAGINA_NATIVA_RESTFUL_RESP_MB_GESTAO)
-public class PgRestfulApiResposta implements ItfServicoControllerExecucao, Serializable {
+public class PgRestfulApiResposta implements ComoServicoControllerExecucao, Serializable {
 
     @Inject
     @ApiIntegracaoRestful()

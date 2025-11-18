@@ -11,10 +11,10 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreObjetoSB;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfServicoLinkEntreEntidadesErpRestfull;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimplesSomenteLeitura;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 import java.util.List;
 import javax.persistence.EntityManager;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimplesSomenteLeitura;
 
 /**
  *
@@ -23,7 +23,7 @@ import javax.persistence.EntityManager;
 public class ServicoLinkEntreEntidadesErpRestfull implements ItfServicoLinkEntreEntidadesErpRestfull {
 
     @Override
-    public String getCodigoApiExterna(ItfSistemaERP pSistema, ItfBeanSimples pEntidade) {
+    public String getCodigoApiExterna(ItfSistemaERP pSistema, ComoEntidadeSimples pEntidade) {
         LinkEntidadesSistemasERP linkEntreEntidades
                 = new LinkEntidadesSistemasERP(
                         pSistema,
@@ -69,7 +69,7 @@ public class ServicoLinkEntreEntidadesErpRestfull implements ItfServicoLinkEntre
     }
 
     @Override
-    public boolean registrarCodigoLigacaoApi(ItfSistemaERP pSistema, ItfBeanSimples pEntidade, String codigoAPIExterna) {
+    public boolean registrarCodigoLigacaoApi(ItfSistemaERP pSistema, ComoEntidadeSimples pEntidade, String codigoAPIExterna) {
         LinkEntidadesSistemasERP linkEntreEntidades
                 = new LinkEntidadesSistemasERP(
                         pSistema,
@@ -119,7 +119,7 @@ public class ServicoLinkEntreEntidadesErpRestfull implements ItfServicoLinkEntre
     }
 
     @Override
-    public <T extends ItfBeanSimplesSomenteLeitura> T getObjetoDTOFromJson(Class< ? extends T> pClass,
+    public <T extends ComoEntidadeSimplesSomenteLeitura> T getObjetoDTOFromJson(Class< ? extends T> pClass,
             String Json
     ) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

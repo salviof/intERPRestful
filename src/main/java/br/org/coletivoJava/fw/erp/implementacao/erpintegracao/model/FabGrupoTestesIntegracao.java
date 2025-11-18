@@ -8,13 +8,13 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 import com.super_bits.modulos.SBAcessosModel.fabricas.FabAcaoProjetoSB;
 import com.super_bits.modulos.SBAcessosModel.model.GrupoUsuarioSB;
 import com.super_bits.modulos.SBAcessosModel.model.ModuloAcaoSistema;
-import com.super_bits.modulosSB.Persistencia.fabrica.ItfFabricaComPersistencia;
+import com.super_bits.modulosSB.Persistencia.fabrica.ComoFabricaComPersistencia;
 
 /**
  *
  * @author sfurbino
  */
-public enum FabGrupoTestesIntegracao implements ItfFabricaComPersistencia {
+public enum FabGrupoTestesIntegracao implements ComoFabricaComPersistencia {
     GRUPO_TESTE;
 
     @Override

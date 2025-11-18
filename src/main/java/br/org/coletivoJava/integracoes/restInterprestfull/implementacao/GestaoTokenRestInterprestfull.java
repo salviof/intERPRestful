@@ -23,7 +23,6 @@ import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.Ch
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.UtilSBApiRestClient;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.gestaoToken.GestaoTokenOath2Base;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
@@ -38,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
 
 /**
  *
@@ -65,7 +65,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
     }
 
     public GestaoTokenRestInterprestfull(
-            final FabTipoAgenteClienteApi pTipoAgente, final ItfUsuario pUsuario, String pIdentificadorServico) {
+            final FabTipoAgenteClienteApi pTipoAgente, final ComoUsuario pUsuario, String pIdentificadorServico) {
         super(FabIntApiRestIntegracaoERPRestfull.class, pTipoAgente, pUsuario, pIdentificadorServico);
         ItfSistemaERP sistemaServidor = integracaoERP.getSistemaByHashChavePublica(pIdentificadorServico);
         ItfSistemaERP sistemaLocal = integracaoERP.getSistemaAtual();

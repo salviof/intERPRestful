@@ -7,7 +7,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJak
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.GeradorIdJsonGenerico;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 
 /**
  *
@@ -19,7 +19,7 @@ public abstract class GeradorIdJsonIdRemotoTabelaAssociacao extends GeradorIdJso
     private ItfSistemaERP sistemaRemoto;
 
     public GeradorIdJsonIdRemotoTabelaAssociacao(ItfSistemaERP pSistemaRemoto) {
-        this(ItfBeanSimples.class, -1);
+        this(ComoEntidadeSimples.class, -1);
     }
 
     public GeradorIdJsonIdRemotoTabelaAssociacao(Class<?> scope, int fv) {
@@ -29,7 +29,7 @@ public abstract class GeradorIdJsonIdRemotoTabelaAssociacao extends GeradorIdJso
 
     @Override
     public Long generateId(Object forPojo) {
-        ItfBeanSimples itemSimples = (ItfBeanSimples) forPojo;
+        ComoEntidadeSimples itemSimples = (ComoEntidadeSimples) forPojo;
         String itemRemoto = ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(sistemaRemoto, itemSimples);
         if (itemRemoto == null) {
             itemRemoto = "0";

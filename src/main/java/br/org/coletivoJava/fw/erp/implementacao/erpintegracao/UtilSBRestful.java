@@ -15,13 +15,10 @@ import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJsonRest;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
-import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabrica;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
@@ -39,6 +36,9 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.IntegracaoRestInterprestfullAcoesGetListaEntidades;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
+import com.super_bits.modulosSB.SBCore.modulos.fabrica.ComoFabrica;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ComoAcaoDoSistema;
 
 /**
  *
@@ -93,9 +93,9 @@ public class UtilSBRestful {
     }
 
     //(String pMetodoRestful, String pHashIdentificadorCliente,
-    //String pNomeUnicoAcao, ItfUsuario pUsuario, String pCodigo, String pAtributo, JsonObject pParametros)
+    //String pNomeUnicoAcao, ComoUsuario pUsuario, String pCodigo, String pAtributo, JsonObject pParametros)
     public static SolicitacaoControllerERP getSolicitacaoAcaoController(ItfSistemaERP pCliente, ItfSistemaERP pServico,
-            ItfAcaoDoSistema pAcaoSistema, ItfBeanSimples pBeanSimples) {
+            ComoAcaoDoSistema pAcaoSistema, ComoEntidadeSimples pBeanSimples) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
         String acao = null;
         if (pAcaoSistema != null) {
@@ -165,7 +165,7 @@ public class UtilSBRestful {
         }
         jsonBuilderParametrosBase.add("filtros", jsonBuilderFiltros.build());
         JsonObject parametrosListagem = jsonBuilderParametrosBase.build();
-        ItfUsuario usuario = SBCore.getUsuarioLogado();
+        ComoUsuario usuario = SBCore.getUsuarioLogado();
         if (pAcessarComoAdmin) {
             usuario = SBCore.getServicoPermissao().getUsuarioByEmail(pServico.getEmailusuarioAdmin());
         }
@@ -182,12 +182,12 @@ public class UtilSBRestful {
     }
 
     public static SolicitacaoControllerERP getSolicitacaoAcaoController(ItfSistemaERP pCliente, ItfSistemaERP pServico,
-            String pNomeUnicoAcao, ItfBeanSimples pBeanSimples) {
+            String pNomeUnicoAcao, ComoEntidadeSimples pBeanSimples) {
         return getSolicitacaoAcaoController(pCliente, pServico, pNomeUnicoAcao, pBeanSimples, false);
     }
 
     public static SolicitacaoControllerERP getSolicitacaoAcaoController(ItfSistemaERP pCliente, ItfSistemaERP pServico,
-            String pNomeUnicoAcao, ItfBeanSimples pBeanSimples, boolean pUsarCodigoIdComoId) {
+            String pNomeUnicoAcao, ComoEntidadeSimples pBeanSimples, boolean pUsarCodigoIdComoId) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
         if (pNomeUnicoAcao == null) {
@@ -256,7 +256,7 @@ public class UtilSBRestful {
         System.out.println("Processando requisição RESTfull:");
         System.out.println(pRequest.getRequestURI());
         TokenAcessoOauthServer token = null;
-        ItfUsuario usuario = null;
+        ComoUsuario usuario = null;
         String acaoDoSistemaEnum = null;
         String codigoEntidade = getCodigoEntidade(pRequest);
         System.out.println("Código Entidade=" + codigoEntidade);
@@ -317,10 +317,10 @@ public class UtilSBRestful {
         return dadosToken;
     }
 
-    private static ItfUsuario getUsuario(TokenAcessoOauthServer pToken) throws ErroTentandoObterTokenAcesso {
+    private static ComoUsuario getUsuario(TokenAcessoOauthServer pToken) throws ErroTentandoObterTokenAcesso {
 
         String scopo = pToken.getScope();
-        ItfUsuario usuario = SBCore.getServicoPermissao().getUsuarioByEmail(scopo);
+        ComoUsuario usuario = SBCore.getServicoPermissao().getUsuarioByEmail(scopo);
         return usuario;
 
     }
@@ -336,8 +336,8 @@ public class UtilSBRestful {
             List lista = (List) pResposta.getRetorno();
             JsonArrayBuilder array = Json.createArrayBuilder();
             for (Object item : lista) {
-                if (item instanceof ItfBeanSimples) {
-                    JsonObject itemJson = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) item);
+                if (item instanceof ComoEntidadeSimples) {
+                    JsonObject itemJson = erpIntegracao.gerarConversaoObjetoToJson((ComoEntidadeSimples) item);
                     if (itemJson.containsKey("@id")) {
                         JsonObjectBuilder itemEdicao = Json.createObjectBuilder(itemJson);
                         itemEdicao.remove("@id");
@@ -350,8 +350,8 @@ public class UtilSBRestful {
             jsonRespconstrutor.add("retorno", array);
             String repostaTexto = UtilSBCoreJson.getTextoByJsonObjeect(jsonRespconstrutor.build());
             return repostaTexto;
-        } else if (pResposta.getRetorno() instanceof ItfBeanSimples) {
-            JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) pResposta.getRetorno());
+        } else if (pResposta.getRetorno() instanceof ComoEntidadeSimples) {
+            JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ComoEntidadeSimples) pResposta.getRetorno());
             jsonRespconstrutor.add("retorno", retorno);
         } else {
             if (pResposta.getRetorno() instanceof Integer) {
@@ -366,9 +366,9 @@ public class UtilSBRestful {
             if (pResposta.getRetorno() instanceof Double) {
                 jsonRespconstrutor.add("retorno", (Double) pResposta.getRetorno());
             }
-            if (pResposta.getRetorno() instanceof ItfFabrica) {
-                ItfFabrica item = (ItfFabrica) pResposta.getRetorno();
-                JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ItfBeanSimples) item.getRegistro());
+            if (pResposta.getRetorno() instanceof ComoFabrica) {
+                ComoFabrica item = (ComoFabrica) pResposta.getRetorno();
+                JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ComoEntidadeSimples) item.getRegistro());
                 jsonRespconstrutor.add("retorno", retorno);
             }
 

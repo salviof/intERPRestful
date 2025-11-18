@@ -12,7 +12,7 @@ import com.super_bits.modulosSB.SBCore.modulos.erp.ItfServicoLinkDeEntidadesERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.conversao.ItfConversorERRestfullToJson;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
@@ -75,7 +75,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
         adicionarMapeamentoCampo(pCaminhoAtributoLocal, pCaminhoAtributoLocal);
     }
 
-    public JsonObjectBuilder buildObjeto(Map<String, String> pMapaValores, ItfBeanSimples pBeanSimples) {
+    public JsonObjectBuilder buildObjeto(Map<String, String> pMapaValores, ComoEntidadeSimples pBeanSimples) {
         String idOrcamento = "0";
         if (pBeanSimples.getId() != null && pBeanSimples.getId() > 0) {
             idOrcamento = ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(getSistemaRemoto(), pBeanSimples);
@@ -91,7 +91,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
         return construtor;
     }
 
-    public void processarAtributo(JsonObjectBuilder pJsonBuilder, String pChave, Map<String, String> pAtributos, ItfBeanSimples pBeanConversao) {
+    public void processarAtributo(JsonObjectBuilder pJsonBuilder, String pChave, Map<String, String> pAtributos, ComoEntidadeSimples pBeanConversao) {
         Class tipoEntidade = UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pBeanConversao.getClass().getSimpleName());
         if (pChave.contains("[]")) {
             String campoLista = pChave.substring(0, pChave.indexOf("[]"));
@@ -104,9 +104,9 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
 
             if (!listagens.containsKey(campoListaReferente)) {
                 listagens.put(campoListaReferente, Json.createArrayBuilder());
-                List<ItfBeanSimples> listaBeans = (List) pBeanConversao.getCPinst(campoLista).getValor();
+                List<ComoEntidadeSimples> listaBeans = (List) pBeanConversao.getCPinst(campoLista).getValor();
                 int idx = 0;
-                for (ItfBeanSimples item : listaBeans) {
+                for (ComoEntidadeSimples item : listaBeans) {
                     JsonObjectBuilder objetoJsonItemArray = Json.createObjectBuilder();
                     List<String> atributos = getListAtributosDaLista(campoLista + "[]", pAtributos);
                     String codigo = ERPIntegracaoSistemasApi.RESTFUL.getRepositorioLinkEntidadesByID().getCodigoApiExterna(getSistemaRemoto(), pBeanConversao);
@@ -222,7 +222,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
     }
 
     @Override
-    public JsonObject getJson(ItfBeanSimples pJson) {
+    public JsonObject getJson(ComoEntidadeSimples pJson) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

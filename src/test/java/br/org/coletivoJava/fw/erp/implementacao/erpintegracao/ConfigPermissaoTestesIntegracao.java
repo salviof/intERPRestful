@@ -8,18 +8,21 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.servicoTeste.ModuloRestfulTeste;
 import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ErroDadosDeContatoUsuarioNaoEncontrado;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.token.ItfTokenAcessoDinamico;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.token.ItfTokenRecuperacaoEmail;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.permissaoPadrao.ConfigPermissaoPadraoEmMemoria;
-import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabricaAcoes;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimplesSomenteLeitura;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfGrupoUsuario;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
-import com.super_bits.modulosSB.SBCore.modulos.view.menu.ItfMenusDeSessao;
+import com.super_bits.modulosSB.SBCore.modulos.erp.FabTipoAgenteOrganizacao;
+import com.super_bits.modulosSB.SBCore.modulos.fabrica.ComoFabricaAcoes;
 import org.coletivojava.fw.api.objetoNativo.view.menu.MenusDaSessao;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.coletivojava.fw.api.objetoNativo.view.menu.MenuSBFW;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimplesSomenteLeitura;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoGrupoUsuario;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.contato.ComoContatoHumano;
+import com.super_bits.modulosSB.SBCore.modulos.view.menu.ComoMenusDeSessao;
 
 /**
  *
@@ -32,22 +35,22 @@ public class ConfigPermissaoTestesIntegracao extends ConfigPermissaoPadraoEmMemo
     }
 
     @Override
-    public ItfMenusDeSessao definirMenu(ItfGrupoUsuario pGrupo) {
+    public ComoMenusDeSessao definirMenu(ComoGrupoUsuario pGrupo) {
         return new MenusDaSessao(new MenuSBFW(), new MenuSBFW());
     }
 
     @Override
-    public ItfTokenRecuperacaoEmail gerarTokenRecuperacaoDeSenha(ItfUsuario pUsuario, int pMinutosValidade) {
+    public ItfTokenRecuperacaoEmail gerarTokenRecuperacaoDeSenha(ComoUsuario pUsuario, int pMinutosValidade) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ItfTokenAcessoDinamico gerarTokenDinamico(ItfFabricaAcoes pAcao, ItfBeanSimplesSomenteLeitura pItem, String pEmail) {
+    public ItfTokenAcessoDinamico gerarTokenDinamico(ComoFabricaAcoes pAcao, ComoEntidadeSimplesSomenteLeitura pItem, String pEmail) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public boolean isTokenDinamicoExiste(ItfFabricaAcoes pAcao, ItfBeanSimplesSomenteLeitura pItem, String pEmail) {
+    public boolean isTokenDinamicoExiste(ComoFabricaAcoes pAcao, ComoEntidadeSimplesSomenteLeitura pItem, String pEmail) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -57,13 +60,23 @@ public class ConfigPermissaoTestesIntegracao extends ConfigPermissaoPadraoEmMemo
     }
 
     @Override
-    public List<ItfUsuario> configuraUsuarios() {
-        List<ItfUsuario> usuarios = super.configuraUsuarios(); //To change body of generated methods, choose Tools | Templates.
+    public List<ComoUsuario> configuraUsuarios() {
+        List<ComoUsuario> usuarios = super.configuraUsuarios(); //To change body of generated methods, choose Tools | Templates.
         EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
         List<UsuarioSB> usuariosDB = UtilSBPersistencia.getListaTodos(UsuarioSB.class, em);
         usuariosDB.stream().forEach(usuarios::add);
         UtilSBPersistencia.fecharEM(em);
         return usuarios;
+    }
+
+    @Override
+    public FabTipoAgenteOrganizacao getTipoAgente(ComoUsuario pUsuario) {
+        return FabTipoAgenteOrganizacao.ATENDIMENTO;
+    }
+
+    @Override
+    public ComoContatoHumano getContatoDoUsuario(ComoUsuario pUsuairo) throws ErroDadosDeContatoUsuarioNaoEncontrado {
+        return null;
     }
 
 }

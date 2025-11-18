@@ -5,19 +5,19 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer;
 
-import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabrica;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanVinculadoAEnum;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.ItemSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeVinculadoAEnum;
+import com.super_bits.modulosSB.SBCore.modulos.fabrica.ComoFabrica;
 
 /**
  *
  * @author sfurbino
  */
 @InfoObjetoSB(tags = "Tipo requisição", plural = "Tipos de Requisição", fabricaVinculada = FabTipoRequisicaoOauthServer.class)
-public class TipoRequisicaoOauth extends ItemSimples implements ItfBeanVinculadoAEnum {
+public class TipoRequisicaoOauth extends ItemSimples implements ComoEntidadeVinculadoAEnum {
 
     @InfoCampo(tipo = FabTipoAtributoObjeto.ID)
     private Long id;
@@ -46,7 +46,7 @@ public class TipoRequisicaoOauth extends ItemSimples implements ItfBeanVinculado
     }
 
     @Override
-    public void setEnumVinculado(ItfFabrica pFabrica) {
+    public void setEnumVinculado(ComoFabrica pFabrica) {
         enumVinculado = (FabTipoRequisicaoOauthServer) pFabrica;
     }
 

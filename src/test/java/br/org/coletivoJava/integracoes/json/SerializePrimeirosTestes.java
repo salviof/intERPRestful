@@ -8,17 +8,17 @@ package br.org.coletivoJava.integracoes.json;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 import java.io.IOException;
 
 /**
  *
  * @author sfurbino
  */
-public class SerializePrimeirosTestes extends JsonSerializer<ItfBeanSimples> {
+public class SerializePrimeirosTestes extends JsonSerializer<ComoEntidadeSimples> {
 
     @Override
-    public void serialize(ItfBeanSimples t, JsonGenerator jg, SerializerProvider sp) throws IOException {
+    public void serialize(ComoEntidadeSimples t, JsonGenerator jg, SerializerProvider sp) throws IOException {
 
     }
 

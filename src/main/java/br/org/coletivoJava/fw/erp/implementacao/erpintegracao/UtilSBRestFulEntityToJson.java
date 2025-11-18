@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
@@ -52,7 +52,7 @@ public class UtilSBRestFulEntityToJson {
     private static Map<Class, Class> mapaConversorEntidadeToJson = new HashMap<>();
     private static Map<Class, Class> mapaConversorJsonToEntidade = new HashMap<>();
 
-    public static JsonObject getJsonFromObjetoGenerico(ItfBeanSimples beanSimples, boolean pUsarIdBeanSimplesComoIdRemoto) {
+    public static JsonObject getJsonFromObjetoGenerico(ComoEntidadeSimples beanSimples, boolean pUsarIdBeanSimplesComoIdRemoto) {
         if (beanSimples == null) {
             return null;
         }
@@ -71,7 +71,7 @@ public class UtilSBRestFulEntityToJson {
         return UtilSBCoreJson.getJsonObjectByTexto(serialized);
     }
 
-    public static JsonObjectBuilder getJsonBuilderFromObjetoGenerico(ItfBeanSimples beanSimples) {
+    public static JsonObjectBuilder getJsonBuilderFromObjetoGenerico(ComoEntidadeSimples beanSimples) {
 
         return Json.createObjectBuilder(getJsonFromObjetoGenerico(beanSimples, false));
     }

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,10 +21,10 @@ import javax.persistence.Entity;
  *
  * @author salvio
  */
-public class SerializadorPadrao extends JsonSerializer<ItfBeanSimples> {
+public class SerializadorPadrao extends JsonSerializer<ComoEntidadeSimples> {
 
     @Override
-    public void serialize(ItfBeanSimples itemSimples, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(ComoEntidadeSimples itemSimples, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
 
         boolean representaEntidade = itemSimples.getClass().isAnnotationPresent(Entity.class);
@@ -71,9 +71,9 @@ public class SerializadorPadrao extends JsonSerializer<ItfBeanSimples> {
                         case ENTIDADE:
                             if (cpInst.isUmValorEmLista()) {
 
-                                List<ItfBeanSimples> itens = (List) cpInst.getValor();
+                                List<ComoEntidadeSimples> itens = (List) cpInst.getValor();
                                 List<Long> itensCodigo = new ArrayList<>();
-                                for (ItfBeanSimples item : itens) {
+                                for (ComoEntidadeSimples item : itens) {
                                     itensCodigo.add(item.getId());
 
                                 }
@@ -87,8 +87,8 @@ public class SerializadorPadrao extends JsonSerializer<ItfBeanSimples> {
                                 gen.writeArray(codigosArray, 0, itensCodigo.size());
                                 System.out.println("Lista");
                             } else {
-                                if (cpInst.getValor() instanceof ItfBeanSimples) {
-                                    gen.writeObjectField(cpInst.getNomeCamponaClasse(), ((ItfBeanSimples) cpInst.getValor()).getId());
+                                if (cpInst.getValor() instanceof ComoEntidadeSimples) {
+                                    gen.writeObjectField(cpInst.getNomeCamponaClasse(), ((ComoEntidadeSimples) cpInst.getValor()).getId());
                                 }
 
                             }

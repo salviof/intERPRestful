@@ -5,7 +5,7 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.geradorIdLocalCorrespondeIdRemoto;
 
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.GeradorIdJsonGenerico;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfBeanSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 
 /**
  *
@@ -16,7 +16,7 @@ public class GeradorIdJsonIDLocalTransienteRefIDRemoto extends GeradorIdJsonGene
     private static final long serialVersionUID = 1L;
 
     public GeradorIdJsonIDLocalTransienteRefIDRemoto() {
-        this(ItfBeanSimples.class, -1);
+        this(ComoEntidadeSimples.class, -1);
     }
 
     public GeradorIdJsonIDLocalTransienteRefIDRemoto(Class<?> scope, int fv) {
@@ -26,7 +26,7 @@ public class GeradorIdJsonIDLocalTransienteRefIDRemoto extends GeradorIdJsonGene
 
     @Override
     public Long generateId(Object forPojo) {
-        return ((ItfBeanSimples) forPojo).getId();
+        return ((ComoEntidadeSimples) forPojo).getId();
     }
 
     @Override

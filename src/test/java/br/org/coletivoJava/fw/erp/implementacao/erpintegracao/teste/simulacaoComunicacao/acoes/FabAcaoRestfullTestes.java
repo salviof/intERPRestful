@@ -7,7 +7,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoCo
 
 import com.super_bits.modulos.SBAcessosModel.controller.FabModulosSistemaSB;
 import com.super_bits.modulos.SBAcessosModel.controller.InfoModulosSistemaSB;
-import com.super_bits.modulos.SBAcessosModel.fabricas.ItfFabricaDeAcoesPersistencia;
+import com.super_bits.modulos.SBAcessosModel.fabricas.ComoFabricaDeAcoesPersistencia;
 import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.anotacoes.InfoTipoAcaoController;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.anotacoes.InfoTipoAcaoFormulario;
@@ -18,7 +18,7 @@ import com.super_bits.modulosSB.SBCore.modulos.Controller.anotacoes.InfoTipoAcao
  * @author sfurbino
  */
 @InfoModulosSistemaSB(modulo = FabModulosSistemaSB.COMUNICACAO)
-public enum FabAcaoRestfullTestes implements ItfFabricaDeAcoesPersistencia {
+public enum FabAcaoRestfullTestes implements ComoFabricaDeAcoesPersistencia {
 
     @InfoTipoAcaoGestaoEntidade(entidade = UsuarioSB.class)
     USUARIO_RESTFUL_MB_GESTAO,

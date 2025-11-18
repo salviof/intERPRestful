@@ -10,10 +10,10 @@ import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.ItfRespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfGrupoUsuario;
 import org.coletivoJava.fw.projetos.integracao.api.cucumber.fluxooauthinteracaousuario.EtapasFluxoOauthInteracaoUsuario;
 import cucumber.api.java.pt.Entao;
 import org.junit.Assert;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoGrupoUsuario;
 
 public class Entao__executar_uma_acao_controller_com_o_token {
 
@@ -25,7 +25,7 @@ public class Entao__executar_uma_acao_controller_com_o_token {
         novoUsuario.setApelido("Usuario teste");
         novoUsuario.setSenha("123");
 
-        novoUsuario.setGrupo((ItfGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
+        novoUsuario.setGrupo((ComoGrupoUsuario) FabGrupoTestesIntegracao.GRUPO_TESTE.getRegistro());
 
         SolicitacaoControllerERP solicitaca = UtilSBRestful.getSolicitacaoAcaoController(FluxoOauth2UsuarioAcessoRestfull.sistemaCliente, FluxoOauth2UsuarioAcessoRestfull.sistemaServidorRecursos,
                 FabAcaoRestfullTestes.USUARIO_RESTFUL_CTR_SALVAR_MERGE.getRegistro().getNomeUnico(),

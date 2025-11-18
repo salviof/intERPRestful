@@ -8,7 +8,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.FabGrupoTestesIntegracao;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.FabModuloTestesIntegracao;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.ConfigPersistenciaPadrao;
-import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabrica;
+import com.super_bits.modulosSB.SBCore.modulos.fabrica.ComoFabrica;
 
 /**
  *
@@ -17,7 +17,7 @@ import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabrica;
 public class ConfigPercistenciaItegracaoSistemas extends ConfigPersistenciaPadrao {
 
     @Override
-    public Class<? extends ItfFabrica>[] fabricasRegistrosIniciais() {
+    public Class<? extends ComoFabrica>[] fabricasRegistrosIniciais() {
         return new Class[]{FabModuloTestesIntegracao.class, FabGrupoTestesIntegracao.class, FabDadosIniciaisTesteIntegracao.class};
     }
 

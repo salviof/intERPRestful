@@ -5,8 +5,7 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.modulo.ItfFabricaModulo;
-import com.super_bits.modulosSB.SBCore.modulos.fabrica.ItfFabrica;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.modulo.ComoFabricaModulo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campo.FabTipoAtributoObjeto;
 import javax.persistence.EnumType;
@@ -14,6 +13,7 @@ import javax.persistence.Enumerated;
 import com.super_bits.modulos.SBAcessosModel.model.ModuloAcaoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
 import javax.persistence.Entity;
+import com.super_bits.modulosSB.SBCore.modulos.fabrica.ComoFabrica;
 
 /**
  *
@@ -33,12 +33,12 @@ public class ModuloTestesIntegracao extends ModuloAcaoSistema {
     }
 
     @Override
-    public ItfFabricaModulo getEnumVinculado() {
+    public ComoFabricaModulo getEnumVinculado() {
         return moduloFab;
     }
 
     @Override
-    public void setEnumVinculado(ItfFabrica pFabrica) {
+    public void setEnumVinculado(ComoFabrica pFabrica) {
         super.setEnumVinculado(pFabrica);
     }
 

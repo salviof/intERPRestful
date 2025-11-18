@@ -5,8 +5,7 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 
-import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
-import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimples;
+import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimplesORM;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampoValidadorLogico;
@@ -37,7 +36,7 @@ import javax.persistence.Transient;
 @InfoObjetoSB(tags = "Sistema ERP Confiável", plural = "Sistemas Confiáveis")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipoChave")
-public class SistemaERPConfiavel extends EntidadeSimples implements ItfSistemaERP {
+public class SistemaERPConfiavel extends EntidadeSimplesORM implements ItfSistemaERP {
 
     @Id
     @InfoCampo(tipo = FabTipoAtributoObjeto.ID)

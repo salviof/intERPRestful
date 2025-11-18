@@ -12,11 +12,8 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
 import com.super_bits.modulos.SBAcessosModel.view.FabAcaoPaginasDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ItfAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.qualificadoresCDI.sessao.QlSessaoFacesContext;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfSessao;
-import com.super_bits.modulosSB.SBCore.modulos.servicosCore.ItfServicoControllerExecucao;
 import com.super_bits.modulosSB.webPaginas.controller.servlets.WebPaginasServlet;
 import com.super_bits.modulosSB.webPaginas.util.UtilSBWPServletTools;
 import com.super_bits.modulosSB.webPaginas.util.UtilSBWP_JSFTools;
@@ -28,6 +25,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoSessao;
+import com.super_bits.modulosSB.SBCore.modulos.servicosCore.ComoServicoControllerExecucao;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ComoAcaoDoSistema;
 
 /**
  *
@@ -40,10 +40,10 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
 
     @Inject
     @QlSessaoFacesContext
-    private ItfSessao sessaoAtual;
+    private ComoSessao sessaoAtual;
 
     @Inject
-    private ItfServicoControllerExecucao entregaJson;
+    private ComoServicoControllerExecucao entregaJson;
 
     private void processarSolicitacao(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         SolicitacaoControllerERP solicitacao;
@@ -64,7 +64,7 @@ public class ServletRestfullERP extends HttpServlet implements Serializable {
                     return;
                 }
 
-                ItfAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
+                ComoAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
                 if (acao == null) {
                     RespostaAcaoDoSistema resposta = new RespostaAcaoDoSistema();
                     resposta.addErro("A ação " + solicitacao.getAcaoStrNomeUnico() + " não foi encontrata");

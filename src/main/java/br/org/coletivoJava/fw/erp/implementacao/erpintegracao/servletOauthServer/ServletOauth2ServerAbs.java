@@ -15,8 +15,6 @@ import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestInteg
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfSessao;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ItfUsuario;
 import java.io.Serializable;
 import javax.persistence.EntityManager;
 import javax.servlet.RequestDispatcher;
@@ -24,6 +22,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoSessao;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoUsuario;
 
 /**
  *
@@ -34,10 +34,10 @@ public abstract class ServletOauth2ServerAbs extends HttpServlet implements Seri
     protected static final ItfIntegracaoERP integracaoEntreSistemas = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
     protected static final ItfIntegracaoERP erp = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
-    protected abstract ItfSessao getSessao();
+    protected abstract ComoSessao getSessao();
 
     public void despacharLoginUsuarioRemotoEscopoDeUsuario(HttpServletResponse pResposta, HttpServletRequest requisicao, TipoRequisicaoOauth pTipoRequisicao,
-            String pDominioConexao, ItfSistemaERP pSistemaCliente, ItfUsuario pUsuario, String pUrlRedirecionamentoTokenCodigoSolicitacao)
+            String pDominioConexao, ItfSistemaERP pSistemaCliente, ComoUsuario pUsuario, String pUrlRedirecionamentoTokenCodigoSolicitacao)
             throws Throwable {
 
         String dominioDoSistemaClienteResgistrado = pSistemaCliente.getDominio();
