@@ -11,9 +11,9 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros.P
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenAcessoOauthServer;
 import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP.SLUGPUBLICACAOSERVLET;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJsonRest;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJsonRest;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringValidador;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.fabricas.FabTipoAcaoSistemaGenerica;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
@@ -221,7 +221,7 @@ public class UtilSBRestful {
      */
     public static SolicitacaoControllerERP getSolicitacaoOption(ItfSistemaERP pCliente, ItfSistemaERP pServico,
             String pNomeUnicoAcao) {
-        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pNomeUnicoAcao)) {
+        if (!UtilCRCStringValidador.isNuloOuEmbranco(pNomeUnicoAcao)) {
             if (!pNomeUnicoAcao.contains("_MB_")) {
                 throw new UnsupportedOperationException("A ação " + pNomeUnicoAcao + " não parece ser do tipo Gestão ManagedBean");
             }
@@ -279,8 +279,8 @@ public class UtilSBRestful {
         acaoDoSistemaEnum = getNomeSlugAcao(pRequest);
         token.getObjetoJsonResposta();
         String corpoRequisicaoTesxto = getCorpoRequisicao(pRequest);
-        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(corpoRequisicaoTesxto)) {
-            json = UtilSBCoreJson.getJsonObjectByTexto(corpoRequisicaoTesxto);
+        if (!UtilCRCStringValidador.isNuloOuEmbranco(corpoRequisicaoTesxto)) {
+            json = UtilCRCJson.getJsonObjectByTexto(corpoRequisicaoTesxto);
         }
         String metodo = pRequest.getMethod();
         HashMap parametorsRequisicao = new HashMap();
@@ -328,7 +328,7 @@ public class UtilSBRestful {
     public static String buildTextoJsonResposta(ItfRespostaAcaoDoSistema pResposta) {
         ItfIntegracaoERP erpIntegracao = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto();
 
-        JsonObjectBuilder jsonRespconstrutor = UtilSBCoreJsonRest.getRespostaJsonBuilderBase(pResposta.isSucesso(), pResposta.getResultado(), pResposta.getMensagens());
+        JsonObjectBuilder jsonRespconstrutor = UtilCRCJsonRest.getRespostaJsonBuilderBase(pResposta.isSucesso(), pResposta.getResultado(), pResposta.getMensagens());
 
         if (pResposta.getRetorno() instanceof JsonObject) {
             jsonRespconstrutor.add("retorno", (JsonObject) pResposta.getRetorno());
@@ -348,7 +348,7 @@ public class UtilSBRestful {
                 }
             }
             jsonRespconstrutor.add("retorno", array);
-            String repostaTexto = UtilSBCoreJson.getTextoByJsonObjeect(jsonRespconstrutor.build());
+            String repostaTexto = UtilCRCJson.getTextoByJsonObjeect(jsonRespconstrutor.build());
             return repostaTexto;
         } else if (pResposta.getRetorno() instanceof ComoEntidadeSimples) {
             JsonObject retorno = erpIntegracao.gerarConversaoObjetoToJson((ComoEntidadeSimples) pResposta.getRetorno());
@@ -374,13 +374,13 @@ public class UtilSBRestful {
 
         }
 
-        if (UtilSBCoreStringValidador.isNuloOuEmbranco(pResposta.getUrlDestino())) {
+        if (UtilCRCStringValidador.isNuloOuEmbranco(pResposta.getUrlDestino())) {
             jsonRespconstrutor.add("urlDestino", JsonValue.NULL);
         } else {
             jsonRespconstrutor.add(SLUGPUBLICACAOSERVLET, BigDecimal.ONE);
         }
 
-        String respostaTexto = UtilSBCoreJson.getTextoByJsonObjeect(jsonRespconstrutor.build());
+        String respostaTexto = UtilCRCJson.getTextoByJsonObjeect(jsonRespconstrutor.build());
         return respostaTexto;
 
     }

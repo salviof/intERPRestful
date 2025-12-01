@@ -7,7 +7,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste;
 
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao.EnvelopeServeletSolicitarCodigoAcessoAoToken;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoComunicacao.EnvelopeRequisicacaoTokenAcesso;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCCriptoRSA;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.ConfigCoreApiIntegracao;
@@ -95,7 +95,7 @@ public class ApiIntegracaoRestfulimplTest extends TesteJunitSBPersistencia {
         sistemaCliente.setUrlPublicaEndPoint("https://crm.casanovadigital.com.br/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
         String urlRecpcaoCodigo = "https://crm.coletivojava.com.br/solicitacaoAuth2Recept/code/Usuario/" + GestaoTokenRestInterprestfull.class.getSimpleName() + "/" + "UTF8";
         sistemaCliente.setUrlRecepcaoCodigo(urlRecpcaoCodigo);
-        Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
+        Map<String, String> parDeChaves = UtilCRCCriptoRSA.chavePublicaPrivada();
         sistemaCliente.setChavePublica(parDeChaves.keySet().stream().findFirst().get());
         chavePrivadaDoAplicativoConfiavel = parDeChaves.values().stream().findFirst().get();
 

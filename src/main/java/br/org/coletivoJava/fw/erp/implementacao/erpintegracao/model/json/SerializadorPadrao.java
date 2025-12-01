@@ -7,7 +7,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.json;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCDataHora;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class SerializadorPadrao extends JsonSerializer<ComoEntidadeSimples> {
                             gen.writeStringField(cpInst.getNomeCamponaClasse(), String.valueOf(cpInst.getValor()));
                             break;
                         case DATAS:
-                            gen.writeStringField(cpInst.getNomeCamponaClasse(), UtilSBCoreDataHora.getDataHoraString((Date) cpInst.getValor(), UtilSBCoreDataHora.FORMATO_TEMPO.DATA_USUARIO));
+                            gen.writeStringField(cpInst.getNomeCamponaClasse(), UtilCRCDataHora.getDataHoraString((Date) cpInst.getValor(), UtilCRCDataHora.FORMATO_TEMPO.DATA_USUARIO));
                             break;
                         case BOOLEAN:
 

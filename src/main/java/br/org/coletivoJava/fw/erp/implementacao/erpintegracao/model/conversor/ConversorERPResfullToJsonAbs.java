@@ -5,8 +5,8 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.conversor;
 
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCReflexaoObjeto;
 import com.super_bits.modulosSB.SBCore.UtilGeral.json.ErroProcessandoJson;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfServicoLinkDeEntidadesERP;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
@@ -92,7 +92,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
     }
 
     public void processarAtributo(JsonObjectBuilder pJsonBuilder, String pChave, Map<String, String> pAtributos, ComoEntidadeSimples pBeanConversao) {
-        Class tipoEntidade = UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pBeanConversao.getClass().getSimpleName());
+        Class tipoEntidade = UtilCRCReflexaoObjeto.getClassExtraindoProxy(pBeanConversao.getClass().getSimpleName());
         if (pChave.contains("[]")) {
             String campoLista = pChave.substring(0, pChave.indexOf("[]"));
             String campmReferenteCompleto = mapeamentoCampos.get(pChave);
@@ -145,7 +145,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
                                         itemRemoto = "0";
                                     }
                                     try {
-                                        JsonObjectBuilder itemSelecionado = UtilSBCoreJson.getJsonBuilderBySequenciaChaveValor("@id", itemRemoto);
+                                        JsonObjectBuilder itemSelecionado = UtilCRCJson.getJsonBuilderBySequenciaChaveValor("@id", itemRemoto);
                                         objetoJsonItemArray.add(nomeCampoItemRemoto, itemSelecionado);
                                     } catch (ErroProcessandoJson ex) {
 
@@ -199,7 +199,7 @@ public abstract class ConversorERPResfullToJsonAbs implements ItfConversorERRest
                             itemRemoto = "0";
                         }
                         try {
-                            JsonObjectBuilder itemSelecionado = UtilSBCoreJson.getJsonBuilderBySequenciaChaveValor("@id", itemRemoto);
+                            JsonObjectBuilder itemSelecionado = UtilCRCJson.getJsonBuilderBySequenciaChaveValor("@id", itemRemoto);
                             pJsonBuilder.add(pAtributos.get(pChave), itemSelecionado.build());
                         } catch (ErroProcessandoJson ex) {
 

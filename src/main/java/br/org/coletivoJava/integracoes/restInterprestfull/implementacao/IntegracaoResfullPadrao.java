@@ -10,8 +10,8 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
 import com.google.common.collect.Lists;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ComoFabricaIntegracaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.RespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
@@ -87,10 +87,10 @@ public abstract class IntegracaoResfullPadrao extends
 
     @Override
     protected RespostaWebServiceSimples gerarRespostaTratamentoFino(RespostaWebServiceSimples pRespostaWSSemTratamento) {
-        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pRespostaWSSemTratamento.getRetorno())) {
+        if (!UtilCRCStringValidador.isNuloOuEmbranco(pRespostaWSSemTratamento.getRetorno())) {
             pRespostaWSSemTratamento.getMensagens();
             try {
-                JsonObject respostaJson = UtilSBCoreJson.getJsonObjectByTexto(pRespostaWSSemTratamento.getRetorno().toString());
+                JsonObject respostaJson = UtilCRCJson.getJsonObjectByTexto(pRespostaWSSemTratamento.getRetorno().toString());
                 if (respostaJson.containsKey("resultado")) {
 
                     String resultado = respostaJson.getString("resultado");

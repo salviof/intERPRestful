@@ -47,7 +47,7 @@ public class EnvelopeSolicitacaoCodigoObterToken extends EnvelopeRequisicaoServl
     }
 
     private void buildRequisicao() {
-        //String emailcripto = UtilSBCoreCriptoRSA.getTextoCriptografado(usuario, chavPrivadaSolicitante);
+        //String emailcripto = UtilCRCCriptoRSA.getTextoCriptografado(usuario, chavPrivadaSolicitante);
         //adicionarHeader("emailCripto", emailcripto);
         adicionarHeader("CHAVE_PUBLICA", sistemaConfiavel.getChavePublica());
         setOrigimHeader(sistemaConfiavel.getDominio());

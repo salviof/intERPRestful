@@ -10,9 +10,9 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenC
 
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.arquivosConfiguracao.ConfigModulo;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringGerador;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCDataHora;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringGerador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.implementacao.gestaoToken.MapaTokensGerenciados;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import java.util.Date;
@@ -52,7 +52,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
             TOKENS_DE_ACCESSO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.put(pSistema.getChavePublica(), new HashMap<>());
         }
 
-        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(chavesPersistidasTExto)) {
+        if (!UtilCRCStringValidador.isNuloOuEmbranco(chavesPersistidasTExto)) {
 
             JsonReader jsonReader = Json.createReader(new StringReader(chavesPersistidasTExto));
             JsonArray array = jsonReader.readArray();
@@ -125,8 +125,8 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
     }
 
     public static TokenConcessaoOauthServer gerarNovoTokenCocessaoDeAcesso(ItfSistemaERP pSistema, ComoUsuario pUsuario) {
-        String tokenConcessao = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio();
-        Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 300);
+        String tokenConcessao = UtilCRCStringGerador.getStringRandomicaTokenAleatorio();
+        Date dataExpiracao = UtilCRCDataHora.incrementaSegundos(new Date(), 300);
 
         TokenConcessaoOauthServer tokenDinamico = new TokenConcessaoOauthServer(tokenConcessao, dataExpiracao, pSistema.getChavePublica(), pUsuario.getEmail());
         if (!TOKENS_DE_CONSESSAO_BY_CHAVE_PUBLICA_SISTEMA_CONFIAVEL.containsKey(pSistema.getChavePublica())) {
@@ -142,9 +142,9 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         if (tokenConcessao == null) {
             return null;
         }
-        String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
-        String codigoRefresh = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
-        Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
+        String codigoTokenDeAcesso = UtilCRCStringGerador.getStringRandomicaTokenAleatorio(30);
+        String codigoRefresh = UtilCRCStringGerador.getStringRandomicaTokenAleatorio(30);
+        Date dataExpiracao = UtilCRCDataHora.incrementaSegundos(new Date(), 3000);
         TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoRefresh, dataExpiracao, pClient_id, pIdentificadorUsuario);
         if (!persistirToken(pClient_id, novoToken)) {
 
@@ -158,7 +158,7 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
             String chavesPersistidasTExto = chavesDeAcessoErrp.getRepositorioDeArquivosExternos().getTexto(pHashClientidentificador);
             List<TokenAcessoOauthServer> tokensValidos = new ArrayList<>();
             tokensValidos.add(pToken);
-            if (!UtilSBCoreStringValidador.isNuloOuEmbranco(chavesPersistidasTExto)) {
+            if (!UtilCRCStringValidador.isNuloOuEmbranco(chavesPersistidasTExto)) {
                 JsonReader jsonReader = Json.createReader(new StringReader(chavesPersistidasTExto));
                 JsonArray array = jsonReader.readArray();
                 jsonReader.close();
@@ -188,14 +188,14 @@ public class MapaTokensGerenciadosConcessaoOauth extends MapaTokensGerenciados {
         if (tokenEncontrado == null) {
             return null;
         }
-        Date dataHoraLimiteRenovacaoToken = UtilSBCoreDataHora.incrementaDias(tokenEncontrado.getDataHoraExpira(), 5);
+        Date dataHoraLimiteRenovacaoToken = UtilCRCDataHora.incrementaDias(tokenEncontrado.getDataHoraExpira(), 5);
         if (dataHoraLimiteRenovacaoToken.getTime() <= new Date().getTime()) {
             return null;
         }
         String sistemaConfiavelChavePublica = tokenEncontrado.getClient_id();
-        Date dataExpiracao = UtilSBCoreDataHora.incrementaSegundos(new Date(), 3000);
-        String codigoTokenDeAcesso = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
-        String codigoTokenRefresh = UtilSBCoreStringGerador.getStringRandomicaTokenAleatorio(30);
+        Date dataExpiracao = UtilCRCDataHora.incrementaSegundos(new Date(), 3000);
+        String codigoTokenDeAcesso = UtilCRCStringGerador.getStringRandomicaTokenAleatorio(30);
+        String codigoTokenRefresh = UtilCRCStringGerador.getStringRandomicaTokenAleatorio(30);
         TokenAcessoOauthServer novoToken = new TokenAcessoOauthServer(codigoTokenDeAcesso, codigoTokenRefresh, dataExpiracao, sistemaConfiavelChavePublica,
                 tokenEncontrado.getClient_id());
         persistirToken(sistemaConfiavelChavePublica, novoToken);

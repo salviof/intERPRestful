@@ -5,7 +5,7 @@
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model;
 
 import com.super_bits.modulosSB.Persistencia.registro.persistidos.EntidadeSimplesORM;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCReflexaoObjeto;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoCampo;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.anotacoes.InfoObjetoSB;
@@ -31,7 +31,7 @@ public class LinkEntidadesSistemasERP extends EntidadeSimplesORM {
 
     public LinkEntidadesSistemasERP(ItfSistemaERP sistemaRemoto, ComoEntidadeSimples pBeanSimples, String pCodigoSistemaRemoto) {
         this.sistemaRemoto = (SistemaERPConfiavel) sistemaRemoto;
-        this.entidade = UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pBeanSimples.getClass().getSimpleName()).getSimpleName();
+        this.entidade = UtilCRCReflexaoObjeto.getClassExtraindoProxy(pBeanSimples.getClass().getSimpleName()).getSimpleName();
         this.codigoSistemaRemoto = pCodigoSistemaRemoto;
         this.codigoInterno = String.valueOf(pBeanSimples.getId());
         this.codigoIdentificador = entidade + this.codigoInterno;
@@ -39,7 +39,7 @@ public class LinkEntidadesSistemasERP extends EntidadeSimplesORM {
 
     public LinkEntidadesSistemasERP(ItfSistemaERP sistemaRemoto, ComoEntidadeSimples pBeanSimples) {
         this.sistemaRemoto = (SistemaERPConfiavel) sistemaRemoto;
-        this.entidade = UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pBeanSimples.getClass().getSimpleName()).getSimpleName();
+        this.entidade = UtilCRCReflexaoObjeto.getClassExtraindoProxy(pBeanSimples.getClass().getSimpleName()).getSimpleName();
         this.codigoInterno = String.valueOf(pBeanSimples.getId());
         this.codigoIdentificador = entidade + codigoInterno;
     }

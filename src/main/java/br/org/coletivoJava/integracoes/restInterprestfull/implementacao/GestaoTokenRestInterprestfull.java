@@ -11,8 +11,8 @@ import br.org.coletivoJava.integracoes.restInterprestfull.api.InfoIntegracaoRest
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCCriptoRSA;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCDataHora;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.FabTipoConexaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.RespostaWebServiceSimples;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.oauth.InfoTokenOauth2;
@@ -162,7 +162,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
         if (codigoSolicitacao != null) {
             try {
 
-                String codigoCriptogrado = UtilSBCoreCriptoRSA.getTextoCriptografadoUsandoChavePublica(codigoSolicitacao, chavePublicaServidor);
+                String codigoCriptogrado = UtilCRCCriptoRSA.getTextoCriptografadoUsandoChavePublica(codigoSolicitacao, chavePublicaServidor);
                 ChamadaHttpSimples chamada = new ChamadaHttpSimples();
                 chamada.setTipoConexao(FabTipoConexaoRest.POST);
                 chamada.setEnderecoHost(urlServidorApiRest);
@@ -229,7 +229,7 @@ public class GestaoTokenRestInterprestfull extends GestaoTokenOath2Base implemen
         org.json.simple.JSONObject respostaJson;
         try {
             respostaJson = (org.json.simple.JSONObject) parser.parse(pToken);
-            Date dataHora = UtilSBCoreDataHora.incrementaSegundos(new Date(), Integer.parseInt(respostaJson.get("expires_in").toString()));
+            Date dataHora = UtilCRCDataHora.incrementaSegundos(new Date(), Integer.parseInt(respostaJson.get("expires_in").toString()));
             respostaJson.put("dataHoraExpirarToken", String.valueOf(dataHora.getTime()));
 
             return super.armazenarRespostaToken(respostaJson.toJSONString()); //chamada super do metodo (implementação classe pai)

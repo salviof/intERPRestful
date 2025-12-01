@@ -7,8 +7,8 @@ package br.org.coletivoJava.integracoes.restInterprestfull.implementacao;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.LinkEntidadesSistemasERP;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.consultaDinamica.ConsultaDinamicaDeEntidade;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreObjetoSB;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCObjetoSB;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCReflexaoObjeto;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfServicoLinkEntreEntidadesErpRestfull;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
@@ -32,7 +32,7 @@ public class ServicoLinkEntreEntidadesErpRestfull implements ItfServicoLinkEntre
         EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
         try {
             ConsultaDinamicaDeEntidade consulta = new ConsultaDinamicaDeEntidade(LinkEntidadesSistemasERP.class, em);
-            Class entidade = UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pEntidade.getClass().getSimpleName());
+            Class entidade = UtilCRCReflexaoObjeto.getClassExtraindoProxy(pEntidade.getClass().getSimpleName());
             consulta.addcondicaoCampoIgualA("codigoIdentificador", linkEntreEntidades.getCodigoIdentificador());
             consulta.addcondicaoCampoIgualA("entidade", entidade.getSimpleName());
             List<LinkEntidadesSistemasERP> linl = consulta.resultadoRegistros();
@@ -53,7 +53,7 @@ public class ServicoLinkEntreEntidadesErpRestfull implements ItfServicoLinkEntre
         try {
             ConsultaDinamicaDeEntidade consulta = new ConsultaDinamicaDeEntidade(LinkEntidadesSistemasERP.class, em);
             consulta.addcondicaoCampoIgualA("codigoSistemaRemoto", pCodigoapiExterno);
-            Class entidade = UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pEntidade.getSimpleName());
+            Class entidade = UtilCRCReflexaoObjeto.getClassExtraindoProxy(pEntidade.getSimpleName());
             consulta.addcondicaoCampoIgualA("entidade", entidade.getSimpleName());
 
             List<LinkEntidadesSistemasERP> linl = consulta.resultadoRegistros();
@@ -81,7 +81,7 @@ public class ServicoLinkEntreEntidadesErpRestfull implements ItfServicoLinkEntre
         try {
             ConsultaDinamicaDeEntidade consulta = new ConsultaDinamicaDeEntidade(LinkEntidadesSistemasERP.class, em);
             consulta.addcondicaoCampoIgualA("codigoIdentificador", linkEntreEntidades.getCodigoIdentificador());
-            Class entidade = UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pEntidade.getClass().getSimpleName());
+            Class entidade = UtilCRCReflexaoObjeto.getClassExtraindoProxy(pEntidade.getClass().getSimpleName());
             consulta.addcondicaoCampoIgualA("entidade", entidade.getSimpleName());
 
             List<LinkEntidadesSistemasERP> linl = consulta.resultadoRegistros();

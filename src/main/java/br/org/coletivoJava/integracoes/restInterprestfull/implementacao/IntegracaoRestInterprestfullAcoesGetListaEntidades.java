@@ -3,7 +3,7 @@ package br.org.coletivoJava.integracoes.restInterprestfull.implementacao;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.parametros.ParametroListaRestful;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.InfoIntegracaoRestInterprestfullRestfull;
 import br.org.coletivoJava.integracoes.restInterprestfull.api.FabIntApiRestIntegracaoERPRestfull;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJson;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.FabTipoAgenteClienteApi;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import jakarta.json.JsonObject;
@@ -49,7 +49,7 @@ public class IntegracaoRestInterprestfullAcoesGetListaEntidades
         SolicitacaoControllerERP sl = getSoliciatacao();
         List<Object> novosPr = new ArrayList<>();
 
-        parametrosJson = UtilSBCoreJson.getJsonObjectByTexto(sl.getCorpoParametros());
+        parametrosJson = UtilCRCJson.getJsonObjectByTexto(sl.getCorpoParametros());
 
         novosPr.add(parametrosJson.getJsonNumber(ATRIBUTO_JSON_FILTRO_PAGINA).intValue());
 
@@ -70,11 +70,11 @@ public class IntegracaoRestInterprestfullAcoesGetListaEntidades
         List<String> filtros = new ArrayList<>();
         JsonObject parametrosJson = null;
 
-        parametrosJson = UtilSBCoreJson.getJsonObjectByTexto(sl.getCorpoParametros());
+        parametrosJson = UtilCRCJson.getJsonObjectByTexto(sl.getCorpoParametros());
 
         String url = super.gerarUrlRequisicao();
 
-        JsonObject parametrosLista = UtilSBCoreJson.getJsonObjectByTexto(sl.getCorpoParametros());
+        JsonObject parametrosLista = UtilCRCJson.getJsonObjectByTexto(sl.getCorpoParametros());
         final StringBuilder strBuilderAtributoParametros = new StringBuilder();
         int idxParam = 0;
         if (parametrosLista.containsKey("filtros")) {

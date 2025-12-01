@@ -6,7 +6,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.arquivosConfiguracao.ItfFabConfigModulo;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCCriptoRSA;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.tipoModulos.integracaoOauth.FabPropriedadeModuloIntegracaoOauth;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.tipoModulos.integracaoOauth.InfoPropriedadeConfigRestIntegracao;
 import com.super_bits.modulosSB.SBCore.modulos.chavesPublicasePrivadas.RepositorioChavePublicaPrivada;
@@ -34,7 +34,7 @@ public enum FabConfigModuloWebERPChaves implements ItfFabConfigModulo {
 
         switch (this) {
             case PAR_DE_CHAVES_IDENTIFICADOR: {
-                Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
+                Map<String, String> parDeChaves = UtilCRCCriptoRSA.chavePublicaPrivada();
                 String identificador = RepositorioChavePublicaPrivada.getIdentificacaoChavePublica(parDeChaves);
                 RepositorioChavePublicaPrivada.persistirChavePublicaPrivada(parDeChaves);
                 return identificador;

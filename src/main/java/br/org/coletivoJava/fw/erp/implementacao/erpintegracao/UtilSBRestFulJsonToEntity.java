@@ -6,8 +6,8 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao;
 
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreNumeros;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCNumeros;
 import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaCampo;
 import com.super_bits.modulosSB.SBCore.modulos.geradorCodigo.model.EstruturaDeEntidade;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
@@ -38,7 +38,7 @@ public class UtilSBRestFulJsonToEntity {
 
                 case INTEIRO:
                     pEntidade.getCampoInstanciadoByNomeOuAnotacao(pChave)
-                            .setValor(UtilSBCoreJson.getComoInteiro(pValorJson));
+                            .setValor(UtilCRCJson.getComoInteiro(pValorJson));
                     break;
                 case NUMERO_LONGO:
 
@@ -69,7 +69,7 @@ public class UtilSBRestFulJsonToEntity {
 
                     break;
                 case DECIMAL:
-                    double valorDouble = UtilSBCoreNumeros.getDoublePorString(pValorJson.toString());
+                    double valorDouble = UtilCRCNumeros.getDoublePorString(pValorJson.toString());
                     campo.setValor(valorDouble);
                     break;
                 case ENTIDADE:
@@ -98,7 +98,7 @@ public class UtilSBRestFulJsonToEntity {
                                     String entidade = estrutura.getCampoByNomeDeclarado(pChave).getClasseCampoDeclaradoOuTipoLista();
                                     Long id = 0l;
                                     if (pValorJson instanceof jakarta.json.JsonObject) {
-                                        id = Long.valueOf(UtilSBCoreJson.getComoInteiro(pValorJson.asJsonObject().get("@id")));
+                                        id = Long.valueOf(UtilCRCJson.getComoInteiro(pValorJson.asJsonObject().get("@id")));
                                     }
 
                                     ComoEntidadeSimples item = (ComoEntidadeSimples) UtilSBPersistencia.getRegistroByID(MapaObjetosProjetoAtual.getClasseDoObjetoByNome(entidade), id, em);

@@ -6,7 +6,7 @@ import com.super_bits.modulosSB.SBCore.modulos.objetos.calculos.ValorLogicoCalcu
 import org.coletivoJava.fw.projetos.integracao.api.model.sistemaerpconfiavel.ValorLogicoSistemaERPConfiavel;
 import org.coletivoJava.fw.projetos.integracao.api.model.sistemaerpconfiavel.ValoresLogicosSistemaERPConfiavel;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
-import org.coletivojava.fw.utilCoreBase.UtilSBCoreReflexaoAPIERPRestFull;
+import org.coletivojava.fw.utilCoreBase.UtilCRCReflexaoAPIERPRestFull;
 
 @ValorLogicoSistemaERPConfiavel(calculo = ValoresLogicosSistemaERPConfiavel.NOME)
 public class ValorLogicoSistemaERPConfiavelNome
@@ -20,7 +20,7 @@ public class ValorLogicoSistemaERPConfiavelNome
     @Override
     public Object getValor(Object... pEntidade) {
         if (getSistema().getNome() == null || getSistema().getNome().isEmpty()) {
-            String nome = UtilSBCoreReflexaoAPIERPRestFull.getSlugAplicacao(getSistema());
+            String nome = UtilCRCReflexaoAPIERPRestFull.getSlugAplicacao(getSistema());
             getSistema().setNome(nome);
         }
         return getSistema().getNome();

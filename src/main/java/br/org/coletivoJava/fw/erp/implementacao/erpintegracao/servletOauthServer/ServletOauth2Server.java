@@ -15,11 +15,11 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenA
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token.TokenConcessaoOauthServer;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.arquivosConfiguracao.ConfigModulo;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreClienteRest;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreDataHora;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCClienteRest;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCCriptoRSA;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCDataHora;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringValidador;
 import com.super_bits.modulosSB.SBCore.UtilGeral.json.ErroProcessandoJson;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.qualificadoresCDI.sessao.QlSessaoFacesContext;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
@@ -44,7 +44,7 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_AUTORIZACAO;
 import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer.OBTER_CODIGO_DE_CONCESSAO_DE_ACESSO;
 import static br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletOauthServer.FabTipoRequisicaoOauthServer.VERIFICACAO_STATUS_ACESSO;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJsonRest;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJsonRest;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
 import jakarta.json.JsonObjectBuilder;
 import java.net.URLEncoder;
@@ -115,7 +115,7 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
             String emailAdmin = configuracaoRESTFull.getPropriedade(FabConfigModuloWebERPChaves.USUARIO_ADMIN);
             System.out.println("O usuário admin é " + emailAdmin);
             boolean solicitacaoUsuarioAdmin = false;
-            if (!UtilSBCoreStringValidador.isNuloOuEmbranco(emailDoEscopo) && !UtilSBCoreStringValidador.isNuloOuEmbranco(emailAdmin)) {
+            if (!UtilCRCStringValidador.isNuloOuEmbranco(emailDoEscopo) && !UtilCRCStringValidador.isNuloOuEmbranco(emailAdmin)) {
                 if (emailDoEscopo.toLowerCase().equals(emailAdmin.toLowerCase())) {
                     solicitacaoUsuarioAdmin = true;
                     System.out.println("Token Solicitado como admin");
@@ -155,13 +155,13 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
                         throw new UnsupportedOperationException("Payload com token a ser validado não foi anexado ao header");
                     }
                     //TokenAcessoOauthServer token = MapaTokensGerenciadosConcessaoOauth.loadTokenExistente(sistemaCliente, pUsuario);
-                    JsonObject jsonPayload = UtilSBCoreJson.getJsonObjectByTexto(tokenPayLoad);
+                    JsonObject jsonPayload = UtilCRCJson.getJsonObjectByTexto(tokenPayLoad);
                     String tokenPayload = jsonPayload.getString("access_token");
                     TokenAcessoOauthServer token = MapaTokensGerenciadosConcessaoOauth.loadTokenExistente(tokenPayload, sistemaCliente);
                     if (token != null && token.isTokenValido()) {
-                        resp.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(UtilSBCoreJsonRest.getRespostaJsonBuilderBaseSucesso("OK", JsonObject.EMPTY_JSON_OBJECT.asJsonObject()).build()));
+                        resp.getWriter().append(UtilCRCJson.getTextoByJsonObjeect(UtilCRCJsonRest.getRespostaJsonBuilderBaseSucesso("OK", JsonObject.EMPTY_JSON_OBJECT.asJsonObject()).build()));
                     } else {
-                        resp.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(UtilSBCoreJsonRest.getRespostaJsonBuilderBaseFalha("FALHOU").build()));
+                        resp.getWriter().append(UtilCRCJson.getTextoByJsonObjeect(UtilCRCJsonRest.getRespostaJsonBuilderBaseFalha("FALHOU").build()));
                         resp.setStatus(400);
                     }
                     break;
@@ -188,23 +188,23 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
                         + "&tipoAplicacao=" + sistemaRecursos.getHashChavePublica() + "&escopo=sistema";
                 System.out.println("enviando codigo de concessão via:");
                 System.out.println(url);
-                JsonObject relatorioRecebimento = UtilSBCoreClienteRest.getObjetoJsonPorUrl(url);
+                JsonObject relatorioRecebimento = UtilCRCClienteRest.getObjetoJsonPorUrl(url);
                 if (relatorioRecebimento == null) {
-                    JsonObjectBuilder respEnvioCodigo = UtilSBCoreJsonRest.getRespostaJsonBuilderBaseFalha("Falha acessando" + url);
+                    JsonObjectBuilder respEnvioCodigo = UtilCRCJsonRest.getRespostaJsonBuilderBaseFalha("Falha acessando" + url);
                     pResposta.setStatus(500);
-                    pResposta.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
+                    pResposta.getWriter().append(UtilCRCJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
                     pResposta.flushBuffer();
                     return;
                 }
-                ItfResposta respObtencaoToken = UtilSBCoreJsonRest.getResposta(relatorioRecebimento);
+                ItfResposta respObtencaoToken = UtilCRCJsonRest.getResposta(relatorioRecebimento);
                 if (respObtencaoToken.isSucesso()) {
-                    JsonObjectBuilder respEnvioCodigo = UtilSBCoreJsonRest.getRespostaJsonBuilderBaseSucesso("o token de acesso foi registrado com sucesso no cliente", relatorioRecebimento);
-                    pResposta.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
+                    JsonObjectBuilder respEnvioCodigo = UtilCRCJsonRest.getRespostaJsonBuilderBaseSucesso("o token de acesso foi registrado com sucesso no cliente", relatorioRecebimento);
+                    pResposta.getWriter().append(UtilCRCJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
                     pResposta.flushBuffer();
 
                 } else {
-                    JsonObjectBuilder respEnvioCodigo = UtilSBCoreJsonRest.getRespostaJsonBuilderBaseSucesso("o codigo de solicitação foi enviado, mas houve falha obtendo o token com o código enviado", relatorioRecebimento);
-                    pResposta.getWriter().append(UtilSBCoreJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
+                    JsonObjectBuilder respEnvioCodigo = UtilCRCJsonRest.getRespostaJsonBuilderBaseSucesso("o codigo de solicitação foi enviado, mas houve falha obtendo o token com o código enviado", relatorioRecebimento);
+                    pResposta.getWriter().append(UtilCRCJson.getTextoByJsonObjeect(respEnvioCodigo.build()));
                     pResposta.flushBuffer();
 
                 }
@@ -267,7 +267,7 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
             return;
         }
         //String codigoCriptografado = JsonReader jsonReader = Json.createReader(new StringReader(jsonSTR));
-        //UtilSBCoreCriptoRSA.getTextoDescriptografado(, sistemaCliente.getChavePublica());
+        //UtilCRCCriptoRSA.getTextoDescriptografado(, sistemaCliente.getChavePublica());
 
         StringBuffer jb = new StringBuffer();
         String line = null;
@@ -281,7 +281,7 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
             /*report an error*/ }
 
         try {
-            JsonObject jsonObject = UtilSBCoreJson.getJsonObjectByTexto(jb.toString());
+            JsonObject jsonObject = UtilCRCJson.getJsonObjectByTexto(jb.toString());
             codigoCriptografado = jsonObject.getString("code");
         } catch (JSONException e) {
             // crash and burn
@@ -294,15 +294,15 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
             sistemaServidor = ERPIntegracaoSistemasApi.RESTFUL.getImplementacaoDoContexto().getSistemaAtual();
         }
 
-        String codigoDescriptografado = UtilSBCoreCriptoRSA.getTextoDescriptografadoUsandoChavePrivada(codigoCriptografado, sistemaServidor.getChavePrivada());
+        String codigoDescriptografado = UtilCRCCriptoRSA.getTextoDescriptografadoUsandoChavePrivada(codigoCriptografado, sistemaServidor.getChavePrivada());
         try {
             TokenConcessaoOauthServer tokenConcessao = MapaTokensGerenciadosConcessaoOauth.loadTokenConcessaoExistente(sistemaCliente, codigoDescriptografado);
             if (tokenConcessao.isTokenValido()) {
                 TokenAcessoOauthServer novoToken = MapaTokensGerenciadosConcessaoOauth
                         .gerarNovoTokenDeAcesso(tokenConcessao.getToken(), sistemaCliente.getHashChavePublica(),
                                 emailDoEscopo);
-                Integer segudos = UtilSBCoreDataHora.segundosEntre(new Date(), novoToken.getDataHoraExpira());
-                JsonObject tokenJson = UtilSBCoreJson
+                Integer segudos = UtilCRCDataHora.segundosEntre(new Date(), novoToken.getDataHoraExpira());
+                JsonObject tokenJson = UtilCRCJson
                         .getJsonObjectBySequenciaChaveValor("access_token", novoToken.getToken(),
                                 "token_type", "Bearer",
                                 "scope", tokenConcessao.getIdentificadorUsuario(),
@@ -311,7 +311,7 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
                         );
 
                 PrintWriter writer = resp.getWriter();
-                String textoJson = UtilSBCoreJson.getTextoByJsonObjeect(tokenJson.asJsonObject());
+                String textoJson = UtilCRCJson.getTextoByJsonObjeect(tokenJson.asJsonObject());
                 writer.append(textoJson);
             }
         } catch (ErroTentandoObterTokenAcesso ex) {

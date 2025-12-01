@@ -18,8 +18,8 @@ import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTo
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreCriptoRSA;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringFiltros;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCCriptoRSA;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringFiltros;
 import com.super_bits.modulosSB.webPaginas.controller.servlets.servletRecepcaoOauth.ServletRecepcaoOauth;
 import cucumber.api.CucumberOptions;
 import java.util.Map;
@@ -84,7 +84,7 @@ public class FluxoOauth2UsuarioAcessoRestfull extends TesteIntegracaoFuncionalid
         sistemaServidorRecursos.setUrlPublicaEndPoint("http://localhost:8066/" + ServletRestfullERP.SLUGPUBLICACAOSERVLET);
 
         sistemaServidorRecursos.setUrlRecepcaoCodigo("não Se Aplica apenas servidor");
-        Map<String, String> parDeChaves = UtilSBCoreCriptoRSA.chavePublicaPrivada();
+        Map<String, String> parDeChaves = UtilCRCCriptoRSA.chavePublicaPrivada();
         sistemaServidorRecursos.setChavePublica(parDeChaves.keySet().stream().findFirst().get());
         sistemaServidorRecursos.setChavePrivada(parDeChaves.values().stream().findFirst().get());
         chavePrivadaDoAplicativoConfiavel = parDeChaves.values().stream().findFirst().get();
@@ -111,11 +111,11 @@ public class FluxoOauth2UsuarioAcessoRestfull extends TesteIntegracaoFuncionalid
 
     public static void printSistema(SistemaERPConfiavel pSistema) {
         System.out.println("______________________________________________");
-        System.out.println("|Nome:           " + UtilSBCoreStringFiltros.getLpad(pSistema.getNome(), 29, " ") + "|");
-        System.out.println("|Chave pública   " + UtilSBCoreStringFiltros.getLpad(pSistema.getHashChavePublica(), 29, " ") + "|");
-        System.out.println("|Domímio         " + UtilSBCoreStringFiltros.getLpad(pSistema.getDominio(), 29, " ") + "|");
-        System.out.println("|UrlEndPoint     " + UtilSBCoreStringFiltros.getLpad(pSistema.getUrlPublicaEndPoint(), 29, " ") + "|");
-        System.out.println("|Urlrecepção COD " + UtilSBCoreStringFiltros.getLpad(pSistema.getUrlRecepcaoCodigo(), 29, " ") + "|");
+        System.out.println("|Nome:           " + UtilCRCStringFiltros.getLpad(pSistema.getNome(), 29, " ") + "|");
+        System.out.println("|Chave pública   " + UtilCRCStringFiltros.getLpad(pSistema.getHashChavePublica(), 29, " ") + "|");
+        System.out.println("|Domímio         " + UtilCRCStringFiltros.getLpad(pSistema.getDominio(), 29, " ") + "|");
+        System.out.println("|UrlEndPoint     " + UtilCRCStringFiltros.getLpad(pSistema.getUrlPublicaEndPoint(), 29, " ") + "|");
+        System.out.println("|Urlrecepção COD " + UtilCRCStringFiltros.getLpad(pSistema.getUrlRecepcaoCodigo(), 29, " ") + "|");
         System.out.println("______________________________________________");
     }
 

@@ -1,7 +1,7 @@
 package org.coletivoJava.fw.projetos.integracao.implemetation.model.sistemaerpconfiavel;
 
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaERPConfiavel;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringValidador;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.validador.ValidacaoGenerica;
 import org.coletivoJava.fw.projetos.integracao.api.model.sistemaerpconfiavel.ValidadorSistemaERPConfiavel;
 import org.coletivoJava.fw.projetos.integracao.api.model.sistemaerpconfiavel.ValidadoresSistemaERPConfiavel;
@@ -25,7 +25,7 @@ public class ValidacaoSistemaERPConfiavelUrlPublicaEndPoint extends ValidacaoGen
         String urlStr = (String) pValor;
         try {
             URL url = new URL(urlStr);
-            if (UtilSBCoreStringValidador.isNuloOuEmbranco(getSistemaERPConfiavel().getDominio())) {
+            if (UtilCRCStringValidador.isNuloOuEmbranco(getSistemaERPConfiavel().getDominio())) {
                 getSistemaERPConfiavel().setDominio(url.getHost());
             }
 

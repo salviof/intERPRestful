@@ -9,9 +9,9 @@ import com.super_bits.modulosSB.Persistencia.ConfigGeral.SBPersistencia;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.UTilSBCoreInputs;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
-import com.super_bits.modulosSB.SBCore.modulos.ManipulaArquivo.UtilSBCoreArquivoTexto;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringValidador;
+import com.super_bits.modulosSB.SBCore.modulos.ManipulaArquivo.UtilCRCArquivoTexto;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonArrayBuilder;
@@ -58,8 +58,8 @@ public class MapaSistemasConfiaveis {
                 sistemaJson.add("hashChavePublica", sistema.getHashChavePublica());
                 sistemaJson.add("emailusuarioAdmin", sistema.getEmailusuarioAdmin());
                 lista.add(sistemaJson);
-                String jsonTexto = UtilSBCoreJson.getTextoByJsonArray(lista.build());
-                UtilSBCoreArquivoTexto.escreverEmArquivoSubstituindoArqAnterior(getArquivoPersistencia(), jsonTexto);
+                String jsonTexto = UtilCRCJson.getTextoByJsonArray(lista.build());
+                UtilCRCArquivoTexto.escreverEmArquivoSubstituindoArqAnterior(getArquivoPersistencia(), jsonTexto);
                 //sistemaJson.add("recepcaoCodigo", sistema.getUrlRecepcaoCodigo());
             }
         }
@@ -87,8 +87,8 @@ public class MapaSistemasConfiaveis {
             UtilSBPersistencia.fecharEM(em);
         } else {
             String json = UTilSBCoreInputs.getStringByArquivoLocal(getArquivoPersistencia());
-            if (!UtilSBCoreStringValidador.isNuloOuEmbranco(json)) {
-                JsonArray sistemasJson = UtilSBCoreJson.getJsonArrayByTexto(json);
+            if (!UtilCRCStringValidador.isNuloOuEmbranco(json)) {
+                JsonArray sistemasJson = UtilCRCJson.getJsonArrayByTexto(json);
                 for (JsonValue valor : sistemasJson) {
                     JsonObject sistemaJson = valor.asJsonObject();
                     SistemaERPConfiavel sistema = new SistemaERPConfiavel();

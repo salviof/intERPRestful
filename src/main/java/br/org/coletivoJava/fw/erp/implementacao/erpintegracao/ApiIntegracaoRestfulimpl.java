@@ -17,10 +17,10 @@ import com.super_bits.modulosSB.Persistencia.dao.consultaDinamica.ConsultaDinami
 
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreJson;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreReflexaoObjeto;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringFiltros;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCReflexaoObjeto;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringFiltros;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.transmissao_recepcao_rest_client.ItfAcaoApiRest;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.ErroChamadaController;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfResposta;
@@ -52,7 +52,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import org.coletivojava.fw.api.tratamentoErros.FabErro;
-import org.coletivojava.fw.utilCoreBase.UtilSBCoreReflexaoAPIERPRestFull;
+import org.coletivojava.fw.utilCoreBase.UtilCRCReflexaoAPIERPRestFull;
 import br.org.coletivoJava.fw.api.erp.erpintegracao.model.ItfSistemaERPLocal;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.SistemaErpChaveLocal;
 import br.org.coletivoJava.integracoes.restInterprestfull.implementacao.GestaoTokenRestInterprestfull;
@@ -204,11 +204,11 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
     private static void printSistema(SistemaERPConfiavel pSistema) {
         System.out.println("______________________________________________");
-        System.out.println("|Nome:           " + UtilSBCoreStringFiltros.getLpad(pSistema.getNome(), 29, " ") + "|");
-        System.out.println("|Chave pública   " + UtilSBCoreStringFiltros.getLpad(pSistema.getHashChavePublica(), 29, " ") + "|");
-        System.out.println("|Domímio         " + UtilSBCoreStringFiltros.getLpad(pSistema.getDominio(), 29, " ") + "|");
-        System.out.println("|UrlEndPoint     " + UtilSBCoreStringFiltros.getLpad(pSistema.getUrlPublicaEndPoint(), 29, " ") + "|");
-        System.out.println("|Urlrecepção COD " + UtilSBCoreStringFiltros.getLpad(pSistema.getUrlRecepcaoCodigo(), 29, " ") + "|");
+        System.out.println("|Nome:           " + UtilCRCStringFiltros.getLpad(pSistema.getNome(), 29, " ") + "|");
+        System.out.println("|Chave pública   " + UtilCRCStringFiltros.getLpad(pSistema.getHashChavePublica(), 29, " ") + "|");
+        System.out.println("|Domímio         " + UtilCRCStringFiltros.getLpad(pSistema.getDominio(), 29, " ") + "|");
+        System.out.println("|UrlEndPoint     " + UtilCRCStringFiltros.getLpad(pSistema.getUrlPublicaEndPoint(), 29, " ") + "|");
+        System.out.println("|Urlrecepção COD " + UtilCRCStringFiltros.getLpad(pSistema.getUrlRecepcaoCodigo(), 29, " ") + "|");
         System.out.println("______________________________________________");
     }
 
@@ -358,7 +358,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         if (pBeanSimples == null) {
             return JsonObject.EMPTY_JSON_OBJECT;
         }
-        String caminhoImplementacaoConversor = UtilSBCoreReflexaoAPIERPRestFull.gerarCaminhoCompletoClasseObjetoToJson(pSistema, UtilSBCoreReflexaoObjeto.getClassExtraindoProxy(pBeanSimples.getClass().getSimpleName()));
+        String caminhoImplementacaoConversor = UtilCRCReflexaoAPIERPRestFull.gerarCaminhoCompletoClasseObjetoToJson(pSistema, UtilCRCReflexaoObjeto.getClassExtraindoProxy(pBeanSimples.getClass().getSimpleName()));
         boolean temImplementacao = false;
         Class classeConversor = null;
         try {
@@ -467,8 +467,8 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
 
         JsonObject retornoProcessado;
         JsonObject parametroSolicitacao = null;
-        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getCorpoParametros())) {
-            parametroSolicitacao = UtilSBCoreJson.getJsonObjectByTexto(pSolicitacao.getCorpoParametros());
+        if (!UtilCRCStringValidador.isNuloOuEmbranco(pSolicitacao.getCorpoParametros())) {
+            parametroSolicitacao = UtilCRCJson.getJsonObjectByTexto(pSolicitacao.getCorpoParametros());
         }
         switch (metodo) {
             case "POST":
@@ -479,7 +479,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                 }
                 EntityManager em = UtilSBPersistencia.getEntyManagerPadraoNovo();
                 try {
-                    if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getCodigoEntidade()) || pSolicitacao.getCodigoEntidade().equals("0")) {
+                    if (!UtilCRCStringValidador.isNuloOuEmbranco(pSolicitacao.getCodigoEntidade()) || pSolicitacao.getCodigoEntidade().equals("0")) {
                         try {
                             entidade = (ComoEntidadeSimples) classeEntidade.newInstance();
                         } catch (InstantiationException | IllegalAccessException ex) {
@@ -582,7 +582,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                                 break;
                                             case ENTIDADE:
                                                 if (chaves.getValue() != null) {
-                                                    String codigoEntidadeFiltroSTR = UtilSBCoreStringFiltros.getNumericosDaString(chaves.getValue().toString());
+                                                    String codigoEntidadeFiltroSTR = UtilCRCStringFiltros.getNumericosDaString(chaves.getValue().toString());
                                                     if (codigoEntidadeFiltroSTR != null) {
 
                                                         String entidadeSTR = estruturaCampo.getClasseCampoDeclaradoOuTipoLista();
@@ -610,7 +610,7 @@ public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
                                 lista = consultaDinamica.gerarResultados(parametros.getLimite());
                                 System.out.println("Encontrados " + lista.size());
 
-                                if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSolicitacao.getAtributoEntidade())) {
+                                if (!UtilCRCStringValidador.isNuloOuEmbranco(pSolicitacao.getAtributoEntidade())) {
                                     if (lista.isEmpty()) {
                                         resposta.addErro("Impossível acessar os atributos pois nenhuma entidade foi encontrada");
                                     }

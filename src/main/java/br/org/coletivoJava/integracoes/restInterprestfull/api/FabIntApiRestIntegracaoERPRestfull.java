@@ -11,8 +11,8 @@ import br.org.coletivoJava.fw.api.erp.erpintegracao.servico.ItfIntegracaoERP;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.FabConfigModuloWebERPChaves;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringJson;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringJson;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringValidador;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.ComoFabricaIntegracaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.FabTipoConexaoRest;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.WS.conexaoWebServiceClient.InfoConsumoRestService;
@@ -160,7 +160,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ComoFabricaIntegracaoR
 
     public static ItfTokenGestaoOauth getGestaoTokenOpcoes(ItfSistemaERP pSistemaServico) {
 
-        if (!UtilSBCoreStringValidador.isNuloOuEmbranco(pSistemaServico.getEmailusuarioAdmin())) {
+        if (!UtilCRCStringValidador.isNuloOuEmbranco(pSistemaServico.getEmailusuarioAdmin())) {
             if (SBCore.getUsuarioLogado().getEmail().equals(pSistemaServico.getEmailusuarioAdmin())) {
                 return getGestaoTokenOpcoesAdmin(pSistemaServico);
             }
@@ -170,7 +170,7 @@ public enum FabIntApiRestIntegracaoERPRestfull implements ComoFabricaIntegracaoR
 
     public synchronized static ItfTokenGestaoOauth getGestaoTokenOpcoesAdmin(ItfSistemaERP pSistemaServico) {
 
-        if (UtilSBCoreStringValidador.isNuloOuEmbranco(pSistemaServico.getEmailusuarioAdmin())) {
+        if (UtilCRCStringValidador.isNuloOuEmbranco(pSistemaServico.getEmailusuarioAdmin())) {
             throw new UnsupportedOperationException("Email do usuaário administrativo do sistema" + pSistemaServico.getNome() + " não foi definida");
         }
 

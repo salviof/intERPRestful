@@ -12,7 +12,7 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.UtilSBRestful;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.servletRestfulERP.ServletRestfullERP;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.UtilGeral.MapaAcoesSistema;
-import com.super_bits.modulosSB.SBCore.UtilGeral.UtilSBCoreStringValidador;
+import com.super_bits.modulosSB.SBCore.UtilGeral.UtilCRCStringValidador;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.ItfRespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.comunicacao.RespostaAcaoDoSistema;
 import com.super_bits.modulosSB.SBCore.modulos.erp.SolicitacaoControllerERP;
@@ -62,7 +62,7 @@ public class UtilTesteServicoRestfull {
             if (resposta.isSucesso()) {
                 res.status(200);
             } else {
-                if (!UtilSBCoreStringValidador.isNuloOuEmbranco(solicitacao.getAcaoStrNomeUnico())) {
+                if (!UtilCRCStringValidador.isNuloOuEmbranco(solicitacao.getAcaoStrNomeUnico())) {
                     ComoAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
                     if (!SBCore.getServicoPermissao().isAcaoPermitidaUsuario(solicitacao.getUsuarioSolicitante(), acao)) {
                         res.status(403);
@@ -123,7 +123,7 @@ public class UtilTesteServicoRestfull {
             if (resposta.isSucesso()) {
                 res.status(200);
             } else {
-                if (!UtilSBCoreStringValidador.isNuloOuEmbranco(solicitacao.getAcaoStrNomeUnico())) {
+                if (!UtilCRCStringValidador.isNuloOuEmbranco(solicitacao.getAcaoStrNomeUnico())) {
                     ComoAcaoDoSistema acao = MapaAcoesSistema.getAcaoDoSistemaByNomeUnico(solicitacao.getAcaoStrNomeUnico());
                     if (!SBCore.getServicoPermissao().isAcaoPermitidaUsuario(solicitacao.getUsuarioSolicitante(), acao)) {
                         res.status(403);
