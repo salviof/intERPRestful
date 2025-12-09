@@ -92,9 +92,11 @@ public class ServletOauth2Server extends ServletOauth2ServerAbs implements Seria
             ItfSistemaERPLocal sistemaLocalRecursos = erp.getSistemaAtual();
 
             if (!sistemaLocalRecursos.getHashChavePublica().equals(hashChaveServicoRecurso)) {
-                resp.setStatus(401);
-                resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO SERVIÇO LOCAL " + hashChaveServicoRecurso + " NÃO FOI ENCONTRADA");
 
+                if (SBCore.isEmModoProducao()) {
+                    resp.setStatus(401);
+                    resp.getWriter().append("ACESSO NEGADO, A CHAVE PÚBLICA DO SERVIÇO LOCAL " + hashChaveServicoRecurso + " NÃO FOI ENCONTRADA");
+                }
             }
 
             //TODO verifica se o rash servico recurso é o hash do servidor atual
