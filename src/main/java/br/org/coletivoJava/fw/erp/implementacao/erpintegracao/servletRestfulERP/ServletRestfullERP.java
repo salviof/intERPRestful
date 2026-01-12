@@ -25,7 +25,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoSessao;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.entidade.basico.ComoSessao;
 import com.super_bits.modulosSB.SBCore.modulos.servicosCore.ComoServicoControllerExecucao;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ComoAcaoDoSistema;
 

@@ -7,7 +7,7 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJak
 import br.org.coletivoJava.fw.api.erp.erpintegracao.contextos.ERPIntegracaoSistemasApi;
 import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.json.geradorIDJakartaBInding.GeradorIdJsonGenerico;
 import com.super_bits.modulosSB.SBCore.modulos.erp.ItfSistemaERP;
-import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.Interfaces.basico.ComoEntidadeSimples;
+import com.super_bits.modulosSB.SBCore.modulos.objetos.entidade.basico.ComoEntidadeSimples;
 
 /**
  *
