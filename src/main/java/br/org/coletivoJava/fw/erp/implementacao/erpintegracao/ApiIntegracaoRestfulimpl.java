@@ -66,8 +66,10 @@ import java.util.HashMap;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.entidade.basico.ComoEntidadeSimplesSomenteLeitura;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.entidade.basico.ComoUsuario;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.acoes.ComoAcaoDoSistema;
+import javax.enterprise.context.ApplicationScoped;
 
 @ApiIntegracaoRestful
+@ApplicationScoped
 public class ApiIntegracaoRestfulimpl extends RepositorioLinkEntidadesGenerico
         implements
         ItfIntegracaoERP {

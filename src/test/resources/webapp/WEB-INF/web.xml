@@ -45,7 +45,7 @@
     </context-param>
 
 
-   
+
 
     <session-config>
         <session-timeout>6000</session-timeout>
@@ -92,7 +92,10 @@
         <url-pattern>*.css</url-pattern>
     </servlet-mapping>
 
-
+    <context-param>
+        <param-name>org.jboss.weld.servlet.archive.isolation</param-name>
+        <param-value>false</param-value>
+    </context-param>
 
     <servlet>
         <servlet-name>Super_BitsWebPaginas</servlet-name>
