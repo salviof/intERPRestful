@@ -6,7 +6,8 @@ package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.json;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.calculos.ItfCalculos;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.calculos.ComoValorLogico;
+
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfAssistenteDeLocalizacao;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.InfoCampos.campoInstanciado.ItfCampoInstanciado;
 import com.super_bits.modulosSB.SBCore.modulos.objetos.registro.CampoMapValores;
@@ -44,7 +45,7 @@ public class MixIgnoreCaseEntidadeSimples {
     @JsonIgnore
     private boolean mapeouTodosOsCampos = false;
     @JsonIgnore
-    private Map<ItfCalculos, Boolean> controleCalculo;
+    private Map<ComoValorLogico, Boolean> controleCalculo;
 
     @JsonIgnore(true)
     private final Object instancia = null;

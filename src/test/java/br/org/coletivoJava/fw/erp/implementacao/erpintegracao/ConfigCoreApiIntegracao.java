@@ -9,7 +9,7 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.simulacaoCom
 import com.super_bits.modulos.SBAcessosModel.fabricas.FabAcaoProjetoSB;
 import com.super_bits.modulosSB.Persistencia.ConfigGeral.ConfiguradorCoreDeProjetoJarPersistenciaAbstrato;
 import com.super_bits.modulosSB.SBCore.ConfigGeral.ItfConfiguracaoCoreCustomizavel;
-import com.super_bits.modulosSB.SBCore.modulos.comunicacao.CentralComunicacaoDesktop;
+import com.super_bits.modulosSB.SBCore.modulos.comunicacao.CentralComunicacaoDesktopTransient;
 
 /**
  *
@@ -22,7 +22,7 @@ public class ConfigCoreApiIntegracao extends ConfiguradorCoreDeProjetoJarPersist
 
         setIgnorarConfiguracaoPermissoes(false);
         pConfig.setFabricaDeAcoes(new Class[]{FabAcaoProjetoSB.class, FabAcaoRestfullTestes.class});
-        pConfig.setCentralComunicacao(CentralComunicacaoDesktop.class);
+        pConfig.setCentralComunicacao(CentralComunicacaoDesktopTransient.class);
         pConfig.setClasseConfigPermissao(ConfigPermissaoTestesIntegracao.class);
 
     }
