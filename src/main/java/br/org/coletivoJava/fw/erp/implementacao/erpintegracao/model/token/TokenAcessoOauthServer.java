@@ -5,7 +5,6 @@
  */
 package br.org.coletivoJava.fw.erp.implementacao.erpintegracao.model.token;
 
-import com.super_bits.modulosSB.SBCore.ConfigGeral.SBCore;
 import com.super_bits.modulosSB.SBCore.integracao.libRestClient.api.token.TokenDeAcessoExternoDinamico;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
