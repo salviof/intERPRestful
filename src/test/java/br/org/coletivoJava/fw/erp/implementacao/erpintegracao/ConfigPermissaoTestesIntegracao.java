@@ -9,6 +9,7 @@ import br.org.coletivoJava.fw.erp.implementacao.erpintegracao.teste.servicoTeste
 import com.super_bits.modulos.SBAcessosModel.model.UsuarioSB;
 import com.super_bits.modulosSB.Persistencia.dao.UtilSBPersistencia;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.ErroDadosDeContatoUsuarioNaoEncontrado;
+import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.token.ComoTokenAcessoBasico;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.token.ItfTokenAcessoDinamico;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.Interfaces.permissoes.token.ItfTokenRecuperacaoEmail;
 import com.super_bits.modulosSB.SBCore.modulos.Controller.permissaoPadrao.ConfigPermissaoPadraoEmMemoria;
@@ -77,6 +78,11 @@ public class ConfigPermissaoTestesIntegracao extends ConfigPermissaoPadraoEmMemo
     @Override
     public ComoContatoHumano getContatoDoUsuario(ComoUsuario pUsuairo) throws ErroDadosDeContatoUsuarioNaoEncontrado {
         return null;
+    }
+
+    @Override
+    public ComoTokenAcessoBasico getTokenAcessoEntreSistemas(String token) {
+        return MapaTokensGerenciadosConcessaoOauth.getTokenExistente(token);
     }
 
 }
